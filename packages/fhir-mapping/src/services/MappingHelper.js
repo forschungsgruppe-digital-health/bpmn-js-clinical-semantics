@@ -1,6 +1,74 @@
 /**
  * Helper functions for reading and writing fhirmap:resourceMappings
  * on BPMN element businessObjects.
+ *
+ * FHIR R4 types from @types/fhir are used for JSDoc annotations.
+ * When migrating to R5, update the fhir4.* references to fhir5.*.
+ *
+ * @module MappingHelper
+ */
+
+/**
+ * @typedef {import('@types/fhir').fhir4.Bundle} FhirBundle
+ * @typedef {import('@types/fhir').fhir4.Reference} FhirReference
+ */
+
+/**
+ * @typedef {Object} KeyElementParams
+ * @property {string} path - FHIRPath expression (e.g. 'DiagnosticReport.status')
+ * @property {string} [semanticRole] - trigger | filter | classifier | identifier | payload
+ * @property {string} [fixedValue] - Fixed value for this element
+ * @property {string} [terminologyBinding] - Terminology binding reference
+ */
+
+/**
+ * @typedef {Object} SearchParamParams
+ * @property {string} name - FHIR SearchParameter name
+ * @property {string} value - Search parameter value
+ */
+
+/**
+ * @typedef {Object} ResourceMappingParams
+ * @property {string} resourceType - FHIR R4 resource type name (e.g. 'DiagnosticReport')
+ * @property {string} [profile] - Canonical FHIR profile URL
+ * @property {string} [interaction] - FHIR interaction: create | read | update | search | transaction
+ * @property {string} [direction] - Data flow: input | output | input-output
+ * @property {string} [structureMapRef] - Canonical FHIR StructureMap URL
+ * @property {KeyElementParams[]} [keyElements] - Key element bindings
+ * @property {SearchParamParams[]} [searchParams] - FHIR SearchParameters
+ */
+
+/**
+ * @typedef {Object} ExportedKeyElement
+ * @property {string} path
+ * @property {string} [semanticRole]
+ * @property {string} [fixedValue]
+ * @property {string} [terminologyBinding]
+ */
+
+/**
+ * @typedef {Object} ExportedMapping
+ * @property {string} resourceType
+ * @property {string} [profile]
+ * @property {string} [interaction]
+ * @property {string} [direction]
+ * @property {string} [structureMapRef]
+ * @property {ExportedKeyElement[]} keyElements
+ * @property {SearchParamParams[]} searchParams
+ */
+
+/**
+ * @typedef {Object} ExportedElement
+ * @property {string} id - BPMN element ID
+ * @property {string} name - BPMN element name
+ * @property {string} type - BPMN element type (e.g. 'bpmn:Task')
+ * @property {ExportedMapping[]} fhirMappings
+ */
+
+/**
+ * @typedef {Object} MappingsExport
+ * @property {string} fhirVersion - FHIR version used (e.g. 'R4')
+ * @property {ExportedElement[]} elements
  */
 
 export function getResourceMappingsContainer(bo) {
@@ -36,14 +104,8 @@ function ensureResourceMappingsContainer(bo, moddle) {
  *
  * @param {Object} bo - businessObject
  * @param {Object} moddle - bpmn-moddle instance
- * @param {Object} params
- * @param {string} params.resourceType - e.g. 'DiagnosticReport'
- * @param {string} [params.profile] - Canonical profile URL
- * @param {string} [params.interaction] - create | read | update | search
- * @param {string} [params.direction] - input | output | input-output
- * @param {string} [params.structureMapRef] - Canonical StructureMap URL
- * @param {Array} [params.keyElements] - [{ path, semanticRole, fixedValue?, terminologyBinding? }]
- * @param {Array} [params.searchParams] - [{ name, value }]
+ * @param {ResourceMappingParams} params
+ * @returns {Object} The created fhirmap:ResourceMapping moddle element
  */
 export function addResourceMapping(bo, moddle, params) {
   const container = ensureResourceMappingsContainer(bo, moddle);
@@ -97,9 +159,20 @@ export function removeResourceMapping(bo, index) {
 
 /**
  * Export all FHIR mappings from a BPMN model as JSON.
+ *
+ * The export includes the active FHIR version for downstream consumers
+ * to interpret the resource types and interactions correctly.
+ *
+ * @param {Object} elementRegistry - bpmn-js element registry
+ * @returns {MappingsExport}
  */
 export function exportMappingsAsJson(elementRegistry) {
-  const result = { elements: [] };
+  /** @type {MappingsExport} */
+  const result = {
+    fhirVersion: 'R4',
+    elements: []
+  };
+
   elementRegistry.forEach(element => {
     const bo = element.businessObject;
     const mappings = getResourceMappings(bo);

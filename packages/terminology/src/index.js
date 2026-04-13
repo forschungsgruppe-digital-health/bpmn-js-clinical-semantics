@@ -1,3 +1,11 @@
+// ─── FHIR Version Configuration ─────────────────────────────
+export {
+  ACTIVE_FHIR_VERSION,
+  FHIR_R4,
+  FHIR_R5,
+  FHIR_MIME_TYPE
+} from './core/fhir-version.js';
+
 // ─── Core ────────────────────────────────────────────────────
 export { TerminologyProvider } from './core/TerminologyProvider.js';
 export { TerminologyRegistry } from './core/TerminologyRegistry.js';

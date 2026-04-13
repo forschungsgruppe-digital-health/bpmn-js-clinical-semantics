@@ -222,6 +222,7 @@ describe('MappingHelper', () => {
       };
 
       const result = exportMappingsAsJson(elementRegistry);
+      expect(result.fhirVersion).toBe('R4');
       expect(result.elements).toHaveLength(1);
       expect(result.elements[0].id).toBe('Task_1');
       expect(result.elements[0].name).toBe('CT-Thorax');
@@ -239,6 +240,7 @@ describe('MappingHelper', () => {
       };
 
       const result = exportMappingsAsJson(elementRegistry);
+      expect(result.fhirVersion).toBe('R4');
       expect(result.elements).toEqual([]);
     });
 

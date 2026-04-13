@@ -8,6 +8,16 @@ import { describe, it, expect } from 'vitest';
  */
 
 describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
+  it('should export FHIR version configuration', async () => {
+    const mod = await import('../src/core/fhir-version.js');
+    expect(mod.ACTIVE_FHIR_VERSION).toBeDefined();
+    expect(mod.FHIR_R4).toBeDefined();
+    expect(mod.FHIR_R5).toBeDefined();
+    expect(mod.FHIR_MIME_TYPE).toBeDefined();
+    expect(mod.ACTIVE_FHIR_VERSION.version).toBe('R4');
+    expect(mod.FHIR_MIME_TYPE).toBe('application/fhir+json');
+  });
+
   it('should export TerminologyProvider', async () => {
     const mod = await import('../src/core/TerminologyProvider.js');
     expect(mod.TerminologyProvider).toBeDefined();

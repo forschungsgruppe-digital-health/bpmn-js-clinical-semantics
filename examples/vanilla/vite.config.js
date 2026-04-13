@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: './',
+  base: '/bpmn-js-clinical-semantics/',
   build: {
-    outDir: 'dist',
+    outDir: '../../docs',
+    emptyOutDir: true,
     sourcemap: true
   }
 });

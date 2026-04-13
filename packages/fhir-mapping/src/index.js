@@ -1,9 +1,20 @@
+// ─── FHIR Version Configuration ─────────────────────────────
+export {
+  ACTIVE_FHIR_VERSION,
+  FHIR_R4,
+  FHIR_R5,
+  FHIR_MIME_TYPE,
+  isValidResourceType,
+  R4_RESOURCE_TYPE_NAMES
+} from './core/fhir-version.js';
+
 // ─── Core ────────────────────────────────────────────────────
 export {
   FHIR_RESOURCE_TYPES,
   INTERACTIONS,
   DIRECTIONS,
-  SEMANTIC_ROLES
+  SEMANTIC_ROLES,
+  getActiveResourceTypes
 } from './core/types.js';
 
 // ─── moddle descriptor ───────────────────────────────────────

@@ -1,4 +1,20 @@
+/**
+ * Ready-to-use terminology provider presets for common clinical code systems.
+ *
+ * FHIR R4 types from @types/fhir are used for JSDoc annotations.
+ * When migrating to R5, update fhir4.* references to fhir5.*.
+ *
+ * @module presets
+ */
+
 import { StaticProvider } from '../StaticProvider.js';
+
+/**
+ * @typedef {import('@types/fhir').fhir4.Bundle} FhirBundle
+ * @typedef {import('@types/fhir').fhir4.CodeSystem} FhirCodeSystem
+ * @typedef {import('@types/fhir').fhir4.CodeSystemConcept} FhirCodeSystemConcept
+ * @typedef {import('../../core/types').Concept} Concept
+ */
 
 // ─── IHE XDS classCode ──────────────────────────────────────
 
@@ -99,8 +115,15 @@ export function createKdlProvider(concepts) {
 }
 
 /**
- * Load full KDL CodeSystem from a FHIR server.
+ * Load the full KDL CodeSystem from a FHIR R4 server.
  * Use this when the built-in subset is insufficient.
+ *
+ * The function fetches a FHIR R4 Bundle containing the KDL CodeSystem
+ * resource and recursively extracts all concepts.
+ *
+ * @param {string} fhirBaseUrl - FHIR R4 server base URL
+ * @param {typeof fetch} [fetchFn] - Custom fetch function (for testing)
+ * @returns {Promise<StaticProvider>} A StaticProvider with the full KDL code set
  */
 export async function loadKdlFromFhir(fhirBaseUrl, fetchFn) {
   const _fetch = fetchFn || globalThis.fetch.bind(globalThis);
@@ -108,11 +131,21 @@ export async function loadKdlFromFhir(fhirBaseUrl, fetchFn) {
     `${fhirBaseUrl}/CodeSystem?url=http://dvmd.de/fhir/CodeSystem/kdl`,
     { headers: { Accept: 'application/fhir+json' } }
   );
+
+  /** @type {FhirBundle} */
   const bundle = await res.json();
-  const cs = bundle.entry?.[0]?.resource;
+
+  /** @type {FhirCodeSystem | undefined} */
+  const cs = /** @type {FhirCodeSystem} */ (bundle.entry?.[0]?.resource);
   if (!cs?.concept) throw new Error('KDL CodeSystem not found');
 
+  /** @type {Concept[]} */
   const concepts = [];
+
+  /**
+   * Recursively extract concepts from the CodeSystem hierarchy.
+   * @param {FhirCodeSystemConcept[]} items
+   */
   function extract(items) {
     for (const item of items) {
       if (item.code && item.display) {

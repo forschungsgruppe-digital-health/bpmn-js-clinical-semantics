@@ -22,5 +22,8 @@
     "url": "git+https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics.git",
     "directory": "packages/vue"
   },
-  "homepage": "https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics#readme"
+  "homepage": "https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics#readme",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
 }

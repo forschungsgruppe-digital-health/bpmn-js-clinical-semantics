@@ -14,6 +14,19 @@ describe('@bpmn-js-clinical-semantics/fhir-mapping – core exports', () => {
     expect(mod.INTERACTIONS).toBeDefined();
     expect(mod.DIRECTIONS).toBeDefined();
     expect(mod.SEMANTIC_ROLES).toBeDefined();
+    expect(mod.getActiveResourceTypes).toBeDefined();
+    expect(typeof mod.getActiveResourceTypes).toBe('function');
+  });
+
+  it('should export FHIR version configuration', async () => {
+    const mod = await import('../src/core/fhir-version.js');
+    expect(mod.ACTIVE_FHIR_VERSION).toBeDefined();
+    expect(mod.FHIR_R4).toBeDefined();
+    expect(mod.FHIR_R5).toBeDefined();
+    expect(mod.FHIR_MIME_TYPE).toBeDefined();
+    expect(mod.isValidResourceType).toBeDefined();
+    expect(mod.R4_RESOURCE_TYPE_NAMES).toBeDefined();
+    expect(mod.ACTIVE_FHIR_VERSION.version).toBe('R4');
   });
 
   it('should export MappingHelper functions', async () => {
