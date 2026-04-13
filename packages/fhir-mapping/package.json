@@ -1,0 +1,28 @@
+{
+  "name": "@bpmn-js-clinical-semantics/fhir-mapping",
+  "version": "0.1.0",
+  "description": "FHIR resource mapping for BPMN process models with FHIRPath targets",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./moddle": "./src/moddle/fhir-mapping.json",
+    "./properties-panel": "./src/properties-panel/index.js"
+  },
+  "peerDependencies": {
+    "bpmn-js": ">=15.0.0",
+    "bpmn-js-properties-panel": ">=5.0.0",
+    "@bpmn-io/properties-panel": ">=3.0.0"
+  },
+  "keywords": ["bpmn", "fhir", "mapping", "fhirpath", "clinical"],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics.git",
+    "directory": "packages/fhir-mapping"
+  },
+  "homepage": "https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics#readme"
+}

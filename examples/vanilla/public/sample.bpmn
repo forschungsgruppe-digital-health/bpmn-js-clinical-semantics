@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions
+    xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
+    xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+    xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+    xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+    xmlns:term="https://clinical-bpmn.org/terminology/v1"
+    id="Definitions_1"
+    targetNamespace="https://clinical-bpmn.org/demo">
+
+  <bpmn2:process id="Process_LungCa" name="Lungenkarzinom Erstdiagnostik" isExecutable="false">
+
+    <bpmn2:startEvent id="Start_1" name="Verdacht auf Lungenkarzinom">
+      <bpmn2:outgoing>Flow_1</bpmn2:outgoing>
+    </bpmn2:startEvent>
+
+    <bpmn2:task id="Task_CT" name="CT-Thorax mit KM" term:clinicalDomain="diagnostics">
+      <bpmn2:extensionElements>
+        <term:annotations>
+          <term:annotation aspect="clinicalContent" mode="descriptive" text="Computertomographie des Thorax mit Kontrastmittel zur Abklärung pulmonaler Raumforderungen">
+            <term:coding system="http://snomed.info/sct" code="169069000" display="CT of chest (procedure)"/>
+            <term:coding system="http://fhir.de/CodeSystem/bfarm/ops" code="3-222" display="CT Thorax mit KM"/>
+          </term:annotation>
+        </term:annotations>
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_1</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_2</bpmn2:outgoing>
+    </bpmn2:task>
+
+    <bpmn2:task id="Task_Befundung" name="Radiologische Befundung" term:clinicalDomain="diagnostics">
+      <bpmn2:incoming>Flow_2</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_3</bpmn2:outgoing>
+    </bpmn2:task>
+
+    <bpmn2:dataObjectReference id="DataObj_Befund" name="CT-Befundbericht" term:clinicalDomain="diagnostics">
+      <bpmn2:extensionElements>
+        <term:annotations>
+          <term:annotation aspect="documentClass" mode="prescriptive">
+            <term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" code="BEF" display="Befundberichte"/>
+            <term:target element="DocumentReference.category" transform="copy"/>
+          </term:annotation>
+          <term:annotation aspect="documentType" mode="prescriptive">
+            <term:coding system="http://ihe-d.de/CodeSystems/IHEXDStypeCode" code="ERGE" display="Ergebnisse bildgebender Diagnostik"/>
+            <term:target element="DocumentReference.type" transform="copy"/>
+          </term:annotation>
+          <term:annotation aspect="documentType" mode="prescriptive">
+            <term:coding system="http://dvmd.de/fhir/CodeSystem/kdl" code="DG020106" display="Ergebnis bildgebender Diagnostik" version="2024"/>
+            <term:target element="DocumentReference.type" transform="copy"/>
+          </term:annotation>
+          <term:annotation aspect="note" mode="descriptive" text="PDF-Befund wird aus KIS exportiert und über XDS Registry bereitgestellt"/>
+        </term:annotations>
+      </bpmn2:extensionElements>
+    </bpmn2:dataObjectReference>
+
+    <bpmn2:exclusiveGateway id="Gateway_Befund" name="Malignität?">
+      <bpmn2:incoming>Flow_3</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_4a</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_4b</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+
+    <bpmn2:task id="Task_Tumorkonferenz" name="Tumorkonferenz" term:clinicalDomain="therapy">
+      <bpmn2:extensionElements>
+        <term:annotations>
+          <term:annotation aspect="clinicalContent" mode="descriptive" text="Interdisziplinäre Tumorkonferenz zur Therapieplanung">
+            <term:coding system="http://snomed.info/sct" code="708004003" display="Multidisciplinary team meeting (procedure)"/>
+          </term:annotation>
+        </term:annotations>
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_4a</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_5</bpmn2:outgoing>
+    </bpmn2:task>
+
+    <bpmn2:endEvent id="End_Unauffaellig" name="Befund unauffällig">
+      <bpmn2:incoming>Flow_4b</bpmn2:incoming>
+    </bpmn2:endEvent>
+
+    <bpmn2:endEvent id="End_Therapie" name="Therapieplan erstellt">
+      <bpmn2:incoming>Flow_5</bpmn2:incoming>
+    </bpmn2:endEvent>
+
+    <bpmn2:sequenceFlow id="Flow_1" sourceRef="Start_1" targetRef="Task_CT"/>
+    <bpmn2:sequenceFlow id="Flow_2" sourceRef="Task_CT" targetRef="Task_Befundung"/>
+    <bpmn2:sequenceFlow id="Flow_3" sourceRef="Task_Befundung" targetRef="Gateway_Befund"/>
+    <bpmn2:sequenceFlow id="Flow_4a" name="Ja" sourceRef="Gateway_Befund" targetRef="Task_Tumorkonferenz"/>
+    <bpmn2:sequenceFlow id="Flow_4b" name="Nein" sourceRef="Gateway_Befund" targetRef="End_Unauffaellig"/>
+    <bpmn2:sequenceFlow id="Flow_5" sourceRef="Task_Tumorkonferenz" targetRef="End_Therapie"/>
+
+    <bpmn2:association id="Assoc_1" sourceRef="Task_Befundung" targetRef="DataObj_Befund"/>
+
+  </bpmn2:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_LungCa">
+      <bpmndi:BPMNShape id="Start_1_di" bpmnElement="Start_1">
+        <dc:Bounds x="180" y="200" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CT_di" bpmnElement="Task_CT">
+        <dc:Bounds x="280" y="178" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Befundung_di" bpmnElement="Task_Befundung">
+        <dc:Bounds x="440" y="178" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObj_Befund_di" bpmnElement="DataObj_Befund">
+        <dc:Bounds x="472" y="68" width="36" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="450" y="38" width="80" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Befund_di" bpmnElement="Gateway_Befund" isMarkerVisible="true">
+        <dc:Bounds x="605" y="193" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="605" y="169" width="52" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Tumorkonferenz_di" bpmnElement="Task_Tumorkonferenz">
+        <dc:Bounds x="720" y="178" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Unauffaellig_di" bpmnElement="End_Unauffaellig">
+        <dc:Bounds x="720" y="312" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="695" y="355" width="86" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Therapie_di" bpmnElement="End_Therapie">
+        <dc:Bounds x="892" y="200" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="867" y="243" width="86" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
+        <di:waypoint x="216" y="218"/>
+        <di:waypoint x="280" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2">
+        <di:waypoint x="380" y="218"/>
+        <di:waypoint x="440" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
+        <di:waypoint x="540" y="218"/>
+        <di:waypoint x="605" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4a_di" bpmnElement="Flow_4a">
+        <di:waypoint x="655" y="218"/>
+        <di:waypoint x="720" y="218"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="681" y="200" width="12" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4b_di" bpmnElement="Flow_4b">
+        <di:waypoint x="630" y="243"/>
+        <di:waypoint x="630" y="330"/>
+        <di:waypoint x="720" y="330"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="638" y="273" width="22" height="14"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5">
+        <di:waypoint x="820" y="218"/>
+        <di:waypoint x="892" y="218"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Assoc_1_di" bpmnElement="Assoc_1">
+        <di:waypoint x="490" y="178"/>
+        <di:waypoint x="490" y="118"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</bpmn2:definitions>

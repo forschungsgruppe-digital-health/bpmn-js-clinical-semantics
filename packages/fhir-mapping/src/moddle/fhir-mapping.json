@@ -1,0 +1,56 @@
+{
+  "name": "FhirMapping",
+  "uri": "https://clinical-bpmn.org/fhir-mapping/v1",
+  "prefix": "fhirmap",
+  "xml": { "tagAlias": "lowerCase" },
+  "types": [
+    {
+      "name": "MappedElement",
+      "extends": [
+        "bpmn:FlowNode",
+        "bpmn:DataObjectReference",
+        "bpmn:DataStoreReference",
+        "bpmn:MessageFlow"
+      ],
+      "properties": []
+    },
+    {
+      "name": "ResourceMappings",
+      "superClass": ["Element"],
+      "properties": [
+        { "name": "mappings", "isMany": true, "type": "ResourceMapping" }
+      ]
+    },
+    {
+      "name": "ResourceMapping",
+      "superClass": ["Element"],
+      "properties": [
+        { "name": "resourceType", "isAttr": true, "type": "String" },
+        { "name": "profile", "isAttr": true, "type": "String" },
+        { "name": "interaction", "isAttr": true, "type": "String" },
+        { "name": "direction", "isAttr": true, "type": "String" },
+        { "name": "structureMapRef", "isAttr": true, "type": "String" },
+        { "name": "keyElements", "isMany": true, "type": "KeyElement" },
+        { "name": "searchParams", "isMany": true, "type": "SearchParam" }
+      ]
+    },
+    {
+      "name": "KeyElement",
+      "superClass": ["Element"],
+      "properties": [
+        { "name": "path", "isAttr": true, "type": "String" },
+        { "name": "semanticRole", "isAttr": true, "type": "String" },
+        { "name": "terminologyBinding", "isAttr": true, "type": "String" },
+        { "name": "fixedValue", "isAttr": true, "type": "String" }
+      ]
+    },
+    {
+      "name": "SearchParam",
+      "superClass": ["Element"],
+      "properties": [
+        { "name": "name", "isAttr": true, "type": "String" },
+        { "name": "value", "isAttr": true, "type": "String" }
+      ]
+    }
+  ]
+}

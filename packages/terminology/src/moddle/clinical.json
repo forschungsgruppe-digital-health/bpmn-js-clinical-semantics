@@ -1,0 +1,86 @@
+{
+  "name": "ClinicalTerminology",
+  "uri": "https://clinical-bpmn.org/terminology/v1",
+  "prefix": "term",
+  "xml": {
+    "tagAlias": "lowerCase"
+  },
+  "types": [
+    {
+      "name": "Annotatable",
+      "extends": [
+        "bpmn:FlowNode",
+        "bpmn:DataObjectReference",
+        "bpmn:DataStoreReference",
+        "bpmn:MessageFlow"
+      ],
+      "properties": [
+        {
+          "name": "clinicalDomain",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "Annotations",
+      "superClass": [ "Element" ],
+      "properties": [
+        {
+          "name": "values",
+          "isMany": true,
+          "type": "Annotation"
+        }
+      ]
+    },
+    {
+      "name": "Annotation",
+      "superClass": [ "Element" ],
+      "properties": [
+        {
+          "name": "aspect",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "mode",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "text",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "codings",
+          "isMany": true,
+          "type": "Coding"
+        },
+        {
+          "name": "target",
+          "type": "MappingTarget"
+        }
+      ]
+    },
+    {
+      "name": "Coding",
+      "superClass": [ "Element" ],
+      "properties": [
+        { "name": "system", "isAttr": true, "type": "String" },
+        { "name": "code", "isAttr": true, "type": "String" },
+        { "name": "display", "isAttr": true, "type": "String" },
+        { "name": "version", "isAttr": true, "type": "String" }
+      ]
+    },
+    {
+      "name": "MappingTarget",
+      "superClass": [ "Element" ],
+      "properties": [
+        { "name": "element", "isAttr": true, "type": "String" },
+        { "name": "transform", "isAttr": true, "type": "String" },
+        { "name": "value", "isAttr": true, "type": "String" }
+      ]
+    }
+  ]
+}

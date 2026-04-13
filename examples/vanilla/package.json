@@ -1,0 +1,22 @@
+{
+  "name": "clinical-bpmn-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Demo app for @bpmn-js-clinical-semantics/terminology and @bpmn-js-clinical-semantics/fhir-mapping",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@bpmn-io/properties-panel": "^3.40.5",
+    "bpmn-js": "^18.14.0",
+    "bpmn-js-properties-panel": "^5.53.0",
+    "@bpmn-js-clinical-semantics/terminology": "file:../../packages/terminology",
+    "@bpmn-js-clinical-semantics/fhir-mapping": "file:../../packages/fhir-mapping"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5"
+  }
+}
