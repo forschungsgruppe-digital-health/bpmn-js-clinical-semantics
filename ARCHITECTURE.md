@@ -242,7 +242,6 @@ classDiagram
         +mode: "descriptive" | "prescriptive"
         +text?: string
         +codings: Coding[0..*]
-        +target?: MappingTarget
     }
 
     class `term:Coding` {
@@ -250,12 +249,6 @@ classDiagram
         +code: string
         +display?: string
         +version?: string
-    }
-
-    class `term:MappingTarget` {
-        +element: string
-        +transform: "copy"|"fixed"|"translate"|"reference"
-        +value?: string
     }
 
     class `fhirmap:ResourceMappings` {
@@ -277,6 +270,7 @@ classDiagram
         +semanticRole?: string
         +fixedValue?: string
         +terminologyBinding?: string
+        +terminologyAspect?: string
     }
 
     class `fhirmap:SearchParam` {
@@ -288,7 +282,6 @@ classDiagram
     `bpmn:FlowNode` "1" --> "0..1" `fhirmap:ResourceMappings` : extensionElements
     `term:Annotations` "1" --> "*" `term:Annotation`
     `term:Annotation` "1" --> "*" `term:Coding`
-    `term:Annotation` "1" --> "0..1" `term:MappingTarget`
     `fhirmap:ResourceMappings` "1" --> "*" `fhirmap:ResourceMapping`
     `fhirmap:ResourceMapping` "1" --> "*" `fhirmap:KeyElement`
     `fhirmap:ResourceMapping` "1" --> "*" `fhirmap:SearchParam`
@@ -296,7 +289,6 @@ classDiagram
     style `term:Annotations` fill:#2563eb,color:#fff
     style `term:Annotation` fill:#2563eb,color:#fff
     style `term:Coding` fill:#2563eb,color:#fff
-    style `term:MappingTarget` fill:#2563eb,color:#fff
     style `fhirmap:ResourceMappings` fill:#7c3aed,color:#fff
     style `fhirmap:ResourceMapping` fill:#7c3aed,color:#fff
     style `fhirmap:KeyElement` fill:#7c3aed,color:#fff
@@ -487,7 +479,6 @@ When annotations and mappings are added via the properties panel, they are persi
       <term:annotation aspect="documentType" mode="prescriptive">
         <term:coding system="http://dvmd.de/fhir/CodeSystem/kdl"
                      code="DG020106" display="Ergebnis bildgebender Diagnostik"/>
-        <term:target element="DocumentReference.type" transform="copy"/>
       </term:annotation>
     </term:annotations>
 

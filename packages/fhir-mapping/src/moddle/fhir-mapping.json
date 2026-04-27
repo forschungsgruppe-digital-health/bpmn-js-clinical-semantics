@@ -41,6 +41,7 @@
         { "name": "path", "isAttr": true, "type": "String" },
         { "name": "semanticRole", "isAttr": true, "type": "String" },
         { "name": "terminologyBinding", "isAttr": true, "type": "String" },
+        { "name": "terminologyAspect", "isAttr": true, "type": "String" },
         { "name": "fixedValue", "isAttr": true, "type": "String" }
       ]
     },

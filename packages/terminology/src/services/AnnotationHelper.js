@@ -35,7 +35,7 @@ export function ensureAnnotationsContainer(bo, moddle) {
   return container;
 }
 
-export function addAnnotation(bo, moddle, { aspect, mode, text, codings, target }) {
+export function addAnnotation(bo, moddle, { aspect, mode, text, codings }) {
   const container = ensureAnnotationsContainer(bo, moddle);
   const props = {
     aspect: aspect || 'clinicalContent',
@@ -57,16 +57,6 @@ export function addAnnotation(bo, moddle, { aspect, mode, text, codings, target 
       coding.$parent = annotation;
       return coding;
     });
-  }
-
-  if (target) {
-    const mappingTarget = moddle.create('term:MappingTarget', {
-      element: target.element,
-      transform: target.transform,
-      value: target.value || undefined
-    });
-    mappingTarget.$parent = annotation;
-    annotation.target = mappingTarget;
   }
 
   if (!container.values) container.values = [];

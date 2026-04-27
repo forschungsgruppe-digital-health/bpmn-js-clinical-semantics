@@ -19,13 +19,6 @@ const MODES = [
   { value: 'prescriptive', label: 'Präskriptiv (normgebend)' }
 ];
 
-const TRANSFORMS = [
-  { value: '', label: '– kein Target –' },
-  { value: 'copy', label: 'copy (Code → Ziel)' },
-  { value: 'fixed', label: 'fixed (fester Wert)' },
-  { value: 'translate', label: 'translate (ConceptMap)' }
-];
-
 const TERMINOLOGY_PRESETS = [
   { label: '– Manuell eingeben –', system: '', code: '', display: '' },
   { label: 'SNOMED CT', system: 'http://snomed.info/sct', code: '', display: '' },
@@ -57,10 +50,7 @@ export function AnnotationListEntry(props) {
       text: '',
       codingSystem: '',
       codingCode: '',
-      codingDisplay: '',
-      targetElement: '',
-      targetTransform: '',
-      targetValue: ''
+      codingDisplay: ''
     };
   }
 
@@ -74,21 +64,11 @@ export function AnnotationListEntry(props) {
       });
     }
 
-    let target = null;
-    if (formData.mode === 'prescriptive' && formData.targetTransform && formData.targetElement) {
-      target = {
-        element: formData.targetElement,
-        transform: formData.targetTransform,
-        value: formData.targetValue || undefined
-      };
-    }
-
     addAnnotation(bo, moddle, {
       aspect: formData.aspect,
       mode: formData.mode,
       text: formData.text || undefined,
-      codings,
-      target
+      codings
     });
 
     // Force re-render and mark model as changed
@@ -144,13 +124,6 @@ export function AnnotationListEntry(props) {
                   ${c.display && html`<span class="coding-display">${c.display}</span>`}
                 </div>
               `)}
-              ${ann.target && html`
-                <div class="annotation-item__target">
-                  → <code>${ann.target.element}</code>
-                  <span class="target-transform">[${ann.target.transform}]</span>
-                  ${ann.target.value && html`<span> = ${ann.target.value}</span>`}
-                </div>
-              `}
             </div>
           `)}
         </div>
@@ -242,43 +215,6 @@ export function AnnotationListEntry(props) {
               </div>
             `}
           </fieldset>
-
-          ${formData.mode === 'prescriptive' && html`
-            <fieldset class="form-fieldset form-fieldset--prescriptive">
-              <legend>Mapping-Target</legend>
-              <div class="form-row">
-                <label>FHIRPath (Ziel-Element)</label>
-                <input
-                  type="text"
-                  placeholder="z.B. DocumentReference.type"
-                  value=${formData.targetElement}
-                  onInput=${(e) => updateField('targetElement', e.target.value)}
-                />
-              </div>
-              <div class="form-row">
-                <label>Transform</label>
-                <select
-                  value=${formData.targetTransform}
-                  onChange=${(e) => updateField('targetTransform', e.target.value)}
-                >
-                  ${TRANSFORMS.map(t =>
-                    html`<option value=${t.value}>${t.label}</option>`
-                  )}
-                </select>
-              </div>
-              ${(formData.targetTransform === 'fixed' || formData.targetTransform === 'translate') && html`
-                <div class="form-row">
-                  <label>${formData.targetTransform === 'fixed' ? 'Fester Wert' : 'ConceptMap-URL'}</label>
-                  <input
-                    type="text"
-                    placeholder=${formData.targetTransform === 'fixed' ? 'z.B. final' : 'https://...'}
-                    value=${formData.targetValue}
-                    onInput=${(e) => updateField('targetValue', e.target.value)}
-                  />
-                </div>
-              `}
-            </fieldset>
-          `}
 
           <div class="form-actions">
             <button class="btn btn--primary" onClick=${handleAdd}>

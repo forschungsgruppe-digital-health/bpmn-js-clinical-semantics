@@ -152,22 +152,6 @@ describe('AnnotationHelper', () => {
       expect(annotation.codings[1].code).toBe('3-222');
     });
 
-    it('should add a mapping target', () => {
-      const bo = createBusinessObject();
-      const annotation = addAnnotation(bo, moddle, {
-        aspect: 'documentType',
-        mode: 'prescriptive',
-        target: {
-          element: 'DocumentReference.type',
-          transform: 'copy'
-        }
-      });
-
-      expect(annotation.target.$type).toBe('term:MappingTarget');
-      expect(annotation.target.element).toBe('DocumentReference.type');
-      expect(annotation.target.transform).toBe('copy');
-    });
-
     it('should add multiple annotations to the same element', () => {
       const bo = createBusinessObject();
       addAnnotation(bo, moddle, { aspect: 'clinicalContent', text: 'First' });
@@ -180,13 +164,11 @@ describe('AnnotationHelper', () => {
     it('should set $parent references correctly', () => {
       const bo = createBusinessObject();
       const annotation = addAnnotation(bo, moddle, {
-        codings: [{ system: 'http://snomed.info/sct', code: '123' }],
-        target: { element: 'Resource.code', transform: 'copy' }
+        codings: [{ system: 'http://snomed.info/sct', code: '123' }]
       });
 
       expect(annotation.$parent.$type).toBe('term:Annotations');
       expect(annotation.codings[0].$parent).toBe(annotation);
-      expect(annotation.target.$parent).toBe(annotation);
     });
   });
 

@@ -30,17 +30,23 @@ These user stories define the minimum viable product for the FHIR resource mappi
 ### US-F02: Define key elements on FHIR resource mappings
 
 **As a** clinical informaticist,
-**I want to** specify key elements (FHIRPath paths with semantic roles and fixed values) on each resource mapping,
+**I want to** specify key elements (FHIRPath paths with semantic roles) on each resource mapping,
 **so that** the mapping captures which FHIR fields are essential and how they should be populated.
 
 **Acceptance Criteria:**
 
-- `fhirmap:keyElement` is a child of `fhirmap:resourceMapping` with attributes: `path` (FHIRPath, e.g., "Observation.code.coding.code"), `semanticRole` (classifier | trigger | payload), optional `terminologyBinding` (code system URI), optional `fixedValue`.
+- `fhirmap:keyElement` is a child of `fhirmap:resourceMapping` with attributes: `path` (FHIRPath, e.g., "Observation.code"), `semanticRole` (classifier | trigger | payload), optional `terminologyBinding` (code system URI), optional `terminologyAspect` (term:annotation aspect for disambiguation), optional `fixedValue` (FHIR-structural constants only).
+- Three mutually exclusive value-source patterns are supported:
+  1. `fixedValue` only — for FHIR-structural constants (e.g., status="final", intent="order").
+  2. `terminologyBinding` + `terminologyAspect` — resolved at runtime from the `term:coding` on the same BPMN element, matched by (aspect, system) composite key.
+  3. Neither — for runtime/computed values.
+- `fixedValue` and `terminologyBinding` must not be used together on the same key element.
 - A resource mapping can have multiple key elements.
 - Round-trip test: key elements with all attribute combinations survive serialization.
-- Example: `<fhirmap:keyElement path="Observation.status" semanticRole="trigger" fixedValue="final"/>`.
+- Example (structural): `<fhirmap:keyElement path="Observation.status" semanticRole="trigger" fixedValue="final"/>`.
+- Example (terminology): `<fhirmap:keyElement path="Observation.code" semanticRole="classifier" terminologyBinding="http://loinc.org" terminologyAspect="clinicalContent"/>`.
 
-**Story Points:** 3
+**Story Points:** 5
 
 ---
 
@@ -164,7 +170,7 @@ These user stories define the minimum viable product for the FHIR resource mappi
 
 - "Add Mapping" creates a `fhirmap:resourceMapping` with a resource type dropdown populated from `getActiveResourceTypes()`.
 - The user can set profile (text input), interaction (dropdown), direction (dropdown), and structureMapRef (text input).
-- Key elements can be added/removed with: path (text), semanticRole (dropdown: classifier, trigger, payload), fixedValue (text), terminologyBinding (text).
+- Key elements can be added/removed with: path (text), semanticRole (dropdown: classifier, trigger, payload), fixedValue (text, exclusive with terminologyBinding), terminologyBinding (text, code system URI), terminologyAspect (dropdown, from term:annotation aspects).
 - Search params can be added/removed.
 - Removing a mapping deletes the `fhirmap:resourceMapping` element.
 - All edits are undoable via the bpmn-js command stack.
@@ -258,7 +264,7 @@ These user stories define the minimum viable product for the FHIR resource mappi
 | Priority | Story | Points | Dependencies |
 |----------|-------|--------|--------------|
 | P0 | US-F01 Resource mappings on tasks | 5 | — |
-| P0 | US-F02 Key elements | 3 | US-F01 |
+| P0 | US-F02 Key elements with terminology resolution | 5 | US-F01 |
 | P0 | US-F03 Search parameters | 2 | US-F01 |
 | P0 | US-F04 Resource mappings on data objects | 3 | US-F01 |
 | P1 | US-F05 XOR gateway → PlanDefinition mapping | 5 | US-F01 |
@@ -271,4 +277,4 @@ These user stories define the minimum viable product for the FHIR resource mappi
 | P2 | US-F12 FHIR Bundle generation | 13 | US-F05, US-F06, US-F07 |
 | P2 | US-F13 Mapping validation | 5 | US-F10, US-F11 |
 
-**Total MVP Story Points:** 65
+**Total MVP Story Points:** 67

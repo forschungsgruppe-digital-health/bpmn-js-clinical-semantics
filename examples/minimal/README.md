@@ -69,9 +69,9 @@ All `definitionCanonical` and `reference` values resolve within the Bundle via `
 
 The annotated BPMN uses two independent XML namespaces:
 
-**`term:` (terminology annotations)** — codes from SNOMED CT, LOINC, OPS, ATC on each task, with aspect (clinicalContent), mode (descriptive/prescriptive), and optional FHIRPath mapping targets.
+**`term:` (terminology annotations)** — codes from SNOMED CT, LOINC, OPS, ATC on each task, with aspect (clinicalContent, documentType, documentClass), mode (descriptive/prescriptive), and optional free text. The `term:` namespace is purely semantic — it carries no FHIR paths or transforms.
 
-**`fhirmap:` (FHIR resource mappings)** — declares which FHIR resource type, profile, interaction, and key elements each BPMN task or data object produces/consumes. Key elements use FHIRPath paths, semantic roles (trigger, classifier, payload), and fixed values.
+**`fhirmap:` (FHIR resource mappings)** — declares which FHIR resource type, profile, interaction, and key elements each BPMN task or data object produces/consumes. Key elements use FHIRPath paths, semantic roles (trigger, classifier, payload), and one of: `fixedValue` (FHIR-structural constants like status/intent) or `terminologyBinding`+`terminologyAspect` (resolved from `term:coding` by aspect+system composite key).
 
 Both namespaces extend `DataObjectReference` in addition to `FlowNode`, so data objects like the MRI report and discharge letter carry the same annotation structure as tasks.
 
@@ -89,8 +89,9 @@ Example from `Task_Staging`:
     </term:annotations>
     <fhirmap:resourceMappings>
       <fhirmap:resourceMapping resourceType="Observation" interaction="create" direction="output">
-        <fhirmap:keyElement path="Observation.code.coding.code" semanticRole="classifier"
-                           fixedValue="21908-9"/>
+        <fhirmap:keyElement path="Observation.code" semanticRole="classifier"
+                           terminologyBinding="http://loinc.org"
+                           terminologyAspect="clinicalContent"/>
         <fhirmap:keyElement path="Observation.status" semanticRole="trigger"
                            fixedValue="final"/>
       </fhirmap:resourceMapping>
@@ -108,13 +109,13 @@ Example from `DataObj_MRI` (data object with DocumentReference mapping):
       <term:annotation aspect="documentType" mode="prescriptive"
                        text="MRT-Befundbericht des Thorax ...">
         <term:coding system="http://loinc.org" code="18748-4" display="Diagnostic imaging study"/>
-        <term:target element="DocumentReference.type" transform="copy"/>
       </term:annotation>
     </term:annotations>
     <fhirmap:resourceMappings>
       <fhirmap:resourceMapping resourceType="DocumentReference" interaction="read" direction="input">
-        <fhirmap:keyElement path="DocumentReference.type.coding.code" semanticRole="classifier"
-                           fixedValue="18748-4"/>
+        <fhirmap:keyElement path="DocumentReference.type" semanticRole="classifier"
+                           terminologyBinding="http://loinc.org"
+                           terminologyAspect="documentType"/>
         <fhirmap:keyElement path="DocumentReference.status" semanticRole="trigger"
                            fixedValue="current"/>
       </fhirmap:resourceMapping>

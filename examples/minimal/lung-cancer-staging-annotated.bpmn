@@ -61,12 +61,10 @@
                          display="Diagnostic imaging study"/>
             <term:coding system="http://ihe-d.de/CodeSystems/IHEXDStypeCode" code="ERGE"
                          display="Ergebnisse bildgebender Diagnostik"/>
-            <term:target element="DocumentReference.type" transform="copy"/>
           </term:annotation>
           <term:annotation aspect="documentClass" mode="prescriptive">
             <term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" code="BEF"
                          display="Befundberichte"/>
-            <term:target element="DocumentReference.category" transform="copy"/>
           </term:annotation>
         </term:annotations>
 
@@ -75,12 +73,14 @@
                                    profile="http://hl7.org/fhir/StructureDefinition/DocumentReference"
                                    interaction="read"
                                    direction="input">
-            <fhirmap:keyElement path="DocumentReference.type.coding.code"
+            <fhirmap:keyElement path="DocumentReference.type"
                                semanticRole="classifier"
-                               fixedValue="18748-4"/>
-            <fhirmap:keyElement path="DocumentReference.type.coding.system"
+                               terminologyBinding="http://loinc.org"
+                               terminologyAspect="documentType"/>
+            <fhirmap:keyElement path="DocumentReference.category"
                                semanticRole="classifier"
-                               fixedValue="http://loinc.org"/>
+                               terminologyBinding="http://ihe-d.de/CodeSystems/IHEXDSclassCode"
+                               terminologyAspect="documentClass"/>
             <fhirmap:keyElement path="DocumentReference.status"
                                semanticRole="trigger"
                                fixedValue="current"/>
@@ -118,13 +118,12 @@
                                    direction="output">
             <fhirmap:keyElement path="Observation.code"
                                semanticRole="classifier"
-                               terminologyBinding="http://loinc.org"/>
-            <fhirmap:keyElement path="Observation.code.coding.code"
-                               semanticRole="classifier"
-                               fixedValue="21908-9"/>
+                               terminologyBinding="http://loinc.org"
+                               terminologyAspect="clinicalContent"/>
             <fhirmap:keyElement path="Observation.valueCodeableConcept"
                                semanticRole="payload"
-                               terminologyBinding="http://snomed.info/sct"/>
+                               terminologyBinding="http://snomed.info/sct"
+                               terminologyAspect="clinicalContent"/>
             <fhirmap:keyElement path="Observation.status"
                                semanticRole="trigger"
                                fixedValue="final"/>
@@ -134,12 +133,10 @@
           <fhirmap:resourceMapping resourceType="ServiceRequest"
                                    interaction="create"
                                    direction="output">
-            <fhirmap:keyElement path="ServiceRequest.code.coding.code"
+            <fhirmap:keyElement path="ServiceRequest.code"
                                semanticRole="classifier"
-                               fixedValue="254292007"/>
-            <fhirmap:keyElement path="ServiceRequest.code.coding.system"
-                               semanticRole="classifier"
-                               fixedValue="http://snomed.info/sct"/>
+                               terminologyBinding="http://snomed.info/sct"
+                               terminologyAspect="clinicalContent"/>
             <fhirmap:keyElement path="ServiceRequest.intent"
                                semanticRole="classifier"
                                fixedValue="order"/>
@@ -181,7 +178,6 @@
                          display="Partial lobectomy of lung (procedure)"/>
             <term:coding system="http://fhir.de/CodeSystem/bfarm/ops" code="5-324"
                          display="Einfache Lobektomie und Bilobektomie der Lunge"/>
-            <term:target element="Procedure.code" transform="copy"/>
           </term:annotation>
         </term:annotations>
 
@@ -190,12 +186,10 @@
                                    profile="http://hl7.org/fhir/StructureDefinition/Procedure"
                                    interaction="create"
                                    direction="output">
-            <fhirmap:keyElement path="Procedure.code.coding.code"
+            <fhirmap:keyElement path="Procedure.code"
                                semanticRole="classifier"
-                               fixedValue="359615001"/>
-            <fhirmap:keyElement path="Procedure.code.coding.system"
-                               semanticRole="classifier"
-                               fixedValue="http://snomed.info/sct"/>
+                               terminologyBinding="http://snomed.info/sct"
+                               terminologyAspect="clinicalContent"/>
             <fhirmap:keyElement path="Procedure.bodySite"
                                semanticRole="payload"
                                terminologyBinding="http://snomed.info/sct"/>
@@ -221,7 +215,6 @@
                          display="Chemotherapy (procedure)"/>
             <term:coding system="http://www.whocc.no/atc" code="L01XA01"
                          display="Cisplatin"/>
-            <term:target element="MedicationRequest.medicationCodeableConcept" transform="copy"/>
           </term:annotation>
         </term:annotations>
 
@@ -230,12 +223,10 @@
                                    profile="http://hl7.org/fhir/StructureDefinition/MedicationRequest"
                                    interaction="create"
                                    direction="output">
-            <fhirmap:keyElement path="MedicationRequest.medicationCodeableConcept.coding.code"
+            <fhirmap:keyElement path="MedicationRequest.medicationCodeableConcept"
                                semanticRole="payload"
-                               fixedValue="L01XA01"/>
-            <fhirmap:keyElement path="MedicationRequest.medicationCodeableConcept.coding.system"
-                               semanticRole="payload"
-                               fixedValue="http://www.whocc.no/atc"/>
+                               terminologyBinding="http://www.whocc.no/atc"
+                               terminologyAspect="clinicalContent"/>
             <fhirmap:keyElement path="MedicationRequest.intent"
                                semanticRole="classifier"
                                fixedValue="order"/>
@@ -268,12 +259,10 @@
                          display="Discharge summary"/>
             <term:coding system="http://dvmd.de/fhir/CodeSystem/kdl" code="AD010101"
                          display="Ärztlicher Entlassungsbericht"/>
-            <term:target element="DocumentReference.type" transform="copy"/>
           </term:annotation>
           <term:annotation aspect="documentClass" mode="prescriptive">
             <term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" code="BRI"
                          display="Arztbriefe"/>
-            <term:target element="DocumentReference.category" transform="copy"/>
           </term:annotation>
         </term:annotations>
 
@@ -282,12 +271,14 @@
                                    profile="http://hl7.org/fhir/StructureDefinition/DocumentReference"
                                    interaction="create"
                                    direction="output">
-            <fhirmap:keyElement path="DocumentReference.type.coding.code"
+            <fhirmap:keyElement path="DocumentReference.type"
                                semanticRole="classifier"
-                               fixedValue="18842-5"/>
-            <fhirmap:keyElement path="DocumentReference.type.coding.system"
+                               terminologyBinding="http://loinc.org"
+                               terminologyAspect="documentType"/>
+            <fhirmap:keyElement path="DocumentReference.category"
                                semanticRole="classifier"
-                               fixedValue="http://loinc.org"/>
+                               terminologyBinding="http://ihe-d.de/CodeSystems/IHEXDSclassCode"
+                               terminologyAspect="documentClass"/>
             <fhirmap:keyElement path="DocumentReference.status"
                                semanticRole="trigger"
                                fixedValue="current"/>
@@ -327,7 +318,8 @@
                                fixedValue="plan"/>
             <fhirmap:keyElement path="CarePlan.category"
                                semanticRole="classifier"
-                               terminologyBinding="http://snomed.info/sct"/>
+                               terminologyBinding="http://snomed.info/sct"
+                               terminologyAspect="clinicalContent"/>
             <fhirmap:keyElement path="CarePlan.title"
                                semanticRole="payload"
                                fixedValue="Nachsorge Lungenkarzinom"/>

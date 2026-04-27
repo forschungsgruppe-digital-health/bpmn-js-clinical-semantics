@@ -17,8 +17,9 @@
  * @typedef {Object} KeyElementParams
  * @property {string} path - FHIRPath expression (e.g. 'DiagnosticReport.status')
  * @property {string} [semanticRole] - trigger | filter | classifier | identifier | payload
- * @property {string} [fixedValue] - Fixed value for this element
- * @property {string} [terminologyBinding] - Terminology binding reference
+ * @property {string} [fixedValue] - FHIR-structural constant (mutually exclusive with terminologyBinding)
+ * @property {string} [terminologyBinding] - Code system URI; resolved from term:coding at runtime
+ * @property {string} [terminologyAspect] - term:annotation aspect to disambiguate (e.g. 'documentType')
  */
 
 /**
@@ -44,6 +45,7 @@
  * @property {string} [semanticRole]
  * @property {string} [fixedValue]
  * @property {string} [terminologyBinding]
+ * @property {string} [terminologyAspect]
  */
 
 /**
@@ -127,7 +129,8 @@ export function addResourceMapping(bo, moddle, params) {
         path: ke.path,
         semanticRole: ke.semanticRole || undefined,
         fixedValue: ke.fixedValue || undefined,
-        terminologyBinding: ke.terminologyBinding || undefined
+        terminologyBinding: ke.terminologyBinding || undefined,
+        terminologyAspect: ke.terminologyAspect || undefined
       });
       keyElement.$parent = mapping;
       return keyElement;
@@ -191,7 +194,8 @@ export function exportMappingsAsJson(elementRegistry) {
             path: ke.path,
             semanticRole: ke.semanticRole,
             fixedValue: ke.fixedValue,
-            terminologyBinding: ke.terminologyBinding
+            terminologyBinding: ke.terminologyBinding,
+            terminologyAspect: ke.terminologyAspect
           })),
           searchParams: (m.searchParams || []).map(sp => ({
             name: sp.name,

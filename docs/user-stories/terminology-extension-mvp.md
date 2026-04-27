@@ -63,23 +63,6 @@ These user stories define the minimum viable product for the terminology annotat
 
 ---
 
-### US-T04: Support mapping targets on terminology annotations
-
-**As a** clinical process modeler,
-**I want to** define a `term:target` on an annotation that specifies which FHIR element the coded value maps to and how the mapping is applied,
-**so that** the terminology annotation can drive automated FHIR resource population.
-
-**Acceptance Criteria:**
-
-- `term:target` is a child element of `term:annotation` with attributes: `element` (FHIRPath-style target, e.g., "Procedure.code"), `transform` (copy | translate | map), and optional `value`.
-- At most one `term:target` per annotation.
-- Round-trip test verifies `element`, `transform`, and `value` attributes survive serialization.
-- Example: `<term:target element="DocumentReference.type" transform="copy"/>` on a document-type annotation.
-
-**Story Points:** 3
-
----
-
 ## Epic 2: Properties Panel UI
 
 ### US-T05: Display terminology annotations in the properties panel
@@ -93,7 +76,6 @@ These user stories define the minimum viable product for the terminology annotat
 - When a `FlowNode` or `DataObjectReference` is selected, the properties panel shows a "Terminology" section.
 - The section lists each annotation with its `aspect`, `mode`, and `text`.
 - Each annotation displays its codings as: `display (system: code)`.
-- If a `term:target` exists, it is shown as a mapping indicator.
 - The `clinicalDomain` attribute is displayed as an editable dropdown.
 - Empty state: if no annotations exist, the section shows "No annotations" with an "Add" button.
 
@@ -217,9 +199,8 @@ These user stories define the minimum viable product for the terminology annotat
 | Priority | Story | Points | Dependencies |
 |----------|-------|--------|--------------|
 | P0 | US-T01 Core annotation model | 5 | — |
-| P0 | US-T03 Clinical domain attribute | 2 | US-T01 |
-| P0 | US-T04 Mapping targets | 3 | US-T01 |
 | P0 | US-T02 Data object annotations | 3 | US-T01 |
+| P0 | US-T03 Clinical domain attribute | 2 | US-T01 |
 | P1 | US-T07 Static provider | 5 | — |
 | P1 | US-T10 Provider registry | 3 | US-T07 |
 | P1 | US-T08 SNOMED CT provider | 5 | US-T10 |
@@ -228,4 +209,4 @@ These user stories define the minimum viable product for the terminology annotat
 | P2 | US-T06 Properties panel (write) | 8 | US-T05 |
 | P2 | US-T11 FHIR version config | 2 | — |
 
-**Total MVP Story Points:** 49
+**Total MVP Story Points:** 46

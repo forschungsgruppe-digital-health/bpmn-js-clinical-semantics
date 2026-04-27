@@ -56,10 +56,6 @@
           "name": "codings",
           "isMany": true,
           "type": "Coding"
-        },
-        {
-          "name": "target",
-          "type": "MappingTarget"
         }
       ]
     },
@@ -71,15 +67,6 @@
         { "name": "code", "isAttr": true, "type": "String" },
         { "name": "display", "isAttr": true, "type": "String" },
         { "name": "version", "isAttr": true, "type": "String" }
-      ]
-    },
-    {
-      "name": "MappingTarget",
-      "superClass": [ "Element" ],
-      "properties": [
-        { "name": "element", "isAttr": true, "type": "String" },
-        { "name": "transform", "isAttr": true, "type": "String" },
-        { "name": "value", "isAttr": true, "type": "String" }
       ]
     }
   ]

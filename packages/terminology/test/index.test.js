@@ -34,7 +34,6 @@ describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
     const mod = await import('../src/core/types.js');
     expect(mod.ASPECTS).toBeDefined();
     expect(mod.MODES).toBeDefined();
-    expect(mod.TRANSFORMS).toBeDefined();
     expect(mod.CLINICAL_DOMAINS).toBeDefined();
   });
 

@@ -37,15 +37,15 @@
         <term:annotations>
           <term:annotation aspect="documentClass" mode="prescriptive">
             <term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" code="BEF" display="Befundberichte"/>
-            <term:target element="DocumentReference.category" transform="copy"/>
+
           </term:annotation>
           <term:annotation aspect="documentType" mode="prescriptive">
             <term:coding system="http://ihe-d.de/CodeSystems/IHEXDStypeCode" code="ERGE" display="Ergebnisse bildgebender Diagnostik"/>
-            <term:target element="DocumentReference.type" transform="copy"/>
+
           </term:annotation>
           <term:annotation aspect="documentType" mode="prescriptive">
             <term:coding system="http://dvmd.de/fhir/CodeSystem/kdl" code="DG020106" display="Ergebnis bildgebender Diagnostik" version="2024"/>
-            <term:target element="DocumentReference.type" transform="copy"/>
+
           </term:annotation>
           <term:annotation aspect="note" mode="descriptive" text="PDF-Befund wird aus KIS exportiert und über XDS Registry bereitgestellt"/>
         </term:annotations>

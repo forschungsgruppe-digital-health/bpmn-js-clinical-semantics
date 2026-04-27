@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ASPECTS, MODES, TRANSFORMS, CLINICAL_DOMAINS } from '../../src/core/types.js';
+import { ASPECTS, MODES, CLINICAL_DOMAINS } from '../../src/core/types.js';
 
 describe('types – ASPECTS', () => {
   it('should expose all eight aspect constants', () => {
@@ -25,16 +25,6 @@ describe('types – MODES', () => {
     expect(MODES.DESCRIPTIVE).toBe('descriptive');
     expect(MODES.PRESCRIPTIVE).toBe('prescriptive');
     expect(Object.keys(MODES)).toHaveLength(2);
-  });
-});
-
-describe('types – TRANSFORMS', () => {
-  it('should expose all four transform types', () => {
-    expect(TRANSFORMS.COPY).toBe('copy');
-    expect(TRANSFORMS.FIXED).toBe('fixed');
-    expect(TRANSFORMS.TRANSLATE).toBe('translate');
-    expect(TRANSFORMS.REFERENCE).toBe('reference');
-    expect(Object.keys(TRANSFORMS)).toHaveLength(4);
   });
 });
 
