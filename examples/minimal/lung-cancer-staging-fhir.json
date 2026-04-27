@@ -22,11 +22,11 @@
         "url": "https://clinical-bpmn.org/examples/PlanDefinition/lung-cancer-staging",
         "version": "0.1.0",
         "name": "LungCancerStagingPathway",
-        "title": "Lungenkarzinom Therapieentscheidung",
+        "title": "Lung Cancer Treatment Decision",
         "status": "draft",
         "experimental": true,
         "date": "2026-04-20",
-        "publisher": "Forschungsgruppe Digital Health",
+        "publisher": "Digital Health Research Group",
         "description": "Minimal example: lung cancer treatment decision pathway based on TNM staging. Maps to the BPMN process Process_LungCaMin in lung-cancer-staging.bpmn.",
         "purpose": "Demonstrate the mapping between BPMN process elements and FHIR R4 PlanDefinition actions. Used for onboarding developers to bpmn-js-clinical-semantics.",
         "type": {
@@ -55,14 +55,14 @@
                 "display": "Malignant tumor of lung (disorder)"
               }
             ],
-            "text": "Lungenkarzinom"
+            "text": "Lung cancer"
           }
         ],
         "action": [
           {
             "_comment": "Corresponds to BPMN: Task_Staging",
             "id": "action-staging",
-            "title": "TNM-Staging durchführen",
+            "title": "Perform TNM Staging",
             "description": "Perform TNM staging assessment to determine tumor stage and guide treatment decision.",
             "code": [
               {
@@ -103,16 +103,16 @@
           {
             "_comment": "Corresponds to BPMN: Gateway_Split — modelled as a group with exclusive selection behavior",
             "id": "action-treatment-decision",
-            "title": "Therapieentscheidung nach Tumorstadium",
+            "title": "Treatment Decision by Tumor Stage",
             "description": "Exclusive decision based on TNM stage: early (I–II) → surgery, advanced (III–IV) → chemotherapy.",
             "groupingBehavior": "visual-group",
             "selectionBehavior": "exactly-one",
             "action": [
               {
-                "_comment": "Corresponds to BPMN: Task_Surgery (path A: Stadium I–II)",
+                "_comment": "Corresponds to BPMN: Task_Surgery (path A: Stage I-II)",
                 "id": "action-surgery",
-                "title": "Chirurgische Resektion",
-                "description": "Lobectomy or pneumonectomy for operable early-stage (I–II) lung cancer.",
+                "title": "Surgical Resection",
+                "description": "Lobectomy or pneumonectomy for operable early-stage (I-II) lung cancer.",
                 "condition": [
                   {
                     "kind": "applicability",
@@ -137,10 +137,10 @@
                 "definitionCanonical": "urn:uuid:activitydefinition-surgery"
               },
               {
-                "_comment": "Corresponds to BPMN: Task_Chemo (path B: Stadium III–IV)",
+                "_comment": "Corresponds to BPMN: Task_Chemo (path B: Stage III-IV)",
                 "id": "action-chemo",
-                "title": "Systemische Chemotherapie",
-                "description": "Platinum-based doublet chemotherapy for inoperable advanced (III–IV) lung cancer.",
+                "title": "Systemic Chemotherapy",
+                "description": "Platinum-based doublet chemotherapy for inoperable advanced (III-IV) lung cancer.",
                 "condition": [
                   {
                     "kind": "applicability",
@@ -169,7 +169,7 @@
           {
             "_comment": "Corresponds to BPMN: Task_Followup (after gateway join)",
             "id": "action-followup",
-            "title": "Nachsorge-Assessment",
+            "title": "Follow-up Assessment",
             "description": "Post-treatment follow-up care plan including imaging surveillance and lab monitoring.",
             "code": [
               {
@@ -220,7 +220,7 @@
         "url": "https://clinical-bpmn.org/examples/ActivityDefinition/tnm-staging",
         "version": "0.1.0",
         "name": "TNMStagingAssessment",
-        "title": "TNM-Staging durchführen",
+        "title": "Perform TNM Staging",
         "status": "draft",
         "experimental": true,
         "date": "2026-04-20",
@@ -240,7 +240,7 @@
               "display": "Stage group.clinical Cancer"
             }
           ],
-          "text": "TNM-Staging"
+          "text": "TNM Staging"
         },
         "observationResultRequirement": [
           {
@@ -272,7 +272,7 @@
               "display": "Stage group.clinical Cancer"
             }
           ],
-          "text": "Klinisches TNM-Stadium"
+          "text": "Clinical TNM Stage"
         },
         "permittedDataType": [
           "CodeableConcept"
@@ -300,7 +300,7 @@
         "url": "https://clinical-bpmn.org/examples/ValueSet/tnm-stage-group",
         "version": "0.1.0",
         "name": "TNMStageGroup",
-        "title": "TNM Stage Group (vereinfacht)",
+        "title": "TNM Stage Group (simplified)",
         "status": "draft",
         "experimental": true,
         "description": "Simplified TNM stage groups for the minimal example. In production, use the full UICC/AJCC staging ValueSet.",
@@ -337,11 +337,11 @@
         "url": "https://clinical-bpmn.org/examples/ActivityDefinition/surgical-resection",
         "version": "0.1.0",
         "name": "SurgicalResection",
-        "title": "Chirurgische Resektion",
+        "title": "Surgical Resection",
         "status": "draft",
         "experimental": true,
         "date": "2026-04-20",
-        "description": "Surgical resection (lobectomy/pneumonectomy) for operable early-stage lung cancer (Stadium I–II). Produces a Procedure resource.",
+        "description": "Surgical resection (lobectomy/pneumonectomy) for operable early-stage lung cancer (Stage I-II). Produces a Procedure resource.",
         "purpose": "Maps to BPMN element Task_Surgery. Executed when TNM staging indicates operable disease (Stage I or II).",
         "kind": "ServiceRequest",
         "intent": "order",
@@ -355,10 +355,10 @@
             {
               "system": "http://fhir.de/CodeSystem/bfarm/ops",
               "code": "5-324",
-              "display": "Einfache Lobektomie und Bilobektomie der Lunge"
+              "display": "Simple lobectomy and bilobectomy of the lung"
             }
           ],
-          "text": "Lobektomie"
+          "text": "Lobectomy"
         },
         "bodySite": [
           {
@@ -391,11 +391,11 @@
         "url": "https://clinical-bpmn.org/examples/ActivityDefinition/systemic-chemotherapy",
         "version": "0.1.0",
         "name": "SystemicChemotherapy",
-        "title": "Systemische Chemotherapie",
+        "title": "Systemic Chemotherapy",
         "status": "draft",
         "experimental": true,
         "date": "2026-04-20",
-        "description": "Platinum-based doublet chemotherapy for inoperable advanced lung cancer (Stadium III–IV). Produces a MedicationRequest resource.",
+        "description": "Platinum-based doublet chemotherapy for inoperable advanced lung cancer (Stage III-IV). Produces a MedicationRequest resource.",
         "purpose": "Maps to BPMN element Task_Chemo. Executed when TNM staging indicates inoperable disease (Stage III or IV).",
         "kind": "MedicationRequest",
         "intent": "order",
@@ -412,7 +412,7 @@
               "display": "Cisplatin (substance)"
             }
           ],
-          "text": "Cisplatin-basierte Chemotherapie"
+          "text": "Cisplatin-based chemotherapy"
         },
         "dosage": [
           {
@@ -455,7 +455,7 @@
         "url": "https://clinical-bpmn.org/examples/ActivityDefinition/followup-assessment",
         "version": "0.1.0",
         "name": "FollowupAssessment",
-        "title": "Nachsorge-Assessment",
+        "title": "Follow-up Assessment",
         "status": "draft",
         "experimental": true,
         "date": "2026-04-20",
@@ -475,7 +475,7 @@
               "display": "Plan of care note"
             }
           ],
-          "text": "Nachsorge-Assessment Lungenkarzinom"
+          "text": "Follow-up Assessment Lung Cancer"
         }
       },
       "request": {
@@ -506,10 +506,10 @@
             {
               "system": "http://ihe-d.de/CodeSystems/IHEXDStypeCode",
               "code": "ERGE",
-              "display": "Ergebnisse bildgebender Diagnostik"
+              "display": "Diagnostic imaging results"
             }
           ],
-          "text": "MRT-Befundbericht Thorax"
+          "text": "MRI Scan Report Thorax"
         },
         "category": [
           {
@@ -517,7 +517,7 @@
               {
                 "system": "http://ihe-d.de/CodeSystems/IHEXDSclassCode",
                 "code": "BEF",
-                "display": "Befundberichte"
+                "display": "Clinical reports"
               }
             ]
           }
@@ -527,7 +527,7 @@
           {
             "attachment": {
               "contentType": "application/pdf",
-              "title": "MRT-Befundbericht Thorax"
+              "title": "MRI Scan Report Thorax"
             }
           }
         ]
@@ -560,10 +560,10 @@
             {
               "system": "http://dvmd.de/fhir/CodeSystem/kdl",
               "code": "AD010101",
-              "display": "Ärztlicher Entlassungsbericht"
+              "display": "Medical discharge report"
             }
           ],
-          "text": "Entlassbrief"
+          "text": "Discharge Letter"
         },
         "category": [
           {
@@ -571,7 +571,7 @@
               {
                 "system": "http://ihe-d.de/CodeSystems/IHEXDSclassCode",
                 "code": "BRI",
-                "display": "Arztbriefe"
+                "display": "Physician letters"
               }
             ]
           }
@@ -581,7 +581,7 @@
           {
             "attachment": {
               "contentType": "application/pdf",
-              "title": "Entlassbrief Lungenkarzinom"
+              "title": "Discharge Letter Lung Cancer"
             }
           }
         ]

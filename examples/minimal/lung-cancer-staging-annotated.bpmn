@@ -43,28 +43,28 @@
        on re-save (standard extensionElements behavior).
        ============================================================ -->
 
-  <bpmn2:process id="Process_LungCaMin" name="Lungenkarzinom Therapieentscheidung" isExecutable="false">
+  <bpmn2:process id="Process_LungCaMin" name="Lung Cancer Treatment Decision" isExecutable="false">
 
     <!-- ─── Start Event ─────────────────────────────────────── -->
-    <bpmn2:startEvent id="StartEvent_1" name="Patient mit V.a. Lungenkarzinom">
+    <bpmn2:startEvent id="StartEvent_1" name="Patient with suspected lung cancer">
       <bpmn2:outgoing>Flow_Start_Staging</bpmn2:outgoing>
     </bpmn2:startEvent>
 
     <!-- ─── Data Object: MRI Scan Report (input to staging) ─── -->
-    <bpmn2:dataObjectReference id="DataObj_MRI" name="MRT-Befundbericht" term:clinicalDomain="diagnostics">
+    <bpmn2:dataObjectReference id="DataObj_MRI" name="MRI Scan Report" term:clinicalDomain="diagnostics">
       <bpmn2:extensionElements>
 
         <term:annotations>
           <term:annotation aspect="documentType" mode="prescriptive"
-                           text="MRT-Befundbericht des Thorax als Eingangsdokument für das TNM-Staging">
+                           text="MRI scan report of the thorax as input document for TNM staging">
             <term:coding system="http://loinc.org" code="18748-4"
                          display="Diagnostic imaging study"/>
             <term:coding system="http://ihe-d.de/CodeSystems/IHEXDStypeCode" code="ERGE"
-                         display="Ergebnisse bildgebender Diagnostik"/>
+                         display="Diagnostic imaging results"/>
           </term:annotation>
           <term:annotation aspect="documentClass" mode="prescriptive">
             <term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" code="BEF"
-                         display="Befundberichte"/>
+                         display="Clinical reports"/>
           </term:annotation>
         </term:annotations>
 
@@ -94,13 +94,13 @@
     </bpmn2:dataObjectReference>
 
     <!-- ─── Task: TNM Staging ───────────────────────────────── -->
-    <bpmn2:task id="Task_Staging" name="TNM-Staging durchführen" term:clinicalDomain="staging">
+    <bpmn2:task id="Task_Staging" name="Perform TNM Staging" term:clinicalDomain="staging">
       <bpmn2:extensionElements>
 
         <!-- Terminology annotations -->
         <term:annotations>
           <term:annotation aspect="clinicalContent" mode="descriptive"
-                           text="Klinisches TNM-Staging zur Bestimmung des Tumorstadiums">
+                           text="Clinical TNM staging to determine tumor stage">
             <term:coding system="http://snomed.info/sct" code="254292007"
                          display="Tumor staging (tumor staging)"/>
             <term:coding system="http://loinc.org" code="21908-9"
@@ -153,12 +153,12 @@
     </bpmn2:task>
 
     <!-- ─── XOR Gateway: Split ──────────────────────────────── -->
-    <bpmn2:exclusiveGateway id="Gateway_Split" name="Tumorstadium?">
+    <bpmn2:exclusiveGateway id="Gateway_Split" name="Tumor Stage?">
       <bpmn2:extensionElements>
 
         <term:annotations>
           <term:annotation aspect="clinicalContent" mode="descriptive"
-                           text="Therapieentscheidung basierend auf TNM-Stadium: Stadium I–II (operabel) vs. Stadium III–IV (inoperabel)"/>
+                           text="Treatment decision based on TNM stage: Stage I-II (operable) vs. Stage III-IV (inoperable)"/>
         </term:annotations>
 
       </bpmn2:extensionElements>
@@ -168,16 +168,16 @@
     </bpmn2:exclusiveGateway>
 
     <!-- ─── Task: Surgical Resection (path A) ───────────────── -->
-    <bpmn2:task id="Task_Surgery" name="Chirurgische Resektion" term:clinicalDomain="therapy">
+    <bpmn2:task id="Task_Surgery" name="Surgical Resection" term:clinicalDomain="therapy">
       <bpmn2:extensionElements>
 
         <term:annotations>
           <term:annotation aspect="clinicalContent" mode="prescriptive"
-                           text="Lobektomie oder Pneumonektomie bei operablem Lungenkarzinom Stadium I–II">
+                           text="Lobectomy or pneumonectomy for operable lung cancer Stage I-II">
             <term:coding system="http://snomed.info/sct" code="359615001"
                          display="Partial lobectomy of lung (procedure)"/>
             <term:coding system="http://fhir.de/CodeSystem/bfarm/ops" code="5-324"
-                         display="Einfache Lobektomie und Bilobektomie der Lunge"/>
+                         display="Simple lobectomy and bilobectomy of the lung"/>
           </term:annotation>
         </term:annotations>
 
@@ -205,12 +205,12 @@
     </bpmn2:task>
 
     <!-- ─── Task: Systemic Chemotherapy (path B) ────────────── -->
-    <bpmn2:task id="Task_Chemo" name="Systemische Chemotherapie" term:clinicalDomain="therapy">
+    <bpmn2:task id="Task_Chemo" name="Systemic Chemotherapy" term:clinicalDomain="therapy">
       <bpmn2:extensionElements>
 
         <term:annotations>
           <term:annotation aspect="clinicalContent" mode="prescriptive"
-                           text="Cisplatin-basierte Doublet-Chemotherapie bei inoperablem Lungenkarzinom Stadium III–IV">
+                           text="Cisplatin-based doublet chemotherapy for inoperable lung cancer Stage III-IV">
             <term:coding system="http://snomed.info/sct" code="367336001"
                          display="Chemotherapy (procedure)"/>
             <term:coding system="http://www.whocc.no/atc" code="L01XA01"
@@ -249,20 +249,20 @@
     </bpmn2:exclusiveGateway>
 
     <!-- ─── Data Object: Discharge Letter (output of follow-up) -->
-    <bpmn2:dataObjectReference id="DataObj_DischargeLetter" name="Entlassbrief" term:clinicalDomain="documentation">
+    <bpmn2:dataObjectReference id="DataObj_DischargeLetter" name="Discharge Letter" term:clinicalDomain="documentation">
       <bpmn2:extensionElements>
 
         <term:annotations>
           <term:annotation aspect="documentType" mode="prescriptive"
-                           text="Ärztlicher Entlassungsbericht nach Abschluss der Nachsorge">
+                           text="Medical discharge report upon completion of follow-up">
             <term:coding system="http://loinc.org" code="18842-5"
                          display="Discharge summary"/>
             <term:coding system="http://dvmd.de/fhir/CodeSystem/kdl" code="AD010101"
-                         display="Ärztlicher Entlassungsbericht"/>
+                         display="Medical discharge report"/>
           </term:annotation>
           <term:annotation aspect="documentClass" mode="prescriptive">
             <term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" code="BRI"
-                         display="Arztbriefe"/>
+                         display="Physician letters"/>
           </term:annotation>
         </term:annotations>
 
@@ -292,12 +292,12 @@
     </bpmn2:dataObjectReference>
 
     <!-- ─── Task: Follow-up Assessment ──────────────────────── -->
-    <bpmn2:task id="Task_Followup" name="Nachsorge-Assessment" term:clinicalDomain="follow-up">
+    <bpmn2:task id="Task_Followup" name="Follow-up Assessment" term:clinicalDomain="follow-up">
       <bpmn2:extensionElements>
 
         <term:annotations>
           <term:annotation aspect="clinicalContent" mode="descriptive"
-                           text="Strukturiertes Nachsorge-Assessment mit bildgebender Kontrolle und Labormonitoring">
+                           text="Structured follow-up assessment with imaging surveillance and lab monitoring">
             <term:coding system="http://snomed.info/sct" code="390906007"
                          display="Follow-up encounter (procedure)"/>
             <term:coding system="http://loinc.org" code="18776-5"
@@ -322,7 +322,7 @@
                                terminologyAspect="clinicalContent"/>
             <fhirmap:keyElement path="CarePlan.title"
                                semanticRole="payload"
-                               fixedValue="Nachsorge Lungenkarzinom"/>
+                               fixedValue="Follow-up Lung Cancer"/>
           </fhirmap:resourceMapping>
         </fhirmap:resourceMappings>
 
@@ -335,15 +335,15 @@
     </bpmn2:task>
 
     <!-- ─── End Event ───────────────────────────────────────── -->
-    <bpmn2:endEvent id="EndEvent_1" name="Behandlungsplan abgeschlossen">
+    <bpmn2:endEvent id="EndEvent_1" name="Treatment plan completed">
       <bpmn2:incoming>Flow_Followup_End</bpmn2:incoming>
     </bpmn2:endEvent>
 
     <!-- ─── Sequence Flows ──────────────────────────────────── -->
     <bpmn2:sequenceFlow id="Flow_Start_Staging" sourceRef="StartEvent_1" targetRef="Task_Staging"/>
     <bpmn2:sequenceFlow id="Flow_Staging_GwSplit" sourceRef="Task_Staging" targetRef="Gateway_Split"/>
-    <bpmn2:sequenceFlow id="Flow_GwSplit_Surgery" name="Stadium I–II (operabel)" sourceRef="Gateway_Split" targetRef="Task_Surgery"/>
-    <bpmn2:sequenceFlow id="Flow_GwSplit_Chemo" name="Stadium III–IV (inoperabel)" sourceRef="Gateway_Split" targetRef="Task_Chemo"/>
+    <bpmn2:sequenceFlow id="Flow_GwSplit_Surgery" name="Stage I-II (operable)" sourceRef="Gateway_Split" targetRef="Task_Surgery"/>
+    <bpmn2:sequenceFlow id="Flow_GwSplit_Chemo" name="Stage III-IV (inoperable)" sourceRef="Gateway_Split" targetRef="Task_Chemo"/>
     <bpmn2:sequenceFlow id="Flow_Surgery_GwJoin" sourceRef="Task_Surgery" targetRef="Gateway_Join"/>
     <bpmn2:sequenceFlow id="Flow_Chemo_GwJoin" sourceRef="Task_Chemo" targetRef="Gateway_Join"/>
     <bpmn2:sequenceFlow id="Flow_GwJoin_Followup" sourceRef="Gateway_Join" targetRef="Task_Followup"/>

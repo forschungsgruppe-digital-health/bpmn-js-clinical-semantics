@@ -24,18 +24,18 @@
        looking at the FHIR-annotated version.
        ============================================================ -->
 
-  <bpmn2:process id="Process_LungCaMin" name="Lungenkarzinom Therapieentscheidung" isExecutable="false">
+  <bpmn2:process id="Process_LungCaMin" name="Lung Cancer Treatment Decision" isExecutable="false">
 
     <!-- ─── Start Event ─────────────────────────────────────── -->
-    <bpmn2:startEvent id="StartEvent_1" name="Patient mit V.a. Lungenkarzinom">
+    <bpmn2:startEvent id="StartEvent_1" name="Patient with suspected lung cancer">
       <bpmn2:outgoing>Flow_Start_Staging</bpmn2:outgoing>
     </bpmn2:startEvent>
 
     <!-- ─── Data Object: MRI Scan Report (input to staging) ─── -->
-    <bpmn2:dataObjectReference id="DataObj_MRI" name="MRT-Befundbericht"/>
+    <bpmn2:dataObjectReference id="DataObj_MRI" name="MRI Scan Report"/>
 
     <!-- ─── Task: TNM Staging (before gateway) ──────────────── -->
-    <bpmn2:task id="Task_Staging" name="TNM-Staging durchführen">
+    <bpmn2:task id="Task_Staging" name="Perform TNM Staging">
       <bpmn2:incoming>Flow_Start_Staging</bpmn2:incoming>
       <bpmn2:outgoing>Flow_Staging_GwSplit</bpmn2:outgoing>
       <bpmn2:dataInputAssociation id="DataInputAssoc_MRI">
@@ -44,20 +44,20 @@
     </bpmn2:task>
 
     <!-- ─── XOR Gateway: Split (tumor stage decision) ───────── -->
-    <bpmn2:exclusiveGateway id="Gateway_Split" name="Tumorstadium?">
+    <bpmn2:exclusiveGateway id="Gateway_Split" name="Tumor Stage?">
       <bpmn2:incoming>Flow_Staging_GwSplit</bpmn2:incoming>
       <bpmn2:outgoing>Flow_GwSplit_Surgery</bpmn2:outgoing>
       <bpmn2:outgoing>Flow_GwSplit_Chemo</bpmn2:outgoing>
     </bpmn2:exclusiveGateway>
 
     <!-- ─── Task: Surgical Resection (path A: early stage) ──── -->
-    <bpmn2:task id="Task_Surgery" name="Chirurgische Resektion">
+    <bpmn2:task id="Task_Surgery" name="Surgical Resection">
       <bpmn2:incoming>Flow_GwSplit_Surgery</bpmn2:incoming>
       <bpmn2:outgoing>Flow_Surgery_GwJoin</bpmn2:outgoing>
     </bpmn2:task>
 
     <!-- ─── Task: Systemic Chemotherapy (path B: advanced) ──── -->
-    <bpmn2:task id="Task_Chemo" name="Systemische Chemotherapie">
+    <bpmn2:task id="Task_Chemo" name="Systemic Chemotherapy">
       <bpmn2:incoming>Flow_GwSplit_Chemo</bpmn2:incoming>
       <bpmn2:outgoing>Flow_Chemo_GwJoin</bpmn2:outgoing>
     </bpmn2:task>
@@ -70,10 +70,10 @@
     </bpmn2:exclusiveGateway>
 
     <!-- ─── Data Object: Discharge Letter (output of follow-up) -->
-    <bpmn2:dataObjectReference id="DataObj_DischargeLetter" name="Entlassbrief"/>
+    <bpmn2:dataObjectReference id="DataObj_DischargeLetter" name="Discharge Letter"/>
 
     <!-- ─── Task: Follow-up Assessment (after gateway) ──────── -->
-    <bpmn2:task id="Task_Followup" name="Nachsorge-Assessment">
+    <bpmn2:task id="Task_Followup" name="Follow-up Assessment">
       <bpmn2:incoming>Flow_GwJoin_Followup</bpmn2:incoming>
       <bpmn2:outgoing>Flow_Followup_End</bpmn2:outgoing>
       <bpmn2:dataOutputAssociation id="DataOutputAssoc_DischargeLetter">
@@ -82,15 +82,15 @@
     </bpmn2:task>
 
     <!-- ─── End Event ───────────────────────────────────────── -->
-    <bpmn2:endEvent id="EndEvent_1" name="Behandlungsplan abgeschlossen">
+    <bpmn2:endEvent id="EndEvent_1" name="Treatment plan completed">
       <bpmn2:incoming>Flow_Followup_End</bpmn2:incoming>
     </bpmn2:endEvent>
 
     <!-- ─── Sequence Flows ──────────────────────────────────── -->
     <bpmn2:sequenceFlow id="Flow_Start_Staging" sourceRef="StartEvent_1" targetRef="Task_Staging"/>
     <bpmn2:sequenceFlow id="Flow_Staging_GwSplit" sourceRef="Task_Staging" targetRef="Gateway_Split"/>
-    <bpmn2:sequenceFlow id="Flow_GwSplit_Surgery" name="Stadium I–II (operabel)" sourceRef="Gateway_Split" targetRef="Task_Surgery"/>
-    <bpmn2:sequenceFlow id="Flow_GwSplit_Chemo" name="Stadium III–IV (inoperabel)" sourceRef="Gateway_Split" targetRef="Task_Chemo"/>
+    <bpmn2:sequenceFlow id="Flow_GwSplit_Surgery" name="Stage I-II (operable)" sourceRef="Gateway_Split" targetRef="Task_Surgery"/>
+    <bpmn2:sequenceFlow id="Flow_GwSplit_Chemo" name="Stage III-IV (inoperable)" sourceRef="Gateway_Split" targetRef="Task_Chemo"/>
     <bpmn2:sequenceFlow id="Flow_Surgery_GwJoin" sourceRef="Task_Surgery" targetRef="Gateway_Join"/>
     <bpmn2:sequenceFlow id="Flow_Chemo_GwJoin" sourceRef="Task_Chemo" targetRef="Gateway_Join"/>
     <bpmn2:sequenceFlow id="Flow_GwJoin_Followup" sourceRef="Gateway_Join" targetRef="Task_Followup"/>
