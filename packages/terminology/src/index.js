@@ -19,6 +19,7 @@ export { FhirTerminologyAdapter } from './adapters/FhirTerminologyAdapter.js';
 export { SnomedCtProvider } from './providers/SnomedCtProvider.js';
 export { FhirProvider } from './providers/FhirProvider.js';
 export { StaticProvider } from './providers/StaticProvider.js';
+export { FallbackProvider } from './providers/FallbackProvider.js';
 
 // ─── Presets (ready-to-use static providers) ─────────────────
 export {
@@ -43,3 +44,7 @@ export {
   ensureAnnotationsContainer,
   ensureExtensionElements
 } from './services/AnnotationHelper.js';
+
+export { createStaticProviderFromCodeSystem } from './services/CodeSystemProviderFactory.js';
+export { loadCodeSystemFromFhir } from './services/FhirCodeSystemLoader.js';
+export { createFhirTerminologyProviderLoader } from './services/TerminologyProviderLoader.js';

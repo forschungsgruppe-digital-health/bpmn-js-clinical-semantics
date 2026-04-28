@@ -88,6 +88,21 @@ describe('TerminologyRegistry', () => {
     });
   });
 
+  describe('findProviderBySystem()', () => {
+    it('should return the provider matching the system URI', () => {
+      const provider = createMockProvider({ systemUri: 'http://example.com/system' });
+      registry.register(provider);
+
+      expect(registry.findProviderBySystem('http://example.com/system')).toBe(provider);
+    });
+
+    it('should return null when no provider matches the system URI', () => {
+      registry.register(createMockProvider());
+
+      expect(registry.findProviderBySystem('http://example.com/unknown')).toBeNull();
+    });
+  });
+
   // ─── listProviders ────────────────────────────────────────
 
   describe('listProviders()', () => {

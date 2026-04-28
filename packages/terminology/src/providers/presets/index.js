@@ -8,6 +8,7 @@
  */
 
 import { StaticProvider } from '../StaticProvider.js';
+export { loadCodeSystemFromFhir } from '../../services/FhirCodeSystemLoader.js';
 
 /**
  * @typedef {import('@types/fhir').fhir4.Bundle} FhirBundle

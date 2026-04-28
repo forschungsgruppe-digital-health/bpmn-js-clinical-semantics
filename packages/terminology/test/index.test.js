@@ -63,12 +63,18 @@ describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
     expect(mod.StaticProvider).toBeDefined();
   });
 
+  it('should export FallbackProvider', async () => {
+    const mod = await import('../src/providers/FallbackProvider.js');
+    expect(mod.FallbackProvider).toBeDefined();
+  });
+
   it('should export preset factory functions', async () => {
     const mod = await import('../src/providers/presets/index.js');
     expect(mod.createIheXdsClassCodeProvider).toBeDefined();
     expect(mod.createIheXdsTypeCodeProvider).toBeDefined();
     expect(mod.createKdlProvider).toBeDefined();
     expect(mod.loadKdlFromFhir).toBeDefined();
+    expect(mod.loadCodeSystemFromFhir).toBeDefined();
   });
 
   it('should export AnnotationHelper functions', async () => {
@@ -79,6 +85,16 @@ describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
     expect(mod.getAnnotationsContainer).toBeDefined();
     expect(mod.ensureAnnotationsContainer).toBeDefined();
     expect(mod.ensureExtensionElements).toBeDefined();
+  });
+
+  it('should export TerminologyProviderLoader helpers', async () => {
+    const mod = await import('../src/services/TerminologyProviderLoader.js');
+    expect(mod.createFhirTerminologyProviderLoader).toBeDefined();
+  });
+
+  it('should export CodeSystemProviderFactory helpers', async () => {
+    const mod = await import('../src/services/CodeSystemProviderFactory.js');
+    expect(mod.createStaticProviderFromCodeSystem).toBeDefined();
   });
 
   it('should export moddle descriptor as JSON', async () => {

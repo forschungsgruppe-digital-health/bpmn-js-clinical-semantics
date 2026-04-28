@@ -59,9 +59,11 @@ Both annotation layers are stored as BPMN 2.0 `extensionElements` in the standar
 
 **BPMN 2.0 extensionElements as the persistence mechanism.** Rather than inventing a sidecar format, both annotation layers use standard BPMN `extensionElements`. This means the annotated XML is still valid BPMN 2.0, can be opened in any compliant tool, and the annotations survive round-trip editing in tools that do not understand them.
 
-**Provider/Adapter pattern for terminology access.** The `TerminologyProvider` interface defines a uniform contract (search, lookup, validate, getHierarchy). Concrete providers (`SnomedCtProvider`, `FhirProvider`, `StaticProvider`) implement this interface and optionally delegate to protocol-specific adapters (`SnowstormAdapter`, `FhirTerminologyAdapter`). This two-layer design means a new terminology system can often be added by configuring an existing adapter rather than writing an entirely new provider.
+**Provider/Adapter pattern for terminology access.** The `TerminologyProvider` interface defines a uniform contract (search, lookup, validate, getHierarchy). Concrete providers (`SnomedCtProvider`, `FhirProvider`, `StaticProvider`, `FallbackProvider`) implement this interface and optionally delegate to protocol-specific adapters (`SnowstormAdapter`, `FhirTerminologyAdapter`). This two-layer design means a new terminology system can often be added by configuring an existing adapter rather than writing an entirely new provider, and multiple sources can be composed behind one registry entry.
 
 **Registry as a facade.** The `TerminologyRegistry` aggregates all providers and exposes `search`, `searchAll`, `lookup`, and `validate` as a single entry point. The properties panel depends on this abstraction, not on individual providers (Dependency Inversion Principle).
+
+**Optional dynamic loader boundary.** When the UI should be able to register unknown FHIR-hosted code systems on demand, that happens through an injected `terminologyProviderLoader` service. This keeps concrete FHIR base URLs and dynamic provider bootstrap out of the properties-panel components. The demo uses a second boundary for known HL7 systems: local package imports are converted into `StaticProvider`s first, then wrapped with `FallbackProvider` so a live FHIR server stays available as the secondary path.
 
 ---
 
@@ -374,23 +376,26 @@ Extensible terminology annotation engine. Each BPMN element can carry multiple a
 |---|---|---|---|
 | SNOMED CT | `SnomedCtProvider` | Yes (Snowstorm) | via API |
 | LOINC, ICD-10-GM, OPS, ATC, ICD-O-3 | `FhirProvider` | Yes (any FHIR TS) | via API |
+| HL7 v2/v3 from local FHIR package + server fallback | `FallbackProvider` + `createStaticProviderFromCodeSystem()` + `FhirProvider` | Optional fallback server | via package JSON, then API fallback |
 | IHE XDS classCode | `createIheXdsClassCodeProvider()` | No | 16 built-in |
 | IHE XDS typeCode | `createIheXdsTypeCodeProvider()` | No | 22 built-in |
 | KDL (DVMD) | `createKdlProvider()` | No | 18 built-in (full set loadable from FHIR) |
 
-Adding a new terminology system requires zero changes to existing code. Implement `TerminologyProvider` and call `registry.register()`. For FHIR-hosted code systems, reuse `FhirProvider`. For small static code systems, use `StaticProvider`.
+Adding a new terminology system requires zero changes to existing code. Implement `TerminologyProvider` and call `registry.register()`. For FHIR-hosted code systems, reuse `FhirProvider`. For small static code systems, use `StaticProvider`. For local FHIR package content, reuse `createStaticProviderFromCodeSystem()`. For dual-track resolution, wrap providers with `FallbackProvider`.
 
 ### `@bpmn-js-clinical-semantics/fhir-mapping`
 
 FHIR resource-level mapping. Each BPMN element can declare:
 
-- **`resourceType`** -- which FHIR resource it represents (16 types including `Condition`, `Procedure`, `Observation`, `DiagnosticReport`, `DocumentReference`, `MedicationRequest`, `ServiceRequest`, `CarePlan`, `Composition`, `Bundle`, `ImagingStudy`, `Consent`, `Patient`, `Encounter`, `Specimen`)
+- **`resourceType`** -- which FHIR resource it represents (drawn from the full FHIR R4 resource catalogue, plus version-specific additions when enabled)
 - **`profile`** -- canonical URL of the applicable FHIR profile (e.g. MII KDS profiles)
 - **`interaction`** -- FHIR interaction type: `create`, `read`, `update`, `search`, `transaction`
 - **`direction`** -- data flow direction: `input`, `output`, `input-output`
 - **`structureMapRef`** -- canonical URL of a FHIR StructureMap for automated transformation
 - **`keyElements`** -- FHIRPath elements with semantic roles (`trigger`, `filter`, `classifier`, `identifier`, `payload`), fixed values, and terminology bindings
 - **`searchParams`** -- FHIR SearchParameters for `search`-type interactions
+
+The package can export these mappings as raw JSON via `exportMappingsAsJson`, which is useful for downstream transformers, documentation generation, or custom FHIR export pipelines.
 
 ### `@bpmn-js-clinical-semantics/vue`
 
@@ -403,7 +408,11 @@ Thin Vue 3 wrapper providing `useTerminology()` and `useFhirMapping()` composabl
 ### Option A: FHIR-hosted code system (no custom adapter)
 
 ```js
-import { FhirProvider, TerminologyRegistry } from '@bpmn-js-clinical-semantics/terminology';
+import {
+  FhirProvider,
+  TerminologyRegistry,
+  createFhirTerminologyProviderLoader
+} from '@bpmn-js-clinical-semantics/terminology';
 
 const registry = new TerminologyRegistry();
 
@@ -413,7 +422,16 @@ registry.register(new FhirProvider({
   systemUri: 'http://fhir.de/CodeSystem/bfarm/atc',
   baseUrl: 'https://fhir.bfarm.de/fhir'
 }));
+
+const loader = createFhirTerminologyProviderLoader({
+  terminologyRegistry: registry,
+  fhirBaseUrl: 'https://fhir.bfarm.de/fhir'
+});
+
+await loader.ensureProvider('http://terminology.hl7.org/CodeSystem/v3-ActCode');
 ```
+
+If a terminology server cannot expand an all-codes ValueSet from the bare CodeSystem URI, `FhirProvider` can be configured with an explicit `valueSetUri` and additional `expandParameters` such as `valueSetVersion` or `system-version`. The demo uses this for systems like LOINC, ICD-10-GM, and OPS on Ontoserver.
 
 ### Option B: Static code system (no server)
 
@@ -431,7 +449,35 @@ registry.register(new StaticProvider(
 ));
 ```
 
-### Option C: Custom API (new adapter + provider)
+### Option C: Local FHIR package resource (package first, server second)
+
+```js
+import {
+  FallbackProvider,
+  FhirProvider,
+  createStaticProviderFromCodeSystem
+} from '@bpmn-js-clinical-semantics/terminology';
+import roleCodeCodeSystem from './path/to/CodeSystem-v3-RoleCode.json';
+
+registry.register(new FallbackProvider({
+  id: 'hl7-v3-rolecode',
+  displayName: 'HL7 v3 RoleCode',
+  primaryProvider: createStaticProviderFromCodeSystem(roleCodeCodeSystem, {
+    id: 'hl7-v3-rolecode-package'
+  }),
+  fallbackProvider: new FhirProvider({
+    id: 'hl7-v3-rolecode-fhir',
+    displayName: 'HL7 v3 RoleCode (FHIR)',
+    systemUri: 'http://terminology.hl7.org/CodeSystem/v3-RoleCode',
+    valueSetUri: 'http://terminology.hl7.org/ValueSet/v3-RoleCode',
+    baseUrl: 'https://fhir.example.com'
+  })
+}));
+```
+
+This pattern keeps the runtime deterministic for well-known package content while preserving a live server path for deployments that need broader coverage, newer server-side expansions, or operational fallback. In the demo, the package-backed path is implemented with a vendored snapshot of selected `hl7.terminology.r4@7.0.1` `CodeSystem` JSON files because the upstream npm package currently references `hl7.fhir.r4.core@4.0.1`, which is not directly installable in this workspace.
+
+### Option D: Custom API (new adapter + provider)
 
 ```js
 import { TerminologyProvider } from '@bpmn-js-clinical-semantics/terminology';
@@ -462,7 +508,7 @@ class OncotreeProvider extends TerminologyProvider {
 registry.register(new OncotreeProvider());
 ```
 
-In all three cases, zero changes to existing library code are required (Open/Closed Principle).
+In all four cases, zero changes to existing library code are required (Open/Closed Principle).
 
 ---
 

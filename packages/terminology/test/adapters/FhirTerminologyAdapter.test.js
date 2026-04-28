@@ -50,6 +50,26 @@ describe('FhirTerminologyAdapter', () => {
       expect(result.total).toBe(1);
     });
 
+    it('should append configured expand parameters', async () => {
+      const mockFetch = createMockFetch({ expansion: { contains: [] } });
+
+      const adapter = new FhirTerminologyAdapter({
+        baseUrl: BASE_URL,
+        systemUri: 'http://fhir.de/ValueSet/bfarm/icd-10-gm',
+        expandParameters: {
+          valueSetVersion: '2020',
+          'system-version': 'http://fhir.de/CodeSystem/bfarm/icd-10-gm|2020'
+        },
+        fetchFn: mockFetch
+      });
+
+      await adapter.search({ term: '', limit: 10, offset: 0 });
+
+      const calledUrl = new URL(mockFetch.mock.calls[0][0]);
+      expect(calledUrl.searchParams.get('valueSetVersion')).toBe('2020');
+      expect(calledUrl.searchParams.get('system-version')).toBe('http://fhir.de/CodeSystem/bfarm/icd-10-gm|2020');
+    });
+
     it('should handle inactive concepts', async () => {
       const mockFetch = createMockFetch({
         expansion: {

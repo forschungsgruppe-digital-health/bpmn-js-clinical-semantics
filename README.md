@@ -42,7 +42,7 @@ For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE
 ### Terminology Annotations (`@bpmn-js-clinical-semantics/terminology`)
 
 - [x] Multi-code annotation of any BPMN element (Tasks, DataObjects, Events, Gateways, MessageFlows)
-- [x] Pluggable provider architecture with built-in support for SNOMED CT (via Snowstorm), any FHIR-hosted code system (LOINC, ICD-10-GM, OPS, ATC, ICD-O-3), IHE XDS classCode/typeCode, and KDL
+- [x] Pluggable provider architecture with built-in support for SNOMED CT (via Snowstorm), any FHIR-hosted code system (LOINC, ICD-10-GM, OPS, ATC, ICD-O-3), package-backed HL7 terminology resources, IHE XDS classCode/typeCode, and KDL
 - [x] Aspect-based annotation model (clinicalContent, documentClass, documentType, note, confidentiality, status, format, participant)
 - [x] Descriptive and prescriptive modes with optional FHIRPath mapping targets
 - [x] Extensibility without code changes -- new terminology systems via `TerminologyProvider` interface
@@ -150,17 +150,43 @@ const modeler = new BpmnModeler({
 
 ```js
 import {
+  FhirProvider,
+  FallbackProvider,
   TerminologyRegistry,
   SnomedCtProvider,
   createKdlProvider,
+  createStaticProviderFromCodeSystem,
+  createFhirTerminologyProviderLoader,
   addAnnotation,
   ASPECTS
 } from '@bpmn-js-clinical-semantics/terminology';
+import actCodeCodeSystem from './path/to/CodeSystem-v3-ActCode.json';
 
 // Set up providers
 const registry = new TerminologyRegistry();
 registry.register(new SnomedCtProvider({ baseUrl: 'https://snowstorm.example.com' }));
 registry.register(createKdlProvider());
+registry.register(new FallbackProvider({
+  id: 'hl7-v3-actcode',
+  displayName: 'HL7 v3 ActCode',
+  primaryProvider: createStaticProviderFromCodeSystem(actCodeCodeSystem, {
+    id: 'hl7-v3-actcode-package'
+  }),
+  fallbackProvider: new FhirProvider({
+    id: 'hl7-v3-actcode-fhir',
+    displayName: 'HL7 v3 ActCode (FHIR)',
+    systemUri: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
+    valueSetUri: 'http://terminology.hl7.org/ValueSet/v3-ActCode',
+    baseUrl: 'https://fhir.example.com'
+  })
+}));
+
+const terminologyProviderLoader = createFhirTerminologyProviderLoader({
+  terminologyRegistry: registry,
+  fhirBaseUrl: 'https://fhir.example.com'
+});
+
+await terminologyProviderLoader.ensureProvider('http://terminology.hl7.org/CodeSystem/v3-ActCode');
 
 // Search across all providers
 const results = await registry.searchAll('pneumonia');
@@ -174,7 +200,9 @@ addAnnotation(businessObject, moddle, {
 });
 ```
 
-For adding custom terminology systems (FHIR-hosted, static, or custom API), see [ARCHITECTURE.md -- Extending with a New Terminology System](ARCHITECTURE.md#extending-with-a-new-terminology-system).
+`createStaticProviderFromCodeSystem()` turns a FHIR `CodeSystem` JSON resource into an in-memory `StaticProvider`. This makes local FHIR packages such as `hl7.terminology.r4` useful without writing a custom adapter: import the package JSON, build a local provider, and optionally wrap it in `FallbackProvider` so a FHIR terminology server remains available when the local package snapshot is missing a concept or unavailable in a given deployment. The demo follows that pattern for HL7 v2/v3 terminology and vendors selected `CodeSystem` resources from `hl7.terminology.r4@7.0.1` under `examples/vanilla/src/vendor/hl7-terminology-r4/`, because the upstream npm package currently depends on `hl7.fhir.r4.core@4.0.1`, which is not resolvable in this workspace install.
+
+For adding custom terminology systems (FHIR-hosted, static, package-backed, or custom API), see [ARCHITECTURE.md -- Extending with a New Terminology System](ARCHITECTURE.md#extending-with-a-new-terminology-system). The demo keeps its concrete server URLs and package imports in a dedicated bootstrap/config layer; the properties panel only talks to `terminologyRegistry` and an optional `terminologyProviderLoader`. For FHIR terminology servers that need explicit canonical ValueSet URLs or version hints, `FhirProvider` also supports `valueSetUri` and `expandParameters`.
 
 ---
 
@@ -217,7 +245,6 @@ The interactive demo is automatically deployed to GitHub Pages on every push to 
 **Live Demo:** [forschungsgruppe-digital-health.github.io/bpmn-js-clinical-semantics](https://forschungsgruppe-digital-health.github.io/bpmn-js-clinical-semantics/)
 
 The demo shows the full bpmn-js modeler with both annotation panels active, loaded with a sample lung cancer diagnostic pathway. Click any BPMN element to inspect and edit its annotations, view the resulting XML, and download the annotated BPMN file.
-
 To run the demo locally:
 
 ```bash

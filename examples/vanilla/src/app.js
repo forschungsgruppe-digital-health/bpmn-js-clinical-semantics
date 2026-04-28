@@ -9,6 +9,10 @@ import {
   TerminologyModdleDescriptor,
   TerminologyPropertiesPanelModule
 } from '@bpmn-js-clinical-semantics/terminology';
+import {
+  createDemoTerminologyServices,
+  createDemoTerminologyModule
+} from './terminology-config.js';
 
 // ─── Import from @bpmn-js-clinical-semantics/fhir-mapping ────────────────
 import {
@@ -23,6 +27,8 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
 
 // ─── Create modeler with BOTH extensions ─────────────────────
+const terminologyServices = createDemoTerminologyServices();
+const TerminologyServicesModule = createDemoTerminologyModule(terminologyServices);
 
 const modeler = new BpmnModeler({
   container: '#canvas',
@@ -33,7 +39,8 @@ const modeler = new BpmnModeler({
     BpmnPropertiesPanelModule,
     BpmnPropertiesProviderModule,
     TerminologyPropertiesPanelModule,    // ← Terminology annotations group
-    FhirMappingPropertiesPanelModule     // ← FHIR mapping group
+    FhirMappingPropertiesPanelModule,    // ← FHIR mapping group
+    TerminologyServicesModule            // ← provides terminology services
   ],
   moddleExtensions: {
     term: TerminologyModdleDescriptor,   // ← term: namespace
@@ -45,7 +52,11 @@ const modeler = new BpmnModeler({
 
 async function loadDiagram() {
   try {
-    const response = await fetch('./sample.bpmn');
+    // Wir versuchen zuerst den relativen, dann den absoluten Pfad
+    let response = await fetch('./sample.bpmn');
+    if (response.headers.get('content-type')?.includes('text/html')) {
+      response = await fetch('/sample.bpmn');
+    }
     const xml = await response.text();
     await modeler.importXML(xml);
     modeler.get('canvas').zoom('fit-viewport');

@@ -39,7 +39,7 @@ describe('FhirProvider', () => {
       const fetchFn = createMockFetch({
         expansion: {
           contains: [
-            { code: 'C34.1', display: 'Oberlappen', system: 'http://fhir.de/CodeSystem/bfarm/icd-10-gm' }
+            { code: 'C34.1', display: 'Oberlappen', system: 'http://fhir.de/ValueSet/bfarm/icd-10-gm' }
           ],
           total: 1
         }
@@ -49,6 +49,7 @@ describe('FhirProvider', () => {
       const result = await provider.search('Lunge', { limit: 5 });
       expect(result.items).toHaveLength(1);
       expect(result.items[0].code).toBe('C34.1');
+      expect(result.items[0].system).toBe('http://fhir.de/CodeSystem/bfarm/icd-10-gm');
     });
 
     it('should respect maxResults config', async () => {
@@ -67,6 +68,22 @@ describe('FhirProvider', () => {
       await provider.search('test', { limit: 3 });
       const calledUrl = new URL(fetchFn.mock.calls[0][0]);
       expect(calledUrl.searchParams.get('count')).toBe('3');
+    });
+
+    it('should forward expandParameters to the adapter search request', async () => {
+      const fetchFn = createMockFetch({ expansion: { contains: [] } });
+      const provider = createProvider({
+        valueSetUri: 'http://fhir.de/ValueSet/bfarm/icd-10-gm',
+        expandParameters: {
+          valueSetVersion: '2020'
+        },
+        fetchFn
+      });
+
+      await provider.search('');
+      const calledUrl = new URL(fetchFn.mock.calls[0][0]);
+      expect(calledUrl.searchParams.get('url')).toBe('http://fhir.de/ValueSet/bfarm/icd-10-gm');
+      expect(calledUrl.searchParams.get('valueSetVersion')).toBe('2020');
     });
   });
 

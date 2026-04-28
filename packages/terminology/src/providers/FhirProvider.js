@@ -12,9 +12,11 @@ export class FhirProvider extends TerminologyProvider {
    * @param {string} config.id - Provider ID (e.g. 'loinc', 'icd-10-gm')
    * @param {string} config.displayName
    * @param {string} config.systemUri
+   * @param {string} [config.valueSetUri] - Override URI for $expand (useful for HL7 ValueSets)
    * @param {string} config.baseUrl - FHIR server base URL
    * @param {number} [config.maxResults=15]
    * @param {string} [config.language]
+   * @param {Record<string, string>} [config.expandParameters]
    * @param {import('../core/types').ConnectionConfig['auth']} [config.auth]
    * @param {typeof fetch} [config.fetchFn]
    */
@@ -25,9 +27,14 @@ export class FhirProvider extends TerminologyProvider {
     this._systemUri = config.systemUri;
     this._maxResults = config.maxResults || 15;
     this._language = config.language;
+    
+    // Use valueSetUri for the adapter if provided, otherwise fallback to systemUri
+    const searchUri = config.valueSetUri || config.systemUri;
+    
     this._adapter = new FhirTerminologyAdapter({
       baseUrl: config.baseUrl,
-      systemUri: config.systemUri,
+      systemUri: searchUri,
+      expandParameters: config.expandParameters,
       auth: config.auth,
       fetchFn: config.fetchFn,
       headers: config.headers
@@ -42,12 +49,19 @@ export class FhirProvider extends TerminologyProvider {
   }
 
   async search(term, options = {}) {
-    return this._adapter.search({
+    const result = await this._adapter.search({
       term,
       limit: options.limit ?? this._maxResults,
       offset: options.offset ?? 0,
       language: options.language ?? this._language
     });
+    
+    // Ensure the returned concepts use the correct CodeSystem URI (not the ValueSet URI)
+    if (result && result.items) {
+      result.items.forEach(c => c.system = this._systemUri);
+    }
+    
+    return result;
   }
 
   async lookup(code) {

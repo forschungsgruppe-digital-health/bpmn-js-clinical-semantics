@@ -31,6 +31,7 @@ export class FhirTerminologyAdapter {
    * @param {ConnectionConfig['auth']} [config.auth]
    * @param {typeof fetch} [config.fetchFn]
    * @param {Record<string, string>} [config.headers]
+   * @param {Record<string, string>} [config.expandParameters]
    */
   constructor(config) {
     this._baseUrl = config.baseUrl.replace(/\/$/, '');
@@ -38,6 +39,7 @@ export class FhirTerminologyAdapter {
     this._auth = config.auth;
     this._fetch = config.fetchFn || globalThis.fetch.bind(globalThis);
     this._extraHeaders = config.headers || {};
+    this._expandParameters = config.expandParameters || {};
   }
 
   /**
@@ -53,8 +55,12 @@ export class FhirTerminologyAdapter {
    */
   async search(params) {
     const url = new URL(`${this._baseUrl}/ValueSet/$expand`);
-    url.searchParams.set('url', `${this._systemUri}?vs`);
-    url.searchParams.set('filter', params.term);
+    
+    // Verhindere doppeltes Anhängen von Parametern bei impliziten ValueSets (z.B. ?fhir_vs)
+    const isValueSet = this._systemUri.includes('/ValueSet/') || this._systemUri.includes('?');
+    const targetUrl = isValueSet ? this._systemUri : `${this._systemUri}?vs`;
+    url.searchParams.set('url', targetUrl);
+    url.searchParams.set('filter', params.term || '');
     url.searchParams.set('count', String(params.limit));
     url.searchParams.set('offset', String(params.offset));
 
@@ -62,9 +68,23 @@ export class FhirTerminologyAdapter {
       url.searchParams.set('displayLanguage', params.language);
     }
 
+    Object.entries(this._expandParameters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        url.searchParams.set(key, value);
+      }
+    });
+    
+    // Manche FHIR-Server (wie Snowstorm) benötigen dieses Flag für die Text-Rückgabe
+    url.searchParams.set('includeDesignations', 'true');
+
     try {
       const res = await this._request(url);
-      if (!res.ok) return { items: [], total: 0 };
+      if (!res.ok) {
+        return {
+          items: [],
+          total: 0
+        };
+      }
 
       /** @type {FhirValueSet} */
       const data = await res.json();
@@ -76,8 +96,11 @@ export class FhirTerminologyAdapter {
         items: contains.map(c => this._mapExpandContainsToConcept(c)),
         total: data.expansion?.total ?? contains.length
       };
-    } catch {
-      return { items: [], total: 0 };
+    } catch (e) {
+      return {
+        items: [],
+        total: 0
+      };
     }
   }
 
@@ -124,9 +147,12 @@ export class FhirTerminologyAdapter {
    * @private
    */
   _mapExpandContainsToConcept(entry) {
+    // Fallback: Falls 'display' leer ist, suche in den designations
+    const designation = entry.designation && entry.designation.length > 0 ? entry.designation[0].value : null;
+    
     return {
       code: entry.code || '',
-      display: entry.display || entry.code || '',
+      display: entry.display || designation || entry.code || '',
       system: entry.system || this._systemUri,
       version: entry.version,
       active: !entry.inactive

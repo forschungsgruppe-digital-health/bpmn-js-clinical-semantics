@@ -46,8 +46,11 @@ export class StaticProvider extends TerminologyProvider {
   }
 
   async validate(code) {
-    const found = this._concepts.some(c => c.code === code);
-    return { valid: found, message: found ? undefined : `Code ${code} not found in ${this._id}` };
+    const concept = this._concepts.find(c => c.code === code) ?? null;
+    return {
+      valid: concept !== null && concept.active !== false,
+      message: concept ? undefined : `Code ${code} not found in ${this._id}`
+    };
   }
 
   /** Get all concepts (useful for dropdowns). */

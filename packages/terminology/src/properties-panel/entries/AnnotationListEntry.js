@@ -26,26 +26,21 @@ const TRANSFORMS = [
   { value: 'translate', label: 'translate (ConceptMap)' }
 ];
 
-const TERMINOLOGY_PRESETS = [
-  { label: '– Manuell eingeben –', system: '', code: '', display: '' },
-  { label: 'SNOMED CT', system: 'http://snomed.info/sct', code: '', display: '' },
-  { label: 'LOINC', system: 'http://loinc.org', code: '', display: '' },
-  { label: 'ICD-10-GM', system: 'http://fhir.de/CodeSystem/bfarm/icd-10-gm', code: '', display: '' },
-  { label: 'OPS', system: 'http://fhir.de/CodeSystem/bfarm/ops', code: '', display: '' },
-  { label: 'IHE XDS classCode', system: 'http://ihe-d.de/CodeSystems/IHEXDSclassCode', code: '', display: '' },
-  { label: 'IHE XDS typeCode', system: 'http://ihe-d.de/CodeSystems/IHEXDStypeCode', code: '', display: '' },
-  { label: 'KDL (DVMD)', system: 'http://dvmd.de/fhir/CodeSystem/kdl', code: '', display: '' }
-];
-
 export function AnnotationListEntry(props) {
   const { element } = props;
   const moddle = useService('moddle');
   const modeling = useService('modeling');
   const translate = useService('translate');
+  const terminologyRegistry = useService('terminologyRegistry', false);
+  const terminologyProviderLoader = useService('terminologyProviderLoader', false);
 
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState(createEmptyForm());
   const [, setRefresh] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchBusy, setSearchBusy] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
 
   const bo = element.businessObject;
   const annotations = getAnnotations(bo);
@@ -62,6 +57,76 @@ export function AnnotationListEntry(props) {
       targetTransform: '',
       targetValue: ''
     };
+  }
+
+  function normalizeConcepts(result) {
+    const concepts = result?.concepts || result?.items || [];
+    return Array.isArray(concepts) ? concepts : [];
+  }
+
+  function findProviderIdForSystem(systemUri) {
+    if (!terminologyRegistry || !systemUri) return null;
+    try {
+      const match = terminologyRegistry.findProviderBySystem(systemUri);
+      return match?.id || null;
+    } catch {
+      return null;
+    }
+  }
+
+  async function runSearch() {
+    setSearchError('');
+    setSearchResults([]);
+
+    if (!terminologyRegistry) {
+      setSearchError('Keine Terminologie-Registry konfiguriert (Demo ohne Live-Provider).');
+      return;
+    }
+    if (!formData.codingSystem) {
+      setSearchError('Bitte zuerst eine Terminologie auswählen (System-URI).');
+      return;
+    }
+    // Leere Suche ab sofort erlauben, um die ersten 15 Ergebnisse zum "Stöbern" zu laden!
+
+    let providerId = findProviderIdForSystem(formData.codingSystem);
+
+    if (!providerId) {
+      if (!terminologyProviderLoader) {
+        setSearchError('System unbekannt und kein dynamischer Terminologie-Loader konfiguriert.');
+        return;
+      }
+
+      setSearchBusy(true);
+      try {
+        const newProvider = await terminologyProviderLoader.ensureProvider(formData.codingSystem);
+        providerId = newProvider.id;
+      } catch (e) {
+        setSearchBusy(false);
+        setSearchError('System unbekannt und dynamisches Nachladen via FHIR fehlgeschlagen.');
+        return;
+      }
+    }
+
+    setSearchBusy(true);
+    try {
+      const result = await terminologyRegistry.search(searchTerm.trim(), providerId, { limit: 15, offset: 0 });
+      setSearchResults(normalizeConcepts(result));
+    } catch (e) {
+      console.error("Fehler bei der Terminologiesuche:", e);
+      if (!searchTerm.trim()) {
+        setSearchError('Leere Suche abgelehnt: Bitte Suchbegriff eingeben (Schutz vor Server-Überlastung oder System fehlt).');
+      } else {
+        setSearchError('Fehler 404: Dieses CodeSystem ist auf dem Server nicht installiert oder erreichbar.');
+      }
+    } finally {
+      setSearchBusy(false);
+    }
+  }
+
+  function applySearchResult(c) {
+    updateField('codingSystem', c.system || formData.codingSystem);
+    updateField('codingCode', c.code || '');
+    updateField('codingDisplay', c.display || '');
   }
 
   function handleAdd() {
@@ -105,10 +170,11 @@ export function AnnotationListEntry(props) {
   }
 
   function handlePreset(e) {
-    const preset = TERMINOLOGY_PRESETS.find(p => p.system === e.target.value);
-    if (preset) {
-      setFormData({ ...formData, codingSystem: preset.system });
-    }
+    const system = e.target.value;
+    setFormData({ ...formData, codingSystem: system });
+    setSearchTerm('');
+    setSearchResults([]);
+    setSearchError('');
   }
 
   function updateField(field, value) {
@@ -139,7 +205,7 @@ export function AnnotationListEntry(props) {
               `}
               ${(ann.codings || []).map(c => html`
                 <div class="annotation-item__coding">
-                  <span class="coding-system">${getSystemShortName(c.system)}</span>
+                  <span class="coding-system">${getSystemShortName(c.system, terminologyRegistry)}</span>
                   <code class="coding-code">${c.code}</code>
                   ${c.display && html`<span class="coding-display">${c.display}</span>`}
                 </div>
@@ -208,8 +274,9 @@ export function AnnotationListEntry(props) {
                 value=${formData.codingSystem}
                 onChange=${handlePreset}
               >
-                ${TERMINOLOGY_PRESETS.map(p =>
-                  html`<option value=${p.system}>${p.label}</option>`
+                <option value="">– Manuell eingeben –</option>
+                ${(terminologyRegistry ? terminologyRegistry.listProviders() : []).map(p =>
+                  html`<option value=${p.systemUri}>${p.displayName}</option>`
                 )}
               </select>
             </div>
@@ -222,6 +289,39 @@ export function AnnotationListEntry(props) {
                   onInput=${(e) => updateField('codingSystem', e.target.value)}
                 />
               </div>
+              <div class="form-row">
+                <label>Suche</label>
+                <div style="display:flex; gap:8px; align-items:center; width:100%;">
+                  <input
+                    type="text"
+                    placeholder="Begriff eingeben (live, falls Provider konfiguriert)…"
+                    value=${searchTerm}
+                    onInput=${(e) => { setSearchTerm(e.target.value); setSearchError(''); }}
+                    onKeyDown=${(e) => { if (e.key === 'Enter') runSearch(); }}
+                    style="flex:1;"
+                  />
+                  <button class="btn btn--secondary" disabled=${searchBusy} onClick=${runSearch}>
+                    ${searchBusy ? '…' : 'Suchen'}
+                  </button>
+                </div>
+              </div>
+              ${searchError && html`<div class="annotation-empty" style="color:#b42318;">${searchError}</div>`}
+              ${searchResults.length > 0 && html`
+                <div class="annotation-list" style="margin-top:8px;">
+                  ${searchResults.map(c => html`
+                    <div class="annotation-item" style="cursor:pointer;" onClick=${() => applySearchResult(c)}>
+                      <div class="annotation-item__header">
+                        <span class="annotation-item__aspect">${getSystemShortName(c.system || formData.codingSystem, terminologyRegistry)}</span>
+                        <span class="annotation-item__mode badge badge--descriptive">Treffer</span>
+                      </div>
+                      <div class="annotation-item__coding">
+                        <code class="coding-code">${c.code}</code>
+                        ${c.display && html`<span class="coding-display">${c.display}</span>`}
+                      </div>
+                    </div>
+                  `)}
+                </div>
+              `}
               <div class="form-row">
                 <label>Code</label>
                 <input
@@ -308,16 +408,13 @@ function getAspectLabel(aspect) {
   return map[aspect] || aspect;
 }
 
-function getSystemShortName(uri) {
-  const map = {
-    'http://snomed.info/sct': 'SNOMED CT',
-    'http://loinc.org': 'LOINC',
-    'http://fhir.de/CodeSystem/bfarm/icd-10-gm': 'ICD-10-GM',
-    'http://fhir.de/CodeSystem/bfarm/ops': 'OPS',
-    'http://ihe-d.de/CodeSystems/IHEXDSclassCode': 'IHE classCode',
-    'http://ihe-d.de/CodeSystems/IHEXDStypeCode': 'IHE typeCode',
-    'http://dvmd.de/fhir/CodeSystem/kdl': 'KDL',
-    'http://terminology.hl7.org/CodeSystem/icd-o-3': 'ICD-O-3'
-  };
-  return map[uri] || uri.split('/').pop();
+function getSystemShortName(uri, registry) {
+  if (!uri) return '';
+  if (registry) {
+    // Sucht den registrierten Namen dynamisch heraus
+    const provider = registry.listProviders().find(p => p.systemUri === uri);
+    if (provider && provider.displayName) return provider.displayName;
+  }
+  // Fallback: Zeigt einfach den letzten Teil der URL, wenn der Provider nicht registriert ist
+  return uri.split('/').pop();
 }
