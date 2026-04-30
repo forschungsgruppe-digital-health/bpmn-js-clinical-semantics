@@ -150,46 +150,44 @@ const modeler = new BpmnModeler({
 
 ```js
 import {
-  FhirProvider,
-  FallbackProvider,
-  TerminologyRegistry,
   SnomedCtProvider,
   createKdlProvider,
-  createStaticProviderFromCodeSystem,
-  createFhirTerminologyProviderLoader,
+  createPackageFallbackProvider,
+  createTerminologyModule,
+  createTerminologyServices,
   addAnnotation,
   ASPECTS
 } from '@bpmn-js-clinical-semantics/terminology';
-import actCodeCodeSystem from './path/to/CodeSystem-v3-ActCode.json';
+import actCodeCodeSystem from 'hl7.terminology.r4/CodeSystem-v3-ActCode.json';
 
-// Set up providers
-const registry = new TerminologyRegistry();
-registry.register(new SnomedCtProvider({ baseUrl: 'https://snowstorm.example.com' }));
-registry.register(createKdlProvider());
-registry.register(new FallbackProvider({
-  id: 'hl7-v3-actcode',
-  displayName: 'HL7 v3 ActCode',
-  primaryProvider: createStaticProviderFromCodeSystem(actCodeCodeSystem, {
-    id: 'hl7-v3-actcode-package'
-  }),
-  fallbackProvider: new FhirProvider({
-    id: 'hl7-v3-actcode-fhir',
-    displayName: 'HL7 v3 ActCode (FHIR)',
-    systemUri: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
-    valueSetUri: 'http://terminology.hl7.org/ValueSet/v3-ActCode',
-    baseUrl: 'https://fhir.example.com'
-  })
-}));
-
-const terminologyProviderLoader = createFhirTerminologyProviderLoader({
-  terminologyRegistry: registry,
-  fhirBaseUrl: 'https://fhir.example.com'
+const terminologyServices = createTerminologyServices({
+  providers: [
+    new SnomedCtProvider({ baseUrl: 'https://snowstorm.example.com' }),
+    createKdlProvider(),
+    createPackageFallbackProvider({
+      id: 'hl7-v3-actcode',
+      displayName: 'HL7 v3 ActCode',
+      systemUri: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
+      codeSystem: actCodeCodeSystem,
+      fallbackFhirConfig: {
+        systemUri: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
+        valueSetUri: 'http://terminology.hl7.org/ValueSet/v3-ActCode',
+        baseUrl: 'https://fhir.example.com'
+      }
+    })
+  ],
+  loaderConfig: {
+    fhirBaseUrl: 'https://fhir.example.com'
+  }
 });
 
-await terminologyProviderLoader.ensureProvider('http://terminology.hl7.org/CodeSystem/v3-ActCode');
+await terminologyServices.terminologyProviderLoader.ensureProvider('http://terminology.hl7.org/CodeSystem/v3-ActCode');
 
 // Search across all providers
-const results = await registry.searchAll('pneumonia');
+const results = await terminologyServices.terminologyRegistry.searchAll('pneumonia');
+
+// Optional: expose the services as a bpmn-js DI module
+const TerminologyServicesModule = createTerminologyModule(terminologyServices);
 
 // Add an annotation to a BPMN element's businessObject
 addAnnotation(businessObject, moddle, {
@@ -200,7 +198,7 @@ addAnnotation(businessObject, moddle, {
 });
 ```
 
-`createStaticProviderFromCodeSystem()` turns a FHIR `CodeSystem` JSON resource into an in-memory `StaticProvider`. This makes local FHIR packages such as `hl7.terminology.r4` useful without writing a custom adapter: import the package JSON, build a local provider, and optionally wrap it in `FallbackProvider` so a FHIR terminology server remains available when the local package snapshot is missing a concept or unavailable in a given deployment. The demo follows that pattern for HL7 v2/v3 terminology and vendors selected `CodeSystem` resources from `hl7.terminology.r4@7.0.1` under `examples/vanilla/src/vendor/hl7-terminology-r4/`, because the upstream npm package currently depends on `hl7.fhir.r4.core@4.0.1`, which is not resolvable in this workspace install.
+`createPackageTerminologyProvider()` and `createPackageFallbackProvider()` are the public extension points for package-backed terminology. Install any package that ships FHIR `CodeSystem` JSON resources, import the JSON you need, and register it through your own app-level config file. In this repository, that consumer-owned bootstrap lives in `examples/vanilla/src/terminology-config.js`, while the demo's concrete package dependencies are declared in `examples/vanilla/package.json`. For your own app, create an equivalent config file next to your modeler setup and pass the resulting services/module into `bpmn-js`.
 
 For adding custom terminology systems (FHIR-hosted, static, package-backed, or custom API), see [ARCHITECTURE.md -- Extending with a New Terminology System](ARCHITECTURE.md#extending-with-a-new-terminology-system). The demo keeps its concrete server URLs and package imports in a dedicated bootstrap/config layer; the properties panel only talks to `terminologyRegistry` and an optional `terminologyProviderLoader`. For FHIR terminology servers that need explicit canonical ValueSet URLs or version hints, `FhirProvider` also supports `valueSetUri` and `expandParameters`.
 

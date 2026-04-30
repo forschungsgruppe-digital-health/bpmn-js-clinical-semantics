@@ -97,6 +97,15 @@ describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
     expect(mod.createStaticProviderFromCodeSystem).toBeDefined();
   });
 
+  it('should export TerminologyServices helpers', async () => {
+    const mod = await import('../src/services/TerminologyServices.js');
+    expect(mod.createPackageTerminologyProvider).toBeDefined();
+    expect(mod.createPackageCollectionProvider).toBeDefined();
+    expect(mod.createPackageFallbackProvider).toBeDefined();
+    expect(mod.createTerminologyServices).toBeDefined();
+    expect(mod.createTerminologyModule).toBeDefined();
+  });
+
   it('should export moddle descriptor as JSON', async () => {
     const { default: descriptor } = await import('../src/moddle/clinical.json');
     expect(descriptor.name).toBe('ClinicalTerminology');

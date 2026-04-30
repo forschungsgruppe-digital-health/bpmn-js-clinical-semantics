@@ -1,16 +1,19 @@
 import {
-  TerminologyRegistry,
-  FhirProvider,
-  FallbackProvider,
   createIheXdsClassCodeProvider,
   createIheXdsTypeCodeProvider,
   createKdlProvider,
-  createFhirTerminologyProviderLoader,
-  createStaticProviderFromCodeSystem
+  createPackageCollectionProvider,
+  createTerminologyModule,
+  createTerminologyServices
 } from '@bpmn-js-clinical-semantics/terminology';
-import hl7V3ActCode from './vendor/hl7-terminology-r4/package/CodeSystem-v3-ActCode.json';
-import hl7V3RoleCode from './vendor/hl7-terminology-r4/package/CodeSystem-v3-RoleCode.json';
-import hl7V20203 from './vendor/hl7-terminology-r4/package/CodeSystem-v2-0203.json';
+
+const HL7_PACKAGE_CODE_SYSTEMS = Object.values(import.meta.glob(
+  '../../../node_modules/hl7.terminology.r4/CodeSystem-*.json',
+  {
+    eager: true,
+    import: 'default'
+  }
+));
 
 const DEFAULT_FHIR_BASE_URL = import.meta.env.VITE_FHIR_BASE_URL || 'https://r4.ontoserver.csiro.au/fhir';
 const DEFAULT_SNOMED_FHIR_BASE_URL = import.meta.env.VITE_SNOMED_FHIR_BASE_URL || 'https://snowstorm-training.snomedtools.org/snowstorm/snomed-ct/fhir';
@@ -62,80 +65,23 @@ const FHIR_PROVIDER_CONFIGS = [
   }
 ];
 
-const HL7_PACKAGE_PROVIDER_CONFIGS = [
-  {
-    id: 'hl7-v3-actcode',
-    displayName: 'HL7 v3 ActCode',
-    systemUri: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
-    valueSetUri: 'http://terminology.hl7.org/ValueSet/v3-ActCode',
-    baseUrl: DEFAULT_FHIR_BASE_URL,
-    codeSystem: hl7V3ActCode
-  },
-  {
-    id: 'hl7-v3-rolecode',
-    displayName: 'HL7 v3 RoleCode',
-    systemUri: 'http://terminology.hl7.org/CodeSystem/v3-RoleCode',
-    valueSetUri: 'http://terminology.hl7.org/ValueSet/v3-RoleCode',
-    baseUrl: DEFAULT_FHIR_BASE_URL,
-    codeSystem: hl7V3RoleCode
-  },
-  {
-    id: 'hl7-v2-identifier-type',
-    displayName: 'HL7 v2 Identifier Type',
-    systemUri: 'http://terminology.hl7.org/CodeSystem/v2-0203',
-    valueSetUri: 'http://terminology.hl7.org/ValueSet/v2-0203',
-    baseUrl: DEFAULT_FHIR_BASE_URL,
-    codeSystem: hl7V20203
-  }
-];
-
-function createDualTrackProvider(config) {
-  const packageProvider = createStaticProviderFromCodeSystem(config.codeSystem, {
-    id: `${config.id}-package`,
-    displayName: `${config.displayName} (Package)`,
-    systemUri: config.systemUri
-  });
-
-  const fhirProvider = new FhirProvider(config);
-
-  return new FallbackProvider({
-    id: config.id,
-    displayName: config.displayName,
-    systemUri: config.systemUri,
-    primaryProvider: packageProvider,
-    fallbackProvider: fhirProvider
-  });
-}
-
 export function createDemoTerminologyServices() {
-  const terminologyRegistry = new TerminologyRegistry();
-
-  STATIC_PROVIDER_FACTORIES
-    .map(createProvider => createProvider())
-    .forEach(provider => terminologyRegistry.register(provider));
-
-  FHIR_PROVIDER_CONFIGS
-    .map(config => new FhirProvider(config))
-    .forEach(provider => terminologyRegistry.register(provider));
-
-  HL7_PACKAGE_PROVIDER_CONFIGS
-    .map(createDualTrackProvider)
-    .forEach(provider => terminologyRegistry.register(provider));
-
-  const terminologyProviderLoader = createFhirTerminologyProviderLoader({
-    terminologyRegistry,
-    fhirBaseUrl: DEFAULT_FHIR_BASE_URL
+  return createTerminologyServices({
+    staticProviderFactories: STATIC_PROVIDER_FACTORIES,
+    fhirProviders: FHIR_PROVIDER_CONFIGS,
+    providers: [
+      createPackageCollectionProvider({
+        id: 'hl7-terminology-r4-package',
+        displayName: 'HL7 Terminology R4 Package',
+        codeSystems: HL7_PACKAGE_CODE_SYSTEMS
+      })
+    ],
+    loaderConfig: {
+      fhirBaseUrl: DEFAULT_FHIR_BASE_URL
+    }
   });
-
-  return {
-    terminologyRegistry,
-    terminologyProviderLoader
-  };
 }
 
 export function createDemoTerminologyModule(services) {
-  return {
-    terminologyRegistry: ['value', services.terminologyRegistry],
-    terminologyProviderLoader: ['value', services.terminologyProviderLoader]
-  };
+  return createTerminologyModule(services);
 }

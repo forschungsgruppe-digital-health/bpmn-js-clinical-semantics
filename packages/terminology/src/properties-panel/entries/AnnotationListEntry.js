@@ -1,5 +1,5 @@
 import { html } from 'htm/preact';
-import { useState } from '@bpmn-io/properties-panel/preact/hooks';
+import { useRef, useState } from '@bpmn-io/properties-panel/preact/hooks';
 import { useService } from 'bpmn-js-properties-panel';
 import {
   getAnnotations,
@@ -41,6 +41,9 @@ export function AnnotationListEntry(props) {
   const [searchBusy, setSearchBusy] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [activeSearchResultIndex, setActiveSearchResultIndex] = useState(-1);
+  const [selectedProviderId, setSelectedProviderId] = useState('');
+  const searchRequestSequence = useRef(0);
 
   const bo = element.businessObject;
   const annotations = getAnnotations(bo);
@@ -64,69 +67,110 @@ export function AnnotationListEntry(props) {
     return Array.isArray(concepts) ? concepts : [];
   }
 
-  function findProviderIdForSystem(systemUri) {
-    if (!terminologyRegistry || !systemUri) return null;
-    try {
-      const match = terminologyRegistry.findProviderBySystem(systemUri);
-      return match?.id || null;
-    } catch {
-      return null;
-    }
+  function getRegisteredProviders() {
+    return terminologyRegistry ? terminologyRegistry.listProviders() : [];
   }
 
-  async function runSearch() {
+  function getSelectedProvider() {
+    return getRegisteredProviders().find(provider => provider.id === selectedProviderId) || null;
+  }
+
+  async function resolveProviderId(providerId) {
+    if (providerId) {
+      return providerId;
+    }
+
+    const selectedProvider = getSelectedProvider();
+
+    if (selectedProvider || !terminologyProviderLoader) {
+      return selectedProvider?.id || null;
+    }
+
+    if (!formData.codingSystem) {
+      return null;
+    }
+
+    const newProvider = await terminologyProviderLoader.ensureProvider(formData.codingSystem);
+    return newProvider.id;
+  }
+
+  async function runSearch(term, providerId) {
+    const normalizedTerm = term.trim();
+    const requestId = ++searchRequestSequence.current;
+
     setSearchError('');
     setSearchResults([]);
+    setActiveSearchResultIndex(-1);
+
+    if (!normalizedTerm) {
+      setSearchBusy(false);
+      return;
+    }
 
     if (!terminologyRegistry) {
+      setSearchBusy(false);
       setSearchError('Keine Terminologie-Registry konfiguriert (Demo ohne Live-Provider).');
       return;
     }
-    if (!formData.codingSystem) {
-      setSearchError('Bitte zuerst eine Terminologie auswählen (System-URI).');
-      return;
-    }
-    // Leere Suche ab sofort erlauben, um die ersten 15 Ergebnisse zum "Stöbern" zu laden!
-
-    let providerId = findProviderIdForSystem(formData.codingSystem);
 
     if (!providerId) {
-      if (!terminologyProviderLoader) {
+      setSearchBusy(false);
+      setSearchError('Bitte zuerst eine Terminologie auswählen.');
+      return;
+    }
+
+    setSearchBusy(true);
+
+    try {
+      const resolvedProviderId = await resolveProviderId(providerId);
+
+      if (requestId !== searchRequestSequence.current) {
+        return;
+      }
+
+      if (!resolvedProviderId) {
         setSearchError('System unbekannt und kein dynamischer Terminologie-Loader konfiguriert.');
         return;
       }
 
-      setSearchBusy(true);
-      try {
-        const newProvider = await terminologyProviderLoader.ensureProvider(formData.codingSystem);
-        providerId = newProvider.id;
-      } catch (e) {
-        setSearchBusy(false);
-        setSearchError('System unbekannt und dynamisches Nachladen via FHIR fehlgeschlagen.');
+      const result = await terminologyRegistry.search(normalizedTerm, resolvedProviderId, { limit: 15, offset: 0 });
+
+      if (requestId !== searchRequestSequence.current) {
         return;
       }
-    }
 
-    setSearchBusy(true);
-    try {
-      const result = await terminologyRegistry.search(searchTerm.trim(), providerId, { limit: 15, offset: 0 });
-      setSearchResults(normalizeConcepts(result));
+      const concepts = normalizeConcepts(result);
+      setSearchResults(concepts);
+      setActiveSearchResultIndex(concepts.length > 0 ? 0 : -1);
     } catch (e) {
-      console.error("Fehler bei der Terminologiesuche:", e);
-      if (!searchTerm.trim()) {
-        setSearchError('Leere Suche abgelehnt: Bitte Suchbegriff eingeben (Schutz vor Server-Überlastung oder System fehlt).');
-      } else {
-        setSearchError('Fehler 404: Dieses CodeSystem ist auf dem Server nicht installiert oder erreichbar.');
+      if (requestId !== searchRequestSequence.current) {
+        return;
       }
+
+      console.error('Fehler bei der Terminologiesuche:', e);
+      setSearchError('Suche fehlgeschlagen. Bitte Terminologiesystem oder Suchbegriff prüfen.');
     } finally {
-      setSearchBusy(false);
+      if (requestId === searchRequestSequence.current) {
+        setSearchBusy(false);
+      }
     }
   }
 
   function applySearchResult(c) {
-    updateField('codingSystem', c.system || formData.codingSystem);
-    updateField('codingCode', c.code || '');
-    updateField('codingDisplay', c.display || '');
+    const nextSystem = c.system || formData.codingSystem;
+
+    searchRequestSequence.current += 1;
+    setFormData(current => ({
+      ...current,
+      codingSystem: nextSystem,
+      codingCode: c.code || '',
+      codingDisplay: c.display || ''
+    }));
+    setSearchTerm(getConceptLabel(c));
+    setSearchResults([]);
+    setActiveSearchResultIndex(-1);
+    setSearchError('');
+    setSearchBusy(false);
   }
 
   function handleAdd() {
@@ -159,6 +203,13 @@ export function AnnotationListEntry(props) {
     // Force re-render and mark model as changed
     modeling.updateModdleProperties(element, bo, {});
     setFormData(createEmptyForm());
+    setSearchTerm('');
+    setSearchResults([]);
+    setActiveSearchResultIndex(-1);
+    setSearchError('');
+    setSearchBusy(false);
+    searchRequestSequence.current += 1;
+    setSelectedProviderId('');
     setShowForm(false);
     setRefresh(n => n + 1);
   }
@@ -170,15 +221,64 @@ export function AnnotationListEntry(props) {
   }
 
   function handlePreset(e) {
-    const system = e.target.value;
-    setFormData({ ...formData, codingSystem: system });
+    const providerId = e.target.value;
+    searchRequestSequence.current += 1;
+    setSelectedProviderId(providerId);
+    setFormData(current => ({
+      ...current,
+      codingSystem: '',
+      codingCode: '',
+      codingDisplay: ''
+    }));
     setSearchTerm('');
     setSearchResults([]);
+    setActiveSearchResultIndex(-1);
     setSearchError('');
+    setSearchBusy(false);
+  }
+
+  function handleSearchInput(e) {
+    const value = e.target.value;
+
+    setSearchTerm(value);
+    setFormData(current => ({
+      ...current,
+      codingCode: '',
+      codingDisplay: ''
+    }));
+    void runSearch(value, selectedProviderId);
+  }
+
+  function handleSearchKeyDown(e) {
+    if (!searchResults.length) {
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSearchResultIndex(current => Math.min(current + 1, searchResults.length - 1));
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSearchResultIndex(current => Math.max(current - 1, 0));
+      return;
+    }
+
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      const selectedIndex = activeSearchResultIndex >= 0 ? activeSearchResultIndex : 0;
+      const selectedResult = searchResults[selectedIndex];
+
+      if (selectedResult) {
+        e.preventDefault();
+        applySearchResult(selectedResult);
+      }
+    }
   }
 
   function updateField(field, value) {
-    setFormData({ ...formData, [field]: value });
+    setFormData(current => ({ ...current, [field]: value }));
   }
 
   return html`
@@ -268,50 +368,50 @@ export function AnnotationListEntry(props) {
 
           <fieldset class="form-fieldset">
             <legend>Coding (optional)</legend>
-            <div class="form-row">
-              <label>Terminologie</label>
-              <select
-                value=${formData.codingSystem}
-                onChange=${handlePreset}
-              >
-                <option value="">– Manuell eingeben –</option>
-                ${(terminologyRegistry ? terminologyRegistry.listProviders() : []).map(p =>
-                  html`<option value=${p.systemUri}>${p.displayName}</option>`
-                )}
-              </select>
-            </div>
-            ${formData.codingSystem && html`
               <div class="form-row">
-                <label>System-URI</label>
+                <label>Terminologie</label>
+                <select
+                  value=${selectedProviderId}
+                  onChange=${handlePreset}
+                >
+                  <option value="">– auswählen –</option>
+                  ${getRegisteredProviders().map(p =>
+                    html`<option value=${p.id}>${p.displayName}</option>`
+                  )}
+                </select>
+              </div>
+            ${selectedProviderId && html`
+               <div class="form-row">
+                 <label>System-URI</label>
+                 <input
+                   type="text"
+                   value=${formData.codingSystem || getSelectedProvider()?.systemUri || ''}
+                   readOnly
+                 />
+               </div>
+              <div class="form-row">
+                <label>Suche ${searchBusy ? '(suche …)' : ''}</label>
                 <input
                   type="text"
-                  value=${formData.codingSystem}
-                  onInput=${(e) => updateField('codingSystem', e.target.value)}
+                  placeholder="Begriff eingeben"
+                  value=${searchTerm}
+                  onInput=${handleSearchInput}
+                  onKeyDown=${handleSearchKeyDown}
                 />
               </div>
-              <div class="form-row">
-                <label>Suche</label>
-                <div style="display:flex; gap:8px; align-items:center; width:100%;">
-                  <input
-                    type="text"
-                    placeholder="Begriff eingeben (live, falls Provider konfiguriert)…"
-                    value=${searchTerm}
-                    onInput=${(e) => { setSearchTerm(e.target.value); setSearchError(''); }}
-                    onKeyDown=${(e) => { if (e.key === 'Enter') runSearch(); }}
-                    style="flex:1;"
-                  />
-                  <button class="btn btn--secondary" disabled=${searchBusy} onClick=${runSearch}>
-                    ${searchBusy ? '…' : 'Suchen'}
-                  </button>
-                </div>
-              </div>
-              ${searchError && html`<div class="annotation-empty" style="color:#b42318;">${searchError}</div>`}
+              ${searchError && html`<div class="annotation-empty annotation-empty--error">${searchError}</div>`}
               ${searchResults.length > 0 && html`
-                <div class="annotation-list" style="margin-top:8px;">
-                  ${searchResults.map(c => html`
-                    <div class="annotation-item" style="cursor:pointer;" onClick=${() => applySearchResult(c)}>
+                <div class="annotation-list annotation-list--search-results">
+                  ${searchResults.map((c, index) => html`
+                    <div
+                      class="annotation-item annotation-item--search-result ${index === activeSearchResultIndex ? 'annotation-item--active' : ''}"
+                      onMouseDown=${(event) => {
+                       event.preventDefault();
+                        applySearchResult(c);
+                      }}
+                    >
                       <div class="annotation-item__header">
-                        <span class="annotation-item__aspect">${getSystemShortName(c.system || formData.codingSystem, terminologyRegistry)}</span>
+                        <span class="annotation-item__aspect">${getSystemShortName(c.system || getSelectedProvider()?.systemUri, terminologyRegistry)}</span>
                         <span class="annotation-item__mode badge badge--descriptive">Treffer</span>
                       </div>
                       <div class="annotation-item__coding">
@@ -326,18 +426,16 @@ export function AnnotationListEntry(props) {
                 <label>Code</label>
                 <input
                   type="text"
-                  placeholder="z.B. 169069000"
                   value=${formData.codingCode}
-                  onInput=${(e) => updateField('codingCode', e.target.value)}
+                  readOnly
                 />
               </div>
               <div class="form-row">
                 <label>Display</label>
                 <input
                   type="text"
-                  placeholder="z.B. CT of chest (procedure)"
                   value=${formData.codingDisplay}
-                  onInput=${(e) => updateField('codingDisplay', e.target.value)}
+                  readOnly
                 />
               </div>
             `}
@@ -392,6 +490,10 @@ export function AnnotationListEntry(props) {
       `}
     </div>
   `;
+}
+
+function getConceptLabel(concept) {
+  return concept.display || concept.code || '';
 }
 
 function getAspectLabel(aspect) {

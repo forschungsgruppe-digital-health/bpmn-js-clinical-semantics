@@ -453,25 +453,20 @@ registry.register(new StaticProvider(
 
 ```js
 import {
-  FallbackProvider,
-  FhirProvider,
-  createStaticProviderFromCodeSystem
+  createPackageFallbackProvider
 } from '@bpmn-js-clinical-semantics/terminology';
-import roleCodeCodeSystem from './path/to/CodeSystem-v3-RoleCode.json';
+import roleCodeCodeSystem from 'hl7.terminology.r4/CodeSystem-v3-RoleCode.json';
 
-registry.register(new FallbackProvider({
+registry.register(createPackageFallbackProvider({
   id: 'hl7-v3-rolecode',
   displayName: 'HL7 v3 RoleCode',
-  primaryProvider: createStaticProviderFromCodeSystem(roleCodeCodeSystem, {
-    id: 'hl7-v3-rolecode-package'
-  }),
-  fallbackProvider: new FhirProvider({
-    id: 'hl7-v3-rolecode-fhir',
-    displayName: 'HL7 v3 RoleCode (FHIR)',
+  systemUri: 'http://terminology.hl7.org/CodeSystem/v3-RoleCode',
+  codeSystem: roleCodeCodeSystem,
+  fallbackFhirConfig: {
     systemUri: 'http://terminology.hl7.org/CodeSystem/v3-RoleCode',
     valueSetUri: 'http://terminology.hl7.org/ValueSet/v3-RoleCode',
     baseUrl: 'https://fhir.example.com'
-  })
+  }
 }));
 ```
 

@@ -48,3 +48,10 @@ export {
 export { createStaticProviderFromCodeSystem } from './services/CodeSystemProviderFactory.js';
 export { loadCodeSystemFromFhir } from './services/FhirCodeSystemLoader.js';
 export { createFhirTerminologyProviderLoader } from './services/TerminologyProviderLoader.js';
+export {
+  createPackageTerminologyProvider,
+  createPackageCollectionProvider,
+  createPackageFallbackProvider,
+  createTerminologyServices,
+  createTerminologyModule
+} from './services/TerminologyServices.js';
