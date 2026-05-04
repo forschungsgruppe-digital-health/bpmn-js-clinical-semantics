@@ -200,6 +200,44 @@ addAnnotation(businessObject, moddle, {
 
 `createPackageTerminologyProvider()` and `createPackageFallbackProvider()` are the public extension points for package-backed terminology. Install any package that ships FHIR `CodeSystem` JSON resources, import the JSON you need, and register it through your own app-level config file. In this repository, that consumer-owned bootstrap lives in `examples/vanilla/src/terminology-config.js`, while the demo's concrete package dependencies are declared in `examples/vanilla/package.json`. For your own app, create an equivalent config file next to your modeler setup and pass the resulting services/module into `bpmn-js`.
 
+### Adding another terminology package in the demo
+
+The demo already uses this pattern with `hl7.terminology.r4`. The package is installed in `examples/vanilla/package.json`, its `CodeSystem-*.json` resources are loaded with `import.meta.glob(...)`, and then everything is exposed as one searchable provider via `createPackageCollectionProvider(...)`.
+
+1. Install the package into the demo workspace:
+
+```bash
+npm install <your-terminology-package> --workspace=examples/vanilla
+```
+
+After a successful install, the package will also appear in the root `package-lock.json`.
+
+2. Load the package's `CodeSystem` files in `examples/vanilla/src/terminology-config.js`:
+
+```js
+const MY_PACKAGE_CODE_SYSTEMS = Object.values(import.meta.glob(
+  '../../../node_modules/<your-terminology-package>/CodeSystem-*.json',
+  {
+    eager: true,
+    import: 'default'
+  }
+));
+```
+
+3. Register the package contents as a provider:
+
+```js
+createPackageCollectionProvider({
+  id: 'my-package',
+  displayName: 'My Terminology Package',
+  codeSystems: MY_PACKAGE_CODE_SYSTEMS
+})
+```
+
+4. Add that provider to the `providers` array passed to `createTerminologyServices(...)`.
+
+This is consumer-side wiring, not library internals: the library provides the helper functions, while the demo shows how an application uses them. A `.npmrc` is not required when the dependency is installed from a direct URL or from the default npm registry; it is only needed when the package must be fetched from a custom registry such as GitHub Packages.
+
 For adding custom terminology systems (FHIR-hosted, static, package-backed, or custom API), see [ARCHITECTURE.md -- Extending with a New Terminology System](ARCHITECTURE.md#extending-with-a-new-terminology-system). The demo keeps its concrete server URLs and package imports in a dedicated bootstrap/config layer; the properties panel only talks to `terminologyRegistry` and an optional `terminologyProviderLoader`. For FHIR terminology servers that need explicit canonical ValueSet URLs or version hints, `FhirProvider` also supports `valueSetUri` and `expandParameters`.
 
 ---
