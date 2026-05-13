@@ -288,7 +288,7 @@ export function AnnotationListEntry(props) {
       ${annotations.length > 0 && html`
         <div class="annotation-list">
           ${annotations.map((ann, i) => html`
-            <div class="annotation-item annotation-item--${ann.mode || 'descriptive'}">
+            <div class="annotation-item annotation-item--saved annotation-item--${ann.mode || 'descriptive'}">
               <div class="annotation-item__header">
                 <span class="annotation-item__aspect">${getAspectLabel(ann.aspect)}</span>
                 <span class="annotation-item__mode badge badge--${ann.mode || 'descriptive'}">

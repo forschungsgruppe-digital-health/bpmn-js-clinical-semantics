@@ -141,28 +141,70 @@ body {
 
 .app-properties .bio-properties-panel-group-header-title {
   font-weight: 600;
+  color: #101828;
+}
+
+.app-properties .bio-properties-panel-group-header.open .bio-properties-panel-group-header-title {
+  font-weight: 600;
+  color: #101828;
 }
 
 .app-properties .bio-properties-panel-label {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--c-text-dim);
+  color: #475467;
   margin-bottom: 3px;
+}
+
+.app-properties .bio-properties-panel-description,
+.app-properties .bio-properties-panel-description p,
+.app-properties .bio-properties-panel-description span,
+.app-properties .bio-properties-panel-description div,
+.app-properties .bio-properties-panel-description code {
+  color: #475467;
 }
 
 .app-properties .bio-properties-panel-input,
 .app-properties select,
 .app-properties textarea,
 .app-properties input[type="text"] {
-  background: var(--c-bg);
-  border: 1px solid var(--c-border);
-  color: var(--c-text);
+  background: #fff;
+  border: 1px solid #d0d5dd;
+  color: #101828;
   border-radius: 4px;
   padding: 5px 8px;
   font-size: 12px;
   font-family: var(--font-sans);
   width: 100%;
+}
+
+.app-properties select,
+.app-properties select.bio-properties-panel-input {
+  background: #fff;
+  border-color: #d0d5dd;
+  color: #101828;
+}
+
+.app-properties select option,
+.app-properties select optgroup {
+  background: #fff;
+  color: #101828;
+}
+
+.app-properties .bio-properties-panel-dropdown-button__menu {
+  background: #fff;
+  color: #101828;
+}
+
+.app-properties .bio-properties-panel-dropdown-button__menu-item {
+  color: #101828;
+}
+
+.app-properties .bio-properties-panel-input::placeholder,
+.app-properties textarea::placeholder,
+.app-properties input[type="text"]::placeholder {
+  color: #98a2b3;
 }
 
 .app-properties select:focus,
@@ -199,6 +241,12 @@ body {
   border-left: 3px solid var(--c-descriptive);
 }
 
+.annotation-item--saved {
+  background: #fff;
+  border-color: #d0d5dd;
+  color: #101828;
+}
+
 .annotation-item--prescriptive {
   border-left-color: var(--c-prescriptive);
 }
@@ -225,6 +273,10 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--c-text);
+}
+
+.annotation-item--saved .annotation-item__aspect {
+  color: #101828;
 }
 
 .badge {
@@ -268,6 +320,10 @@ body {
   line-height: 1.4;
 }
 
+.annotation-item--saved .annotation-item__text {
+  color: #344054;
+}
+
 .annotation-item__coding {
   display: flex;
   align-items: center;
@@ -285,6 +341,10 @@ body {
   white-space: nowrap;
 }
 
+.annotation-item--saved .coding-system {
+  background: rgba(78, 168, 222, 0.12);
+}
+
 .coding-code {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -296,12 +356,20 @@ body {
   font-size: 11px;
 }
 
+.annotation-item--saved .coding-display {
+  color: #475467;
+}
+
 .annotation-item__target {
   margin-top: 4px;
   padding-top: 4px;
   border-top: 1px dashed var(--c-border);
   font-size: 11px;
   color: var(--c-prescriptive);
+}
+
+.annotation-item--saved .annotation-item__target {
+  border-top-color: #d0d5dd;
 }
 
 .annotation-item__target code {
@@ -313,6 +381,10 @@ body {
   font-size: 10px;
   color: var(--c-text-dim);
   margin-left: 4px;
+}
+
+.annotation-item--saved .target-transform {
+  color: #667085;
 }
 
 .annotation-empty {
@@ -349,13 +421,14 @@ body {
 
 /* ─── Annotation Form ───────────────────────────────────── */
 .annotation-form {
-  background: var(--c-bg);
-  border: 1px solid var(--c-accent-dim);
+  background: #fff;
+  border: 1px solid #d0d5dd;
   border-radius: var(--radius);
   padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  color: #101828;
 }
 
 .form-row {
@@ -366,16 +439,16 @@ body {
 
 .form-row label {
   font-size: 11px;
-  color: var(--c-text-dim);
+  color: #475467;
   font-weight: 500;
 }
 
 .form-row select,
 .form-row input,
 .form-row textarea {
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  color: var(--c-text);
+  background: #fff;
+  border: 1px solid #d0d5dd;
+  color: #101828;
   border-radius: 4px;
   padding: 5px 8px;
   font-size: 12px;
@@ -392,19 +465,20 @@ body {
 }
 
 .form-fieldset {
-  border: 1px solid var(--c-border);
+  border: 1px solid #d0d5dd;
   border-radius: var(--radius);
   padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  background: #f8fafc;
 }
 
 .form-fieldset legend {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--c-text-dim);
+  color: #667085;
   padding: 0 4px;
   font-weight: 600;
 }
