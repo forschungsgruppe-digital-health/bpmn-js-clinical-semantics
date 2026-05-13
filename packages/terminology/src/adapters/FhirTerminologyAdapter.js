@@ -28,18 +28,22 @@ export class FhirTerminologyAdapter {
    * @param {Object} config
    * @param {string} config.baseUrl - FHIR base URL (e.g. 'https://fhir.bfarm.de/fhir')
    * @param {string} config.systemUri - CodeSystem URI (e.g. 'http://fhir.de/CodeSystem/bfarm/icd-10-gm')
+   * @param {string} [config.valueSetUri] - Explicit ValueSet URI for $expand
    * @param {ConnectionConfig['auth']} [config.auth]
    * @param {typeof fetch} [config.fetchFn]
    * @param {Record<string, string>} [config.headers]
    * @param {Record<string, string>} [config.expandParameters]
+   * @param {Record<string, string>} [config.lookupParameters]
    */
   constructor(config) {
     this._baseUrl = config.baseUrl.replace(/\/$/, '');
     this._systemUri = config.systemUri;
+    this._valueSetUri = config.valueSetUri || null;
     this._auth = config.auth;
     this._fetch = config.fetchFn || globalThis.fetch.bind(globalThis);
     this._extraHeaders = config.headers || {};
     this._expandParameters = config.expandParameters || {};
+    this._lookupParameters = config.lookupParameters || {};
   }
 
   /**
@@ -55,10 +59,8 @@ export class FhirTerminologyAdapter {
    */
   async search(params) {
     const url = new URL(`${this._baseUrl}/ValueSet/$expand`);
-    
-    // Verhindere doppeltes Anhängen von Parametern bei impliziten ValueSets (z.B. ?fhir_vs)
-    const isValueSet = this._systemUri.includes('/ValueSet/') || this._systemUri.includes('?');
-    const targetUrl = isValueSet ? this._systemUri : `${this._systemUri}?vs`;
+
+    const targetUrl = this._valueSetUri || getImplicitValueSetUri(this._systemUri);
     url.searchParams.set('url', targetUrl);
     url.searchParams.set('filter', params.term || '');
     url.searchParams.set('count', String(params.limit));
@@ -117,6 +119,12 @@ export class FhirTerminologyAdapter {
     const url = new URL(`${this._baseUrl}/CodeSystem/$lookup`);
     url.searchParams.set('system', this._systemUri);
     url.searchParams.set('code', code);
+
+    Object.entries(this._lookupParameters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        url.searchParams.set(key, value);
+      }
+    });
 
     try {
       const res = await this._request(url);
@@ -186,4 +194,10 @@ export class FhirTerminologyAdapter {
     if (this._auth?.type === 'Basic') headers['Authorization'] = `Basic ${this._auth.credentials}`;
     return this._fetch(url.toString(), { headers });
   }
+}
+
+function getImplicitValueSetUri(systemUri) {
+  const isValueSet = systemUri.includes('/ValueSet/') || systemUri.includes('?');
+
+  return isValueSet ? systemUri : `${systemUri}?vs`;
 }

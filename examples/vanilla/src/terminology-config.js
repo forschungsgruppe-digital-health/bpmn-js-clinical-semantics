@@ -16,7 +16,6 @@ const HL7_PACKAGE_CODE_SYSTEMS = Object.values(import.meta.glob(
 ));
 
 const DEFAULT_FHIR_BASE_URL = import.meta.env.VITE_FHIR_BASE_URL || 'https://r4.ontoserver.csiro.au/fhir';
-const DEFAULT_SNOMED_FHIR_BASE_URL = import.meta.env.VITE_SNOMED_FHIR_BASE_URL || 'https://snowstorm-training.snomedtools.org/snowstorm/snomed-ct/fhir';
 
 const STATIC_PROVIDER_FACTORIES = [
   createIheXdsClassCodeProvider,
@@ -30,7 +29,7 @@ const FHIR_PROVIDER_CONFIGS = [
     displayName: 'SNOMED CT',
     systemUri: 'http://snomed.info/sct',
     valueSetUri: 'http://snomed.info/sct?fhir_vs',
-    baseUrl: DEFAULT_SNOMED_FHIR_BASE_URL,
+    baseUrl: DEFAULT_FHIR_BASE_URL,
     language: 'en',
     headers: {
       'Accept-Language': 'en'
@@ -60,6 +59,19 @@ const FHIR_PROVIDER_CONFIGS = [
     valueSetUri: 'http://fhir.de/ValueSet/bfarm/ops',
     expandParameters: {
       'system-version': 'http://fhir.de/CodeSystem/bfarm/ops|2021'
+    },
+    baseUrl: DEFAULT_FHIR_BASE_URL
+  },
+  {
+    id: 'atc',
+    displayName: 'ATC',
+    systemUri: 'http://www.whocc.no/atc',
+    valueSetUri: 'http://www.whocc.no/atc/vs',
+    expandParameters: {
+      valueSetVersion: '2025.0.0'
+    },
+    lookupParameters: {
+      version: '2025.0.0'
     },
     baseUrl: DEFAULT_FHIR_BASE_URL
   }

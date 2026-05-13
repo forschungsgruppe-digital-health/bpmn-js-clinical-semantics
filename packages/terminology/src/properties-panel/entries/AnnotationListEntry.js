@@ -35,7 +35,6 @@ export function AnnotationListEntry(props) {
   const { element } = props;
   const moddle = useService('moddle');
   const modeling = useService('modeling');
-  const translate = useService('translate');
   const terminologyRegistry = useService('terminologyRegistry', false);
   const terminologyProviderLoader = useService('terminologyProviderLoader', false);
 
@@ -51,6 +50,7 @@ export function AnnotationListEntry(props) {
   const searchRequestSequence = useRef(0);
   const searchBlurTimeout = useRef(null);
   const searchSuggestionItemRefs = useRef([]);
+  const searchInputRef = useRef(null);
 
   const bo = element.businessObject;
   const annotations = getAnnotations(bo);
@@ -60,9 +60,7 @@ export function AnnotationListEntry(props) {
       aspect: 'clinicalContent',
       mode: 'descriptive',
       text: '',
-      codingSystem: '',
-      codingCode: '',
-      codingDisplay: '',
+      codings: [],
       targetElement: '',
       targetTransform: '',
       targetValue: ''
@@ -88,12 +86,7 @@ export function AnnotationListEntry(props) {
       return selectedProvider?.id || null;
     }
 
-    if (!formData.codingSystem) {
-      return null;
-    }
-
-    const newProvider = await terminologyProviderLoader.ensureProvider(formData.codingSystem);
-    return newProvider.id;
+    return null;
   }
 
   async function runSearch(term, providerId) {
@@ -184,41 +177,53 @@ export function AnnotationListEntry(props) {
     setShowForm(false);
   }
 
-  function applySearchResult(c, options = {}) {
-    const { submit = false } = options;
-    const nextSystem = c.system || formData.codingSystem;
-    const nextFormData = {
-      ...formData,
-      codingSystem: nextSystem,
-      codingCode: c.code || '',
-      codingDisplay: c.display || ''
+  function createCodingFromConcept(c) {
+    return {
+      system: c.system || getSelectedProvider()?.systemUri || '',
+      code: c.code || '',
+      display: c.display || ''
     };
+  }
 
-    if (submit) {
-      handleAdd(nextFormData);
+  function addCodingToForm(coding, options = {}) {
+    const { submit = false, refocus = false } = options;
+
+    if (!coding.system || !coding.code) {
       return;
     }
 
+    const alreadyExists = formData.codings.some(existing =>
+      existing.system === coding.system &&
+      existing.code === coding.code &&
+      (existing.display || '') === (coding.display || '')
+    );
+
+    const nextCodings = alreadyExists ? formData.codings : [ ...formData.codings, coding ];
+    const nextFormData = {
+      ...formData,
+      codings: nextCodings
+    };
+
     searchRequestSequence.current += 1;
     setFormData(nextFormData);
-    setSearchTerm(getConceptLabel(c));
-    setSearchResults([]);
-    setActiveSearchResultIndex(-1);
-    setSearchError('');
-    setSearchBusy(false);
-    setSearchFocused(false);
-  }
+    resetSearchState();
 
-  function handleAdd(nextFormData = formData) {
-    const codings = [];
-    if (nextFormData.codingSystem && nextFormData.codingCode) {
-      codings.push({
-        system: nextFormData.codingSystem,
-        code: nextFormData.codingCode,
-        display: nextFormData.codingDisplay || undefined
+    if (refocus) {
+      requestAnimationFrame(() => {
+        searchInputRef.current?.focus();
       });
     }
 
+    if (submit) {
+      handleAdd(nextFormData);
+    }
+  }
+
+  function applySearchResult(c, options = {}) {
+    addCodingToForm(createCodingFromConcept(c), options);
+  }
+
+  function handleAdd(nextFormData = formData) {
     let target = null;
     if (nextFormData.mode === 'prescriptive' && nextFormData.targetTransform && nextFormData.targetElement) {
       target = {
@@ -232,7 +237,7 @@ export function AnnotationListEntry(props) {
       aspect: nextFormData.aspect,
       mode: nextFormData.mode,
       text: nextFormData.text || undefined,
-      codings,
+      codings: nextFormData.codings,
       target
     });
 
@@ -252,12 +257,6 @@ export function AnnotationListEntry(props) {
     const providerId = e.target.value;
     searchRequestSequence.current += 1;
     setSelectedProviderId(providerId);
-    setFormData(current => ({
-      ...current,
-      codingSystem: '',
-      codingCode: '',
-      codingDisplay: ''
-    }));
     resetSearchState();
   }
 
@@ -271,11 +270,6 @@ export function AnnotationListEntry(props) {
 
     setSearchFocused(true);
     setSearchTerm(value);
-    setFormData(current => ({
-      ...current,
-      codingCode: '',
-      codingDisplay: ''
-    }));
     void runSearch(value, selectedProviderId);
   }
 
@@ -308,29 +302,46 @@ export function AnnotationListEntry(props) {
     }
 
     if (!searchResults.length) {
+      if ((e.key === 'Enter' || e.key === 'Tab') && activeSearchResult && searchTerm.trim()) {
+        e.preventDefault();
+        e.stopPropagation();
+        applySearchResult(activeSearchResult, {
+          refocus: true
+        });
+        return;
+      }
+
+      if (e.key === 'Tab' && !e.shiftKey && !searchTerm.trim() && canSubmitFromCodingArea(formData)) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleAdd();
+      }
       return;
     }
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
+      e.stopPropagation();
       setActiveSearchResultIndex(current => Math.min(current + 1, searchResults.length - 1));
       return;
     }
 
     if (e.key === 'ArrowUp') {
       e.preventDefault();
+      e.stopPropagation();
       setActiveSearchResultIndex(current => Math.max(current - 1, 0));
       return;
     }
 
     if (e.key === 'Enter' || e.key === 'Tab') {
       const selectedIndex = activeSearchResultIndex >= 0 ? activeSearchResultIndex : 0;
-      const selectedResult = searchResults[selectedIndex];
+      const selectedResult = searchResults[selectedIndex] || activeSearchResult;
 
       if (selectedResult) {
         e.preventDefault();
+        e.stopPropagation();
         applySearchResult(selectedResult, {
-          submit: e.key === 'Tab' && !e.shiftKey && formData.mode !== 'prescriptive'
+          refocus: true
         });
       }
     }
@@ -349,7 +360,27 @@ export function AnnotationListEntry(props) {
     }
 
     e.preventDefault();
+    e.stopPropagation();
     handleAdd();
+  }
+
+  function handleRemoveCoding(index) {
+    setFormData(current => ({
+      ...current,
+      codings: current.codings.filter((_, codingIndex) => codingIndex !== index)
+    }));
+  }
+
+  function hasTargetData(currentFormData) {
+    return Boolean(
+      currentFormData.targetElement ||
+      currentFormData.targetTransform ||
+      currentFormData.targetValue
+    );
+  }
+
+  function canSubmitFromCodingArea(currentFormData) {
+    return currentFormData.mode !== 'prescriptive' || !hasTargetData(currentFormData);
   }
 
   function updateField(field, value) {
@@ -374,6 +405,30 @@ export function AnnotationListEntry(props) {
       });
     }
   }, [activeSearchResultIndex, showSearchSuggestions]);
+
+  useEffect(() => {
+    const searchInput = searchInputRef.current;
+
+    if (!searchInput) {
+      return;
+    }
+
+    const nativeKeyDownHandler = (event) => {
+      handleSearchKeyDown(event);
+    };
+
+    searchInput.addEventListener('keydown', nativeKeyDownHandler, true);
+
+    return () => {
+      searchInput.removeEventListener('keydown', nativeKeyDownHandler, true);
+    };
+  }, [
+    activeSearchResult,
+    activeSearchResultIndex,
+    formData,
+    searchResults,
+    searchTerm
+  ]);
 
   return html`
     <div class="clinical-annotations">
@@ -467,7 +522,7 @@ export function AnnotationListEntry(props) {
                 <select
                   value=${selectedProviderId}
                   onChange=${handlePreset}
-                 onKeyDown=${!selectedProviderId && formData.mode === 'descriptive' ? handleSubmitOnTab : undefined}
+                 onKeyDownCapture=${!selectedProviderId && canSubmitFromCodingArea(formData) ? handleSubmitOnTab : undefined}
                >
                  <option value="">– select –</option>
                  ${getRegisteredProviders().map(p =>
@@ -475,21 +530,43 @@ export function AnnotationListEntry(props) {
                  )}
                </select>
              </div>
+            ${formData.codings.length > 0 && html`
+              <div class="form-row">
+                <label>Selected codings</label>
+                <div class="selected-codings">
+                  ${formData.codings.map((coding, index) => html`
+                    <div class="selected-coding">
+                      <div class="selected-coding__content">
+                        <span class="coding-system">${getSystemShortName(coding.system, terminologyRegistry)}</span>
+                        <code class="coding-code">${coding.code}</code>
+                        ${coding.display && html`<span class="coding-display">${coding.display}</span>`}
+                      </div>
+                      <button
+                        type="button"
+                        class="selected-coding__remove"
+                        title="Remove coding"
+                        onClick=${() => handleRemoveCoding(index)}
+                      >×</button>
+                    </div>
+                  `)}
+                </div>
+              </div>
+            `}
             ${selectedProviderId && html`
               <div class="form-row">
-                <label>Search ${searchBusy ? '(searching...)' : ''}</label>
+               <label>Search ${searchBusy ? '(searching...)' : ''}</label>
                 <div class="search-field">
                   <div class="search-input-shell ${searchFocused ? 'search-input-shell--focused' : ''}">
                     <div class="search-input-ghost" aria-hidden="true">
                       <span class="search-input-ghost__typed">${searchTerm}</span><span class="search-input-ghost__completion">${searchCompletion}</span>
                     </div>
                     <input
+                      ref=${searchInputRef}
                       class="search-input-field"
                       type="text"
                       placeholder="Enter term"
                       value=${searchTerm}
                       onInput=${handleSearchInput}
-                      onKeyDown=${handleSearchKeyDown}
                       onFocus=${handleSearchFocus}
                       onBlur=${handleSearchBlur}
                       autocomplete="off"
@@ -525,42 +602,23 @@ export function AnnotationListEntry(props) {
                 </div>
               </div>
               <div class="form-row">
-                <label>System-URI</label>
-                <input
-                  type="text"
-                  value=${formData.codingSystem || getSelectedProvider()?.systemUri || ''}
-                  readOnly
-                />
+                <div class="form-hint">
+                  Press Tab or Enter to add an annotation (multiple entries allowed).
+                  To submit, press Tab in the empty search field.
+                </div>
               </div>
               ${searchError && html`<div class="annotation-empty annotation-empty--error">${searchError}</div>`}
-              <div class="form-row">
-                <label>Code</label>
-                <input
-                  type="text"
-                  value=${formData.codingCode}
-                  readOnly
-                />
-              </div>
-              <div class="form-row">
-                <label>Display</label>
-                <input
-                  type="text"
-                  value=${formData.codingDisplay}
-                  readOnly
-                  onKeyDown=${formData.mode === 'descriptive' ? handleSubmitOnTab : undefined}
-                />
-              </div>
             `}
           </fieldset>
 
           ${formData.mode === 'prescriptive' && html`
             <fieldset class="form-fieldset form-fieldset--prescriptive">
-              <legend>Mapping-Target</legend>
+              <legend>Mapping target (optional)</legend>
               <div class="form-row">
-                <label>FHIRPath (Ziel-Element)</label>
+                <label>FHIRPath (target element)</label>
                 <input
                   type="text"
-                  placeholder="z.B. DocumentReference.type"
+                  placeholder="e.g. DocumentReference.type"
                   value=${formData.targetElement}
                   onInput=${(e) => updateField('targetElement', e.target.value)}
                 />
@@ -570,7 +628,7 @@ export function AnnotationListEntry(props) {
                 <select
                   value=${formData.targetTransform}
                   onChange=${(e) => updateField('targetTransform', e.target.value)}
-                  onKeyDown=${(formData.targetTransform !== 'fixed' && formData.targetTransform !== 'translate') ? handleSubmitOnTab : undefined}
+                  onKeyDownCapture=${(formData.targetTransform !== 'fixed' && formData.targetTransform !== 'translate') ? handleSubmitOnTab : undefined}
                 >
                   ${TRANSFORMS.map(t =>
                     html`<option value=${t.value}>${t.label}</option>`
@@ -579,13 +637,13 @@ export function AnnotationListEntry(props) {
               </div>
               ${(formData.targetTransform === 'fixed' || formData.targetTransform === 'translate') && html`
                 <div class="form-row">
-                  <label>${formData.targetTransform === 'fixed' ? 'Fester Wert' : 'ConceptMap-URL'}</label>
+                  <label>${formData.targetTransform === 'fixed' ? 'Fixed value' : 'ConceptMap URL'}</label>
                   <input
                     type="text"
-                    placeholder=${formData.targetTransform === 'fixed' ? 'z.B. final' : 'https://...'}
+                    placeholder=${formData.targetTransform === 'fixed' ? 'e.g. final' : 'https://...'}
                     value=${formData.targetValue}
                     onInput=${(e) => updateField('targetValue', e.target.value)}
-                    onKeyDown=${handleSubmitOnTab}
+                    onKeyDownCapture=${handleSubmitOnTab}
                   />
                 </div>
               `}

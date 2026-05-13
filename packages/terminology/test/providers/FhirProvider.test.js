@@ -85,6 +85,19 @@ describe('FhirProvider', () => {
       expect(calledUrl.searchParams.get('url')).toBe('http://fhir.de/ValueSet/bfarm/icd-10-gm');
       expect(calledUrl.searchParams.get('valueSetVersion')).toBe('2020');
     });
+
+    it('should use valueSetUri as-is for search', async () => {
+      const fetchFn = createMockFetch({ expansion: { contains: [] } });
+      const provider = createProvider({
+        systemUri: 'http://loinc.org',
+        valueSetUri: 'http://loinc.org/vs',
+        fetchFn
+      });
+
+      await provider.search('discharge');
+      const calledUrl = new URL(fetchFn.mock.calls[0][0]);
+      expect(calledUrl.searchParams.get('url')).toBe('http://loinc.org/vs');
+    });
   });
 
   describe('lookup()', () => {
@@ -99,6 +112,20 @@ describe('FhirProvider', () => {
       const concept = await provider.lookup('C34.1');
       expect(concept.code).toBe('C34.1');
       expect(concept.display).toBe('Bösartige Neubildung');
+    });
+
+    it('should forward lookupParameters to the adapter lookup request', async () => {
+      const fetchFn = createMockFetch({ parameter: [] });
+      const provider = createProvider({
+        lookupParameters: {
+          version: '2025.0.0'
+        },
+        fetchFn
+      });
+
+      await provider.lookup('C34.1');
+      const calledUrl = new URL(fetchFn.mock.calls[0][0]);
+      expect(calledUrl.searchParams.get('version')).toBe('2025.0.0');
     });
   });
 });

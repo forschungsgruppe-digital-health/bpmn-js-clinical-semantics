@@ -4,6 +4,7 @@ import { useService } from 'bpmn-js-properties-panel';
 const CLINICAL_DOMAINS = [
   { value: '', label: '– not set –' },
   { value: 'diagnostics', label: 'Diagnostics' },
+  { value: 'documentation', label: 'Documentation' },
   { value: 'staging', label: 'Staging' },
   { value: 'therapy', label: 'Therapy' },
   { value: 'follow-up', label: 'Follow-up' },

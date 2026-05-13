@@ -17,6 +17,7 @@ export class FhirProvider extends TerminologyProvider {
    * @param {number} [config.maxResults=15]
    * @param {string} [config.language]
    * @param {Record<string, string>} [config.expandParameters]
+   * @param {Record<string, string>} [config.lookupParameters]
    * @param {import('../core/types').ConnectionConfig['auth']} [config.auth]
    * @param {typeof fetch} [config.fetchFn]
    */
@@ -29,12 +30,12 @@ export class FhirProvider extends TerminologyProvider {
     this._language = config.language;
     
     // Use valueSetUri for the adapter if provided, otherwise fallback to systemUri
-    const searchUri = config.valueSetUri || config.systemUri;
-    
     this._adapter = new FhirTerminologyAdapter({
       baseUrl: config.baseUrl,
-      systemUri: searchUri,
+      systemUri: config.systemUri,
+      valueSetUri: config.valueSetUri,
       expandParameters: config.expandParameters,
+      lookupParameters: config.lookupParameters,
       auth: config.auth,
       fetchFn: config.fetchFn,
       headers: config.headers

@@ -360,6 +360,48 @@ body {
   color: #475467;
 }
 
+.selected-codings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.selected-coding {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 5px 6px;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.selected-coding__content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.selected-coding__remove {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #98a2b3;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 1px;
+  border-radius: 3px;
+}
+
+.selected-coding__remove:hover {
+  color: var(--c-danger);
+  background: rgba(217, 79, 79, 0.1);
+}
+
 .annotation-item__target {
   margin-top: 2px;
   font-size: 11px;
@@ -439,6 +481,12 @@ body {
   font-size: 11px;
   color: #475467;
   font-weight: 500;
+}
+
+.form-hint {
+  color: #667085;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .form-row select,
