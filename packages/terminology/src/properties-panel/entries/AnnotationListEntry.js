@@ -1,11 +1,16 @@
 import { html } from 'htm/preact';
-import { useRef, useState } from '@bpmn-io/properties-panel/preact/hooks';
+import { useEffect, useRef, useState } from '@bpmn-io/properties-panel/preact/hooks';
 import { useService } from 'bpmn-js-properties-panel';
 import {
   getAnnotations,
   addAnnotation,
   removeAnnotation
 } from '../../services/AnnotationHelper.js';
+import {
+  normalizeConcepts,
+  getConceptLabel,
+  getAutocompleteSuffix
+} from './search-utils.js';
 
 const ASPECTS = [
   { value: 'clinicalContent', label: 'Klinischer Inhalt' },
@@ -44,6 +49,8 @@ export function AnnotationListEntry(props) {
   const [activeSearchResultIndex, setActiveSearchResultIndex] = useState(-1);
   const [selectedProviderId, setSelectedProviderId] = useState('');
   const searchRequestSequence = useRef(0);
+  const searchBlurTimeout = useRef(null);
+  const searchSuggestionItemRefs = useRef([]);
 
   const bo = element.businessObject;
   const annotations = getAnnotations(bo);
@@ -60,11 +67,6 @@ export function AnnotationListEntry(props) {
       targetTransform: '',
       targetValue: ''
     };
-  }
-
-  function normalizeConcepts(result) {
-    const concepts = result?.concepts || result?.items || [];
-    return Array.isArray(concepts) ? concepts : [];
   }
 
   function getRegisteredProviders() {
@@ -156,61 +158,87 @@ export function AnnotationListEntry(props) {
     }
   }
 
-  function applySearchResult(c) {
-    const nextSystem = c.system || formData.codingSystem;
+  function resetSearchState() {
+    if (searchBlurTimeout.current) {
+      clearTimeout(searchBlurTimeout.current);
+      searchBlurTimeout.current = null;
+    }
 
+    setSearchTerm('');
+    setSearchResults([]);
+    setActiveSearchResultIndex(-1);
+    setSearchError('');
+    setSearchBusy(false);
+    setSearchFocused(false);
+  }
+
+  function resetFormState() {
     searchRequestSequence.current += 1;
-    setFormData(current => ({
-      ...current,
+    setFormData(createEmptyForm());
+    setSelectedProviderId('');
+    resetSearchState();
+  }
+
+  function closeForm() {
+    resetFormState();
+    setShowForm(false);
+  }
+
+  function applySearchResult(c, options = {}) {
+    const { submit = false } = options;
+    const nextSystem = c.system || formData.codingSystem;
+    const nextFormData = {
+      ...formData,
       codingSystem: nextSystem,
       codingCode: c.code || '',
       codingDisplay: c.display || ''
-    }));
+    };
+
+    if (submit) {
+      handleAdd(nextFormData);
+      return;
+    }
+
+    searchRequestSequence.current += 1;
+    setFormData(nextFormData);
     setSearchTerm(getConceptLabel(c));
     setSearchResults([]);
     setActiveSearchResultIndex(-1);
     setSearchError('');
     setSearchBusy(false);
+    setSearchFocused(false);
   }
 
-  function handleAdd() {
+  function handleAdd(nextFormData = formData) {
     const codings = [];
-    if (formData.codingSystem && formData.codingCode) {
+    if (nextFormData.codingSystem && nextFormData.codingCode) {
       codings.push({
-        system: formData.codingSystem,
-        code: formData.codingCode,
-        display: formData.codingDisplay || undefined
+        system: nextFormData.codingSystem,
+        code: nextFormData.codingCode,
+        display: nextFormData.codingDisplay || undefined
       });
     }
 
     let target = null;
-    if (formData.mode === 'prescriptive' && formData.targetTransform && formData.targetElement) {
+    if (nextFormData.mode === 'prescriptive' && nextFormData.targetTransform && nextFormData.targetElement) {
       target = {
-        element: formData.targetElement,
-        transform: formData.targetTransform,
-        value: formData.targetValue || undefined
+        element: nextFormData.targetElement,
+        transform: nextFormData.targetTransform,
+        value: nextFormData.targetValue || undefined
       };
     }
 
     addAnnotation(bo, moddle, {
-      aspect: formData.aspect,
-      mode: formData.mode,
-      text: formData.text || undefined,
+      aspect: nextFormData.aspect,
+      mode: nextFormData.mode,
+      text: nextFormData.text || undefined,
       codings,
       target
     });
 
     // Force re-render and mark model as changed
     modeling.updateModdleProperties(element, bo, {});
-    setFormData(createEmptyForm());
-    setSearchTerm('');
-    setSearchResults([]);
-    setActiveSearchResultIndex(-1);
-    setSearchError('');
-    setSearchBusy(false);
-    searchRequestSequence.current += 1;
-    setSelectedProviderId('');
-    setShowForm(false);
+    closeForm();
     setRefresh(n => n + 1);
   }
 
@@ -230,16 +258,18 @@ export function AnnotationListEntry(props) {
       codingCode: '',
       codingDisplay: ''
     }));
-    setSearchTerm('');
-    setSearchResults([]);
-    setActiveSearchResultIndex(-1);
-    setSearchError('');
-    setSearchBusy(false);
+    resetSearchState();
   }
 
   function handleSearchInput(e) {
     const value = e.target.value;
 
+    if (searchBlurTimeout.current) {
+      clearTimeout(searchBlurTimeout.current);
+      searchBlurTimeout.current = null;
+    }
+
+    setSearchFocused(true);
     setSearchTerm(value);
     setFormData(current => ({
       ...current,
@@ -249,7 +279,34 @@ export function AnnotationListEntry(props) {
     void runSearch(value, selectedProviderId);
   }
 
+  function handleSearchFocus() {
+    if (searchBlurTimeout.current) {
+      clearTimeout(searchBlurTimeout.current);
+      searchBlurTimeout.current = null;
+    }
+
+    setSearchFocused(true);
+  }
+
+  function handleSearchBlur() {
+    if (searchBlurTimeout.current) {
+      clearTimeout(searchBlurTimeout.current);
+    }
+
+    searchBlurTimeout.current = setTimeout(() => {
+      setSearchFocused(false);
+      searchBlurTimeout.current = null;
+    }, 120);
+  }
+
   function handleSearchKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      setSearchFocused(false);
+      return;
+    }
+
     if (!searchResults.length) {
       return;
     }
@@ -272,14 +329,51 @@ export function AnnotationListEntry(props) {
 
       if (selectedResult) {
         e.preventDefault();
-        applySearchResult(selectedResult);
+        applySearchResult(selectedResult, {
+          submit: e.key === 'Tab' && !e.shiftKey && formData.mode !== 'prescriptive'
+        });
       }
     }
+  }
+
+  function handleFormKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeForm();
+    }
+  }
+
+  function handleSubmitOnTab(e) {
+    if (e.key !== 'Tab' || e.shiftKey) {
+      return;
+    }
+
+    e.preventDefault();
+    handleAdd();
   }
 
   function updateField(field, value) {
     setFormData(current => ({ ...current, [field]: value }));
   }
+
+  const [searchFocused, setSearchFocused] = useState(false);
+  const activeSearchResult = searchResults[activeSearchResultIndex >= 0 ? activeSearchResultIndex : 0] || null;
+  const searchCompletion = getAutocompleteSuffix(searchTerm, activeSearchResult);
+  const showSearchSuggestions = searchFocused && searchResults.length > 0;
+
+  useEffect(() => {
+    if (!showSearchSuggestions || activeSearchResultIndex < 0) {
+      return;
+    }
+
+    const activeItem = searchSuggestionItemRefs.current[activeSearchResultIndex];
+
+    if (activeItem) {
+      activeItem.scrollIntoView({
+        block: 'nearest'
+      });
+    }
+  }, [activeSearchResultIndex, showSearchSuggestions]);
 
   return html`
     <div class="clinical-annotations">
@@ -335,7 +429,7 @@ export function AnnotationListEntry(props) {
 
       <!-- Add form -->
       ${showForm && html`
-        <div class="annotation-form">
+        <div class="annotation-form" onKeyDown=${handleFormKeyDown}>
           <div class="form-row">
             <label>Aspekt</label>
             <select
@@ -373,55 +467,72 @@ export function AnnotationListEntry(props) {
                 <select
                   value=${selectedProviderId}
                   onChange=${handlePreset}
-                >
-                  <option value="">– auswählen –</option>
-                  ${getRegisteredProviders().map(p =>
-                    html`<option value=${p.id}>${p.displayName}</option>`
-                  )}
-                </select>
-              </div>
+                 onKeyDown=${!selectedProviderId && formData.mode === 'descriptive' ? handleSubmitOnTab : undefined}
+               >
+                 <option value="">– auswählen –</option>
+                 ${getRegisteredProviders().map(p =>
+                   html`<option value=${p.id}>${p.displayName}</option>`
+                 )}
+               </select>
+             </div>
             ${selectedProviderId && html`
-               <div class="form-row">
-                 <label>System-URI</label>
-                 <input
-                   type="text"
-                   value=${formData.codingSystem || getSelectedProvider()?.systemUri || ''}
-                   readOnly
-                 />
-               </div>
               <div class="form-row">
                 <label>Suche ${searchBusy ? '(suche …)' : ''}</label>
+                <div class="search-field">
+                  <div class="search-input-shell ${searchFocused ? 'search-input-shell--focused' : ''}">
+                    <div class="search-input-ghost" aria-hidden="true">
+                      <span class="search-input-ghost__typed">${searchTerm}</span><span class="search-input-ghost__completion">${searchCompletion}</span>
+                    </div>
+                    <input
+                      class="search-input-field"
+                      type="text"
+                      placeholder="Begriff eingeben"
+                      value=${searchTerm}
+                      onInput=${handleSearchInput}
+                      onKeyDown=${handleSearchKeyDown}
+                      onFocus=${handleSearchFocus}
+                      onBlur=${handleSearchBlur}
+                      autocomplete="off"
+                    />
+                  </div>
+                  ${showSearchSuggestions && html`
+                    <div class="search-suggestions" role="listbox">
+                      ${searchResults.map((c, index) => html`
+                        <div
+                          class="search-suggestion ${index === activeSearchResultIndex ? 'search-suggestion--active' : ''}"
+                          ref=${(node) => {
+                            searchSuggestionItemRefs.current[index] = node;
+                          }}
+                          onMouseMove=${() => setActiveSearchResultIndex(index)}
+                          onMouseDown=${(event) => {
+                            event.preventDefault();
+                            if (searchBlurTimeout.current) {
+                              clearTimeout(searchBlurTimeout.current);
+                              searchBlurTimeout.current = null;
+                            }
+                            applySearchResult(c);
+                          }}
+                        >
+                          <div class="search-suggestion__label">${getConceptLabel(c)}</div>
+                          <div class="search-suggestion__meta">
+                            <span class="coding-system">${getSystemShortName(c.system || getSelectedProvider()?.systemUri, terminologyRegistry)}</span>
+                            <code class="coding-code">${c.code}</code>
+                          </div>
+                        </div>
+                      `)}
+                    </div>
+                  `}
+                </div>
+              </div>
+              <div class="form-row">
+                <label>System-URI</label>
                 <input
                   type="text"
-                  placeholder="Begriff eingeben"
-                  value=${searchTerm}
-                  onInput=${handleSearchInput}
-                  onKeyDown=${handleSearchKeyDown}
+                  value=${formData.codingSystem || getSelectedProvider()?.systemUri || ''}
+                  readOnly
                 />
               </div>
               ${searchError && html`<div class="annotation-empty annotation-empty--error">${searchError}</div>`}
-              ${searchResults.length > 0 && html`
-                <div class="annotation-list annotation-list--search-results">
-                  ${searchResults.map((c, index) => html`
-                    <div
-                      class="annotation-item annotation-item--search-result ${index === activeSearchResultIndex ? 'annotation-item--active' : ''}"
-                      onMouseDown=${(event) => {
-                       event.preventDefault();
-                        applySearchResult(c);
-                      }}
-                    >
-                      <div class="annotation-item__header">
-                        <span class="annotation-item__aspect">${getSystemShortName(c.system || getSelectedProvider()?.systemUri, terminologyRegistry)}</span>
-                        <span class="annotation-item__mode badge badge--descriptive">Treffer</span>
-                      </div>
-                      <div class="annotation-item__coding">
-                        <code class="coding-code">${c.code}</code>
-                        ${c.display && html`<span class="coding-display">${c.display}</span>`}
-                      </div>
-                    </div>
-                  `)}
-                </div>
-              `}
               <div class="form-row">
                 <label>Code</label>
                 <input
@@ -436,6 +547,7 @@ export function AnnotationListEntry(props) {
                   type="text"
                   value=${formData.codingDisplay}
                   readOnly
+                  onKeyDown=${formData.mode === 'descriptive' ? handleSubmitOnTab : undefined}
                 />
               </div>
             `}
@@ -458,6 +570,7 @@ export function AnnotationListEntry(props) {
                 <select
                   value=${formData.targetTransform}
                   onChange=${(e) => updateField('targetTransform', e.target.value)}
+                  onKeyDown=${(formData.targetTransform !== 'fixed' && formData.targetTransform !== 'translate') ? handleSubmitOnTab : undefined}
                 >
                   ${TRANSFORMS.map(t =>
                     html`<option value=${t.value}>${t.label}</option>`
@@ -472,28 +585,16 @@ export function AnnotationListEntry(props) {
                     placeholder=${formData.targetTransform === 'fixed' ? 'z.B. final' : 'https://...'}
                     value=${formData.targetValue}
                     onInput=${(e) => updateField('targetValue', e.target.value)}
+                    onKeyDown=${handleSubmitOnTab}
                   />
                 </div>
               `}
             </fieldset>
           `}
-
-          <div class="form-actions">
-            <button class="btn btn--primary" onClick=${handleAdd}>
-              Hinzufügen
-            </button>
-            <button class="btn btn--secondary" onClick=${() => { setShowForm(false); setFormData(createEmptyForm()); }}>
-              Abbrechen
-            </button>
-          </div>
         </div>
       `}
     </div>
   `;
-}
-
-function getConceptLabel(concept) {
-  return concept.display || concept.code || '';
 }
 
 function getAspectLabel(aspect) {
