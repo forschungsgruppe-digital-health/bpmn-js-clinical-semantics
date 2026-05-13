@@ -13,21 +13,21 @@ import {
 } from './search-utils.js';
 
 const ASPECTS = [
-  { value: 'clinicalContent', label: 'Klinischer Inhalt' },
-  { value: 'documentClass', label: 'Dokumentklasse (IHE XDS classCode)' },
-  { value: 'documentType', label: 'Dokumenttyp (IHE XDS typeCode / KDL)' },
-  { value: 'note', label: 'Freitext-Notiz' }
+  { value: 'clinicalContent', label: 'Clinical content' },
+  { value: 'documentClass', label: 'Document class (IHE XDS classCode)' },
+  { value: 'documentType', label: 'Document type (IHE XDS typeCode / KDL)' },
+  { value: 'note', label: 'Free-text note' }
 ];
 
 const MODES = [
-  { value: 'descriptive', label: 'Deskriptiv (beschreibend)' },
-  { value: 'prescriptive', label: 'Präskriptiv (normgebend)' }
+  { value: 'descriptive', label: 'Descriptive' },
+  { value: 'prescriptive', label: 'Prescriptive' }
 ];
 
 const TRANSFORMS = [
-  { value: '', label: '– kein Target –' },
-  { value: 'copy', label: 'copy (Code → Ziel)' },
-  { value: 'fixed', label: 'fixed (fester Wert)' },
+  { value: '', label: '– no target –' },
+  { value: 'copy', label: 'copy (Code → target)' },
+  { value: 'fixed', label: 'fixed (fixed value)' },
   { value: 'translate', label: 'translate (ConceptMap)' }
 ];
 
@@ -111,13 +111,13 @@ export function AnnotationListEntry(props) {
 
     if (!terminologyRegistry) {
       setSearchBusy(false);
-      setSearchError('Keine Terminologie-Registry konfiguriert (Demo ohne Live-Provider).');
+      setSearchError('No terminology registry configured (demo without live provider).');
       return;
     }
 
     if (!providerId) {
       setSearchBusy(false);
-      setSearchError('Bitte zuerst eine Terminologie auswählen.');
+      setSearchError('Please select a terminology first.');
       return;
     }
 
@@ -131,7 +131,7 @@ export function AnnotationListEntry(props) {
       }
 
       if (!resolvedProviderId) {
-        setSearchError('System unbekannt und kein dynamischer Terminologie-Loader konfiguriert.');
+        setSearchError('Unknown system and no dynamic terminology loader configured.');
         return;
       }
 
@@ -149,8 +149,8 @@ export function AnnotationListEntry(props) {
         return;
       }
 
-      console.error('Fehler bei der Terminologiesuche:', e);
-      setSearchError('Suche fehlgeschlagen. Bitte Terminologiesystem oder Suchbegriff prüfen.');
+      console.error('Terminology search failed:', e);
+      setSearchError('Search failed. Please check the terminology system or search term.');
     } finally {
       if (requestId === searchRequestSequence.current) {
         setSearchBusy(false);
@@ -386,11 +386,11 @@ export function AnnotationListEntry(props) {
               <div class="annotation-item__header">
                 <span class="annotation-item__aspect">${getAspectLabel(ann.aspect)}</span>
                 <span class="annotation-item__mode badge badge--${ann.mode || 'descriptive'}">
-                  ${ann.mode === 'prescriptive' ? '⬤ präskriptiv' : '○ deskriptiv'}
+                  ${ann.mode === 'prescriptive' ? '⬤ prescriptive' : '○ descriptive'}
                 </span>
                 <button
                   class="annotation-item__remove"
-                  title="Entfernen"
+                  title="Remove"
                   onClick=${() => handleRemove(i)}
                 >×</button>
               </div>
@@ -417,13 +417,13 @@ export function AnnotationListEntry(props) {
       `}
 
       ${annotations.length === 0 && !showForm && html`
-        <div class="annotation-empty">Keine Annotationen vorhanden.</div>
+        <div class="annotation-empty">No annotations yet.</div>
       `}
 
       <!-- Add button -->
       ${!showForm && html`
         <button class="annotation-add-btn" onClick=${() => setShowForm(true)}>
-          + Annotation hinzufügen
+          + Add annotation
         </button>
       `}
 
@@ -431,7 +431,7 @@ export function AnnotationListEntry(props) {
       ${showForm && html`
         <div class="annotation-form" onKeyDown=${handleFormKeyDown}>
           <div class="form-row">
-            <label>Aspekt</label>
+            <label>Aspect</label>
             <select
               value=${formData.aspect}
               onChange=${(e) => updateField('aspect', e.target.value)}
@@ -441,7 +441,7 @@ export function AnnotationListEntry(props) {
           </div>
 
           <div class="form-row">
-            <label>Modus</label>
+            <label>Mode</label>
             <select
               value=${formData.mode}
               onChange=${(e) => updateField('mode', e.target.value)}
@@ -451,10 +451,10 @@ export function AnnotationListEntry(props) {
           </div>
 
           <div class="form-row">
-            <label>Freitext</label>
+            <label>Free text</label>
             <textarea
               rows="2"
-              placeholder="Beschreibung in natürlicher Sprache..."
+              placeholder="Description in natural language..."
               value=${formData.text}
               onInput=${(e) => updateField('text', e.target.value)}
             />
@@ -463,13 +463,13 @@ export function AnnotationListEntry(props) {
           <fieldset class="form-fieldset">
             <legend>Coding (optional)</legend>
               <div class="form-row">
-                <label>Terminologie</label>
+                <label>Terminology</label>
                 <select
                   value=${selectedProviderId}
                   onChange=${handlePreset}
                  onKeyDown=${!selectedProviderId && formData.mode === 'descriptive' ? handleSubmitOnTab : undefined}
                >
-                 <option value="">– auswählen –</option>
+                 <option value="">– select –</option>
                  ${getRegisteredProviders().map(p =>
                    html`<option value=${p.id}>${p.displayName}</option>`
                  )}
@@ -477,7 +477,7 @@ export function AnnotationListEntry(props) {
              </div>
             ${selectedProviderId && html`
               <div class="form-row">
-                <label>Suche ${searchBusy ? '(suche …)' : ''}</label>
+                <label>Search ${searchBusy ? '(searching...)' : ''}</label>
                 <div class="search-field">
                   <div class="search-input-shell ${searchFocused ? 'search-input-shell--focused' : ''}">
                     <div class="search-input-ghost" aria-hidden="true">
@@ -486,7 +486,7 @@ export function AnnotationListEntry(props) {
                     <input
                       class="search-input-field"
                       type="text"
-                      placeholder="Begriff eingeben"
+                      placeholder="Enter term"
                       value=${searchTerm}
                       onInput=${handleSearchInput}
                       onKeyDown=${handleSearchKeyDown}
@@ -599,14 +599,14 @@ export function AnnotationListEntry(props) {
 
 function getAspectLabel(aspect) {
   const map = {
-    clinicalContent: 'Klinischer Inhalt',
-    documentClass: 'Dokumentklasse',
-    documentType: 'Dokumenttyp',
-    note: 'Notiz',
-    confidentiality: 'Vertraulichkeit',
+    clinicalContent: 'Clinical content',
+    documentClass: 'Document class',
+    documentType: 'Document type',
+    note: 'Note',
+    confidentiality: 'Confidentiality',
     status: 'Status',
     format: 'Format',
-    participant: 'Teilnehmer'
+    participant: 'Participant'
   };
   return map[aspect] || aspect;
 }

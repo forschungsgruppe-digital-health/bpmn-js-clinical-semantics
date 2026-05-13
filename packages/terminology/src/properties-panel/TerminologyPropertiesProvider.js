@@ -28,7 +28,7 @@ TerminologyPropertiesProvider.prototype.getGroups = function (element) {
 
     groups.push({
       id: 'clinical-terminology',
-      label: translate('Klinische Annotation'),
+      label: translate('Clinical annotations'),
       entries: [
         {
           id: 'clinical-domain',
