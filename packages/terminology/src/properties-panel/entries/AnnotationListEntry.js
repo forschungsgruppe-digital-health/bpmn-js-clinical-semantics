@@ -293,6 +293,29 @@ export function AnnotationListEntry(props) {
     }, 120);
   }
 
+  function acceptSearchSuggestion(result) {
+    const label = getConceptLabel(result);
+
+    if (!label) {
+      return;
+    }
+
+    searchRequestSequence.current += 1;
+    setSearchTerm(label);
+    setSearchFocused(true);
+    setActiveSearchResultIndex(-1);
+
+    requestAnimationFrame(() => {
+      if (searchInputRef.current) {
+        const caretPosition = label.length;
+        searchInputRef.current.focus();
+        searchInputRef.current.setSelectionRange(caretPosition, caretPosition);
+      }
+    });
+
+    void runSearch(label, selectedProviderId);
+  }
+
   function handleSearchKeyDown(e) {
     if (e.key === 'Escape') {
       e.preventDefault();
@@ -330,6 +353,18 @@ export function AnnotationListEntry(props) {
       e.preventDefault();
       e.stopPropagation();
       setActiveSearchResultIndex(current => Math.max(current - 1, 0));
+      return;
+    }
+
+    if (e.key === 'ArrowRight') {
+      const selectedIndex = activeSearchResultIndex >= 0 ? activeSearchResultIndex : 0;
+      const selectedResult = searchResults[selectedIndex] || activeSearchResult;
+
+      if (selectedResult) {
+        e.preventDefault();
+        e.stopPropagation();
+        acceptSearchSuggestion(selectedResult);
+      }
       return;
     }
 
@@ -603,6 +638,7 @@ export function AnnotationListEntry(props) {
               </div>
               <div class="form-row">
                 <div class="form-hint">
+                  Press Right Arrow to accept the highlighted suggestion text.
                   Press Tab or Enter to add an annotation (multiple entries allowed).
                   To submit, press Tab in the empty search field.
                 </div>
