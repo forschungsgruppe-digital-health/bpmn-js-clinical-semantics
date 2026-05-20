@@ -638,7 +638,6 @@ export function AnnotationListEntry(props) {
               </div>
               <div class="form-row">
                 <div class="form-hint">
-                  Press Right Arrow to accept the highlighted suggestion text.
                   Press Tab or Enter to add an annotation (multiple entries allowed).
                   To submit, press Tab in the empty search field.
                 </div>

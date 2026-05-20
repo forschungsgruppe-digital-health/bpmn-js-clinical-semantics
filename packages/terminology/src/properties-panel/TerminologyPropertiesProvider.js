@@ -8,6 +8,7 @@ const TARGET_TYPES = [
   'bpmn:Task', 'bpmn:UserTask', 'bpmn:ServiceTask', 'bpmn:SendTask',
   'bpmn:ReceiveTask', 'bpmn:ManualTask', 'bpmn:ScriptTask',
   'bpmn:BusinessRuleTask', 'bpmn:SubProcess',
+  'bpmn:ExclusiveGateway',
   'bpmn:DataObjectReference', 'bpmn:DataStoreReference',
   'bpmn:IntermediateThrowEvent', 'bpmn:IntermediateCatchEvent',
   'bpmn:StartEvent', 'bpmn:EndEvent'
