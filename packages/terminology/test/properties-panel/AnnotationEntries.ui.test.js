@@ -132,10 +132,74 @@ describe('terminology properties panel UI', () => {
 
     expect(xml).toContain('id="Task_Staging"');
     expect(xml).toContain('term:clinicalDomain="staging"');
-    expect(xml).toContain('<term:annotation aspect="clinicalContent" mode="descriptive" text="Clinical TNM staging to determine tumor stage">');
+    expect(xml).toContain('<term:annotation aspect="clinicalContent" aspectId="clinical-content-1" text="Clinical TNM staging to determine tumor stage">');
     expect(xml).toContain('<term:coding system="http://snomed.info/sct" code="254292007" display="Tumor staging (tumor staging)"');
     expect(xml).toContain('<term:coding system="http://loinc.org" code="21908-9" display="Stage group.clinical Cancer"');
     expect(xml).not.toContain('fhirmap:');
+  });
+
+  it('hides the mapping target section when configured', async () => {
+    const context = await createTestContext({
+      id: 'Task_Configured',
+      type: 'bpmn:Task',
+      name: 'Configured Task'
+    });
+
+    setServices(context, {
+      terminologyPropertiesConfig: {
+        showMappingTarget: false
+      }
+    });
+
+    render(h(AnnotationListEntry, { element: context.element }));
+    fireEvent.click(screen.getByText('+ Add annotation'));
+
+    expect(screen.queryByText('Mapping target (optional)')).toBeNull();
+  });
+
+  it('persists a manually entered aspect ID', async () => {
+    const context = await createTestContext({
+      id: 'Task_CustomAspect',
+      type: 'bpmn:Task',
+      name: 'Configured Task'
+    });
+
+    setServices(context);
+
+    const annotationView = render(h(AnnotationListEntry, { element: context.element }));
+    await createAnnotation(annotationView.container, {
+      aspect: 'documentType',
+      aspectId: 'thorax-report-type',
+      text: 'Thorax report',
+      codings: []
+    });
+
+    const xml = await serializeXml(context.moddle, context.definitions);
+
+    expect(xml).toContain('<term:annotation aspect="documentType" aspectId="thorax-report-type" text="Thorax report" />');
+  });
+
+  it('marks the aspect ID field and shows its error below the field', async () => {
+    const context = await createTestContext({
+      id: 'Task_InvalidAspect',
+      type: 'bpmn:Task',
+      name: 'Configured Task'
+    });
+
+    setServices(context);
+
+    const view = render(h(AnnotationListEntry, { element: context.element }));
+    fireEvent.click(screen.getByText('+ Add annotation'));
+    fireEvent.input(getControlByLabel(view.container, 'Aspect ID'), {
+      target: { value: 'invalid id' }
+    });
+    fireEvent.input(getControlByLabel(view.container, 'Free text'), {
+      target: { value: 'Thorax report' }
+    });
+    fireEvent.click(screen.getByText('Save annotation'));
+
+    expect(screen.getByText('Aspect ID may only contain letters, numbers, dots, underscores, and hyphens.')).toBeTruthy();
+    expect(getControlByLabel(view.container, 'Aspect ID').className).toContain('bio-properties-panel-input--error');
   });
 
   it('recreates the chemotherapy task without adding a mapping target', async () => {
@@ -155,7 +219,7 @@ describe('terminology properties panel UI', () => {
 
     const annotationView = render(h(AnnotationListEntry, { element: context.element }));
     await createAnnotation(annotationView.container, {
-      mode: 'prescriptive',
+      
       text: 'Cisplatin-based doublet chemotherapy for inoperable lung cancer Stage III-IV',
       codings: [
         {
@@ -176,7 +240,7 @@ describe('terminology properties panel UI', () => {
 
     expect(xml).toContain('id="Task_Chemo"');
     expect(xml).toContain('term:clinicalDomain="therapy"');
-    expect(xml).toContain('<term:annotation aspect="clinicalContent" mode="prescriptive" text="Cisplatin-based doublet chemotherapy for inoperable lung cancer Stage III-IV">');
+    expect(xml).toContain('<term:annotation aspect="clinicalContent" aspectId="clinical-content-1" text="Cisplatin-based doublet chemotherapy for inoperable lung cancer Stage III-IV">');
     expect(xml).toContain('<term:coding system="http://snomed.info/sct" code="367336001" display="Chemotherapy (procedure)"');
     expect(xml).toContain('<term:coding system="http://www.whocc.no/atc" code="L01XA01" display="Cisplatin"');
     expect(xml).not.toContain('<term:target');
@@ -201,7 +265,7 @@ describe('terminology properties panel UI', () => {
 
     await createAnnotation(annotationView.container, {
       aspect: 'documentType',
-      mode: 'prescriptive',
+      
       text: 'Medical discharge report upon completion of follow-up',
       codings: [
         {
@@ -219,7 +283,7 @@ describe('terminology properties panel UI', () => {
 
     await createAnnotation(annotationView.container, {
       aspect: 'documentClass',
-      mode: 'prescriptive',
+      
       codings: [
         {
           providerId: 'ihe-xds-class',
@@ -234,10 +298,10 @@ describe('terminology properties panel UI', () => {
 
     expect(xml).toContain('id="DataObj_DischargeLetter"');
     expect(xml).toContain('term:clinicalDomain="documentation"');
-    expect(xml).toContain('<term:annotation aspect="documentType" mode="prescriptive" text="Medical discharge report upon completion of follow-up">');
+    expect(xml).toContain('<term:annotation aspect="documentType" aspectId="document-type-1" text="Medical discharge report upon completion of follow-up">');
     expect(xml).toContain('<term:coding system="http://loinc.org" code="18842-5" display="Discharge summary"');
     expect(xml).toContain('<term:coding system="http://dvmd.de/fhir/CodeSystem/kdl" code="AD010101" display="Medical discharge report"');
-    expect(xml).toContain('<term:annotation aspect="documentClass" mode="prescriptive">');
+    expect(xml).toContain('<term:annotation aspect="documentClass" aspectId="document-class-1">');
     expect(xml).toContain('<term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" code="BRI" display="Physician letters"');
   });
 
@@ -260,7 +324,7 @@ describe('terminology properties panel UI', () => {
 
     await createAnnotation(annotationView.container, {
       aspect: 'documentType',
-      mode: 'prescriptive',
+      
       text: 'MRI scan report of the thorax as input document for TNM staging',
       codings: [
         {
@@ -278,7 +342,7 @@ describe('terminology properties panel UI', () => {
 
     await createAnnotation(annotationView.container, {
       aspect: 'documentClass',
-      mode: 'prescriptive',
+      
       codings: [
         {
           providerId: 'ihe-xds-class',
@@ -293,7 +357,7 @@ describe('terminology properties panel UI', () => {
 
     expect(xml).toContain('id="DataObj_MRI"');
     expect(xml).toContain('term:clinicalDomain="diagnostics"');
-    expect(xml).toContain('<term:annotation aspect="documentType" mode="prescriptive" text="MRI scan report of the thorax as input document for TNM staging">');
+    expect(xml).toContain('<term:annotation aspect="documentType" aspectId="document-type-1" text="MRI scan report of the thorax as input document for TNM staging">');
     expect(xml).toContain('<term:coding system="http://loinc.org" code="18748-4" display="Diagnostic imaging study"');
     expect(xml).toContain('<term:coding system="http://ihe-d.de/CodeSystems/IHEXDStypeCode" code="ERGE" display="Diagnostic imaging results"');
     expect(xml).toContain('<term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" code="BEF" display="Clinical reports"');
@@ -315,7 +379,7 @@ describe('terminology properties panel UI', () => {
     await setClinicalDomain(context, 'DataObj_MRI', 'diagnostics');
     await addAnnotationToElement(context, 'DataObj_MRI', {
       aspect: 'documentType',
-      mode: 'prescriptive',
+      
       text: 'MRI scan report of the thorax as input document for TNM staging',
       codings: [
         {
@@ -332,7 +396,7 @@ describe('terminology properties panel UI', () => {
     });
     await addAnnotationToElement(context, 'DataObj_MRI', {
       aspect: 'documentClass',
-      mode: 'prescriptive',
+      
       codings: [
         {
           providerId: 'ihe-xds-class',
@@ -366,7 +430,7 @@ describe('terminology properties panel UI', () => {
 
     await setClinicalDomain(context, 'Task_Surgery', 'therapy');
     await addAnnotationToElement(context, 'Task_Surgery', {
-      mode: 'prescriptive',
+      
       text: 'Lobectomy or pneumonectomy for operable lung cancer Stage I-II',
       codings: [
         {
@@ -384,7 +448,7 @@ describe('terminology properties panel UI', () => {
 
     await setClinicalDomain(context, 'Task_Chemo', 'therapy');
     await addAnnotationToElement(context, 'Task_Chemo', {
-      mode: 'prescriptive',
+      
       text: 'Cisplatin-based doublet chemotherapy for inoperable lung cancer Stage III-IV',
       codings: [
         {
@@ -403,7 +467,7 @@ describe('terminology properties panel UI', () => {
     await setClinicalDomain(context, 'DataObj_DischargeLetter', 'documentation');
     await addAnnotationToElement(context, 'DataObj_DischargeLetter', {
       aspect: 'documentType',
-      mode: 'prescriptive',
+      
       text: 'Medical discharge report upon completion of follow-up',
       codings: [
         {
@@ -420,7 +484,7 @@ describe('terminology properties panel UI', () => {
     });
     await addAnnotationToElement(context, 'DataObj_DischargeLetter', {
       aspect: 'documentClass',
-      mode: 'prescriptive',
+      
       codings: [
         {
           providerId: 'ihe-xds-class',
@@ -533,10 +597,15 @@ async function createProcessContext(elementDefinitions) {
   };
 }
 
-function setServices(context) {
+function setServices(context, overrides = {}) {
   serviceState.current = {
     moddle: context.moddle,
     modeling: context.modeling,
+    elementRegistry: {
+      forEach(callback) {
+        Object.values(context.elements).forEach(callback);
+      }
+    },
     translate: (value) => value,
     terminologyRegistry: {
       listProviders: () => PROVIDERS,
@@ -545,7 +614,8 @@ function setServices(context) {
           concept.display.toLowerCase().includes(term.toLowerCase())
         )
       }))
-    }
+    },
+    ...overrides
   };
 }
 
@@ -558,11 +628,12 @@ async function createAnnotation(container, config) {
     });
   }
 
-  if (config.mode) {
-    fireEvent.change(getControlByLabel(container, 'Mode'), {
-      target: { value: config.mode }
+  if (config.aspectId) {
+    fireEvent.input(getControlByLabel(container, 'Aspect ID'), {
+      target: { value: config.aspectId }
     });
   }
+
 
   if (config.text) {
     fireEvent.input(getControlByLabel(container, 'Free text'), {

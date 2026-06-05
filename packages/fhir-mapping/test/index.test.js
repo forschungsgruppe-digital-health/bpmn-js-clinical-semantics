@@ -32,6 +32,7 @@ describe('@bpmn-js-clinical-semantics/fhir-mapping – core exports', () => {
   it('should export MappingHelper functions', async () => {
     const mod = await import('../src/services/MappingHelper.js');
     expect(mod.getResourceMappings).toBeDefined();
+    expect(mod.getBindableTerminologyAnnotations).toBeDefined();
     expect(mod.addResourceMapping).toBeDefined();
     expect(mod.removeResourceMapping).toBeDefined();
     expect(mod.exportMappingsAsJson).toBeDefined();

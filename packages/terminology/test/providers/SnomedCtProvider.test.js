@@ -44,7 +44,7 @@ describe('SnomedCtProvider', () => {
       });
       const provider = createProvider({ fetchFn });
 
-      const result = await provider.search('pneumonia', { limit: 5, language: 'de' });
+      const result = await provider.search('pneumonia', { limit: 5 });
       expect(result.items).toHaveLength(1);
 
       const calledUrl = new URL(fetchFn.mock.calls[0][0]);

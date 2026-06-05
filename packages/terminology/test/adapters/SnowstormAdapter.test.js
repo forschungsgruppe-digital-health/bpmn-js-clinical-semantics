@@ -16,7 +16,7 @@ describe('SnowstormAdapter', () => {
       const mockFetch = createMockFetch({ items: [], total: 0 });
       const adapter = new SnowstormAdapter({ baseUrl: BASE_URL, fetchFn: mockFetch });
 
-      await adapter.search({ term: 'pneumonia', limit: 10, offset: 0, language: 'en' });
+      await adapter.search({ term: 'pneumonia', limit: 10, offset: 0 });
 
       const calledUrl = new URL(mockFetch.mock.calls[0][0]);
       expect(calledUrl.pathname).toContain('/MAIN/concepts');
@@ -24,7 +24,7 @@ describe('SnowstormAdapter', () => {
       expect(calledUrl.searchParams.get('limit')).toBe('10');
       expect(calledUrl.searchParams.get('offset')).toBe('0');
       expect(calledUrl.searchParams.get('activeFilter')).toBe('true');
-      expect(calledUrl.searchParams.get('language')).toBe('en');
+      expect(calledUrl.searchParams.get('language')).toBe('de');
     });
 
     it('should map Snowstorm response to Concept objects', async () => {

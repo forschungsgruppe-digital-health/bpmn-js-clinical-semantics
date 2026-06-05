@@ -18,7 +18,6 @@ export class SnomedCtProvider extends TerminologyProvider {
     this._id = 'snomed-ct';
     this._displayName = config.displayName || 'SNOMED CT';
     this._branch = config.branch || 'MAIN';
-    this._language = config.language || 'en';
     this._maxResults = config.maxResults || 15;
     this._defaultEcl = config.defaultEcl;
     this._adapter = new SnowstormAdapter({
@@ -49,7 +48,6 @@ export class SnomedCtProvider extends TerminologyProvider {
       term,
       limit: options.limit ?? this._maxResults,
       offset: options.offset ?? 0,
-      language: options.language ?? this._language,
       additionalParams
     });
   }

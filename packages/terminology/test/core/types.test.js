@@ -20,13 +20,6 @@ describe('types – ASPECTS', () => {
   });
 });
 
-describe('types – MODES', () => {
-  it('should expose descriptive and prescriptive modes', () => {
-    expect(MODES.DESCRIPTIVE).toBe('descriptive');
-    expect(MODES.PRESCRIPTIVE).toBe('prescriptive');
-    expect(Object.keys(MODES)).toHaveLength(2);
-  });
-});
 
 describe('types – TRANSFORMS', () => {
   it('should expose all four transform types', () => {

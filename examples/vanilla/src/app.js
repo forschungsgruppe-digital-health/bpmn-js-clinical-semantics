@@ -7,12 +7,13 @@ import {
 // ─── Import from @bpmn-js-clinical-semantics/terminology ──────────────────
 import {
   TerminologyModdleDescriptor,
-  TerminologyPropertiesPanelModule
+  createTerminologyPropertiesPanelModule
 } from '@bpmn-js-clinical-semantics/terminology';
 import {
   createDemoTerminologyServices,
   createDemoTerminologyModule
 } from './terminology-config.js';
+import { DEMO_FEATURES } from './demo-config.js';
 
 // ─── Import from @bpmn-js-clinical-semantics/fhir-mapping ────────────────
 import {
@@ -25,27 +26,51 @@ import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-js.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
+import './styles.css';
 
 // ─── Create modeler with BOTH extensions ─────────────────────
-const terminologyServices = createDemoTerminologyServices();
-const TerminologyServicesModule = createDemoTerminologyModule(terminologyServices);
+const additionalModules = [];
+const moddleExtensions = {};
+
+if (DEMO_FEATURES.showPropertiesPanel) {
+  additionalModules.push(
+    BpmnPropertiesPanelModule,
+    BpmnPropertiesProviderModule
+  );
+}
+
+if (DEMO_FEATURES.showTerminology) {
+  const terminologyServices = createDemoTerminologyServices();
+  const terminologyServicesModule = createDemoTerminologyModule(terminologyServices);
+
+  additionalModules.push(
+    createTerminologyPropertiesPanelModule({
+      showClinicalDomain: DEMO_FEATURES.showTerminologyClinicalDomain,
+      showAnnotations: DEMO_FEATURES.showTerminologyAnnotations,
+      showMappingTarget: DEMO_FEATURES.showTerminologyMappingTarget
+    }),
+    terminologyServicesModule
+  );
+
+  moddleExtensions.term = TerminologyModdleDescriptor;
+}
+
+if (DEMO_FEATURES.showFhirMapping) {
+  additionalModules.push(FhirMappingPropertiesPanelModule);
+  moddleExtensions.fhirmap = FhirMappingModdleDescriptor;
+}
 
 const modeler = new BpmnModeler({
   container: '#canvas',
-  propertiesPanel: {
-    parent: '#properties'
-  },
-  additionalModules: [
-    BpmnPropertiesPanelModule,
-    BpmnPropertiesProviderModule,
-    TerminologyPropertiesPanelModule,    // ← Terminology annotations group
-    FhirMappingPropertiesPanelModule,    // ← FHIR mapping group
-    TerminologyServicesModule            // ← provides terminology services
-  ],
-  moddleExtensions: {
-    term: TerminologyModdleDescriptor,   // ← term: namespace
-    fhirmap: FhirMappingModdleDescriptor // ← fhirmap: namespace
-  }
+  ...(DEMO_FEATURES.showPropertiesPanel
+    ? {
+        propertiesPanel: {
+          parent: '#properties'
+        }
+      }
+    : {}),
+  additionalModules,
+  moddleExtensions
 });
 
 // ─── Load sample diagram ─────────────────────────────────────
@@ -67,29 +92,57 @@ async function loadDiagram() {
 
 loadDiagram();
 
+function setVisibility(selector, isVisible) {
+  const node = document.querySelector(selector);
+
+  if (!node) {
+    return null;
+  }
+
+  node.hidden = !isVisible;
+
+  return node;
+}
+
+const downloadButton = setVisibility('#btn-download', DEMO_FEATURES.showXmlDownload);
+const xmlToggleButton = setVisibility('#btn-xml-toggle', DEMO_FEATURES.showXmlPreview);
+
+setVisibility('#properties', DEMO_FEATURES.showPropertiesPanel);
+setVisibility('.app-footer', DEMO_FEATURES.showFooter);
+
+const headerActions = document.querySelector('.app-header__actions');
+
+if (headerActions) {
+  headerActions.hidden = !DEMO_FEATURES.showXmlDownload && !DEMO_FEATURES.showXmlPreview;
+}
+
 // ─── XML Download ────────────────────────────────────────────
 
-document.getElementById('btn-download').addEventListener('click', async () => {
-  const { xml } = await modeler.saveXML({ format: true });
-  const blob = new Blob([xml], { type: 'application/xml' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'clinical-annotated.bpmn';
-  a.click();
-  URL.revokeObjectURL(url);
-});
+if (downloadButton) {
+  downloadButton.addEventListener('click', async () => {
+    const { xml } = await modeler.saveXML({ format: true });
+    const blob = new Blob([xml], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'clinical-annotated.bpmn';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+}
 
 // ─── XML Viewer Toggle ──────────────────────────────────────
 
 const xmlOverlay = document.getElementById('xml-overlay');
 const xmlContent = document.getElementById('xml-content');
 
-document.getElementById('btn-xml-toggle').addEventListener('click', async () => {
-  const { xml } = await modeler.saveXML({ format: true });
-  xmlContent.textContent = xml;
-  xmlOverlay.classList.remove('xml-overlay--hidden');
-});
+if (xmlToggleButton) {
+  xmlToggleButton.addEventListener('click', async () => {
+    const { xml } = await modeler.saveXML({ format: true });
+    xmlContent.textContent = xml;
+    xmlOverlay.classList.remove('xml-overlay--hidden');
+  });
+}
 
 document.getElementById('btn-xml-close').addEventListener('click', () => {
   xmlOverlay.classList.add('xml-overlay--hidden');

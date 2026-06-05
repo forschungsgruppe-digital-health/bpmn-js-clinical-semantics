@@ -33,7 +33,6 @@ describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
   it('should export type constants', async () => {
     const mod = await import('../src/core/types.js');
     expect(mod.ASPECTS).toBeDefined();
-    expect(mod.MODES).toBeDefined();
     expect(mod.TRANSFORMS).toBeDefined();
     expect(mod.CLINICAL_DOMAINS).toBeDefined();
   });
@@ -81,6 +80,9 @@ describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
     const mod = await import('../src/services/AnnotationHelper.js');
     expect(mod.getAnnotations).toBeDefined();
     expect(mod.addAnnotation).toBeDefined();
+    expect(mod.createAnnotationAspectId).toBeDefined();
+    expect(mod.getUsedAspectIds).toBeDefined();
+    expect(mod.isValidAspectId).toBeDefined();
     expect(mod.removeAnnotation).toBeDefined();
     expect(mod.getAnnotationsContainer).toBeDefined();
     expect(mod.ensureAnnotationsContainer).toBeDefined();
@@ -104,6 +106,20 @@ describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
     expect(mod.createPackageFallbackProvider).toBeDefined();
     expect(mod.createTerminologyServices).toBeDefined();
     expect(mod.createTerminologyModule).toBeDefined();
+  });
+
+  it('should export configurable properties panel helpers', async () => {
+    const mod = await import('../src/properties-panel/config.js');
+    expect(mod.DEFAULT_TERMINOLOGY_PROPERTIES_CONFIG).toBeDefined();
+    expect(mod.resolveTerminologyPropertiesConfig).toBeDefined();
+
+    const panelConfig = mod.resolveTerminologyPropertiesConfig({
+      showMappingTarget: false
+    });
+
+    expect(panelConfig.showClinicalDomain).toBe(true);
+    expect(panelConfig.showAnnotations).toBe(true);
+    expect(panelConfig.showMappingTarget).toBe(false);
   });
 
   it('should export moddle descriptor as JSON', async () => {

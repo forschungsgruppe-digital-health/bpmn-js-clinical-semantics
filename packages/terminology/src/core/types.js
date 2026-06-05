@@ -111,11 +111,6 @@ export const ASPECTS = {
   PARTICIPANT: 'participant'
 };
 
-export const MODES = {
-  DESCRIPTIVE: 'descriptive',
-  PRESCRIPTIVE: 'prescriptive'
-};
-
 export const TRANSFORMS = {
   COPY: 'copy',
   FIXED: 'fixed',

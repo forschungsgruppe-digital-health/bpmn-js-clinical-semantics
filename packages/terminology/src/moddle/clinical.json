@@ -43,7 +43,7 @@
           "type": "String"
         },
         {
-          "name": "mode",
+          "name": "aspectId",
           "isAttr": true,
           "type": "String"
         },

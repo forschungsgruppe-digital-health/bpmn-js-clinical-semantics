@@ -27,10 +27,11 @@ describe('FhirTerminologyAdapter', () => {
       const adapter = new FhirTerminologyAdapter({
         baseUrl: BASE_URL,
         systemUri: SYSTEM_URI,
-        fetchFn: mockFetch
+        fetchFn: mockFetch,
+        language: 'de'
       });
 
-      const result = await adapter.search({ term: 'Lunge', limit: 10, offset: 0, language: 'de' });
+      const result = await adapter.search({ term: 'Lunge', limit: 10, offset: 0 });
 
       const calledUrl = new URL(mockFetch.mock.calls[0][0]);
       expect(calledUrl.pathname).toContain('ValueSet/$expand');

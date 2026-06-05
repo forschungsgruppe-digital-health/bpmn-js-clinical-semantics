@@ -10,10 +10,8 @@
   --c-text-dim: #6b7084;
   --c-accent: #4ea8de;
   --c-accent-dim: #2a5a7a;
-  --c-prescriptive: #e07b4a;
-  --c-descriptive: #4ea8de;
   --c-danger: #d94f4f;
-  --c-success: #4ade80;
+  --c-success: #349658;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --radius: 6px;
@@ -215,10 +213,19 @@ body {
   box-shadow: 0 0 0 2px rgba(78, 168, 222, 0.15);
 }
 
+.app-properties .bio-properties-panel-input--error,
+.app-properties input[type="text"].bio-properties-panel-input--error,
+.app-properties textarea.bio-properties-panel-input--error,
+.app-properties select.bio-properties-panel-input--error {
+  border-color: #d92d20;
+  box-shadow: 0 0 0 2px rgba(217, 45, 32, 0.12);
+}
+
 /* ─── Clinical Annotations ──────────────────────────────── */
 .clinical-annotations {
   padding: 4px 0;
 }
+
 
 .annotation-list {
   display: flex;
@@ -234,18 +241,18 @@ body {
   padding: 6px 8px;
   font-size: 12px;
   position: relative;
-  border-left: 3px solid var(--c-descriptive);
+  border-left: 3px solid transparent;
 }
 
 .annotation-item--saved {
+  border-left: 4px solid #4ea8de;
   background: #fff;
-  border-color: #d0d5dd;
+  border-top-color: #d0d5dd;
+  border-right-color: #d0d5dd;
+  border-bottom-color: #d0d5dd;
   color: #101828;
 }
 
-.annotation-item--prescriptive {
-  border-left-color: var(--c-prescriptive);
-}
 
 .annotation-item--active {
   border-color: var(--c-accent);
@@ -278,15 +285,11 @@ body {
   line-height: 1.5;
 }
 
-.badge--descriptive {
+.badge--annotation {
   background: rgba(78, 168, 222, 0.15);
-  color: var(--c-descriptive);
+  color: #4ea8de;
 }
 
-.badge--prescriptive {
-  background: rgba(224, 123, 74, 0.15);
-  color: var(--c-prescriptive);
-}
 
 .annotation-item__remove {
   margin-left: auto;
@@ -405,7 +408,7 @@ body {
 .annotation-item__target {
   margin-top: 2px;
   font-size: 11px;
-  color: var(--c-prescriptive);
+  color: #4ea8de;
   line-height: 1.3;
   display: flex;
   align-items: center;
@@ -438,6 +441,12 @@ body {
   color: #b42318;
 }
 
+.form-error-text {
+  color: #b42318;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .annotation-add-btn {
   display: block;
   width: 100%;
@@ -458,6 +467,20 @@ body {
   border-color: var(--c-accent);
   color: #fff;
 }
+
+.annotation-submit-btn {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  background: #4ea8de;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.annotation-submit-btn:hover { background: #3b82c6; }
 
 /* ─── Annotation Form ───────────────────────────────────── */
 .annotation-form {
@@ -636,12 +659,12 @@ body {
   font-weight: 600;
 }
 
-.form-fieldset--prescriptive {
-  border-color: rgba(224, 123, 74, 0.3);
+.form-fieldset--mapping {
+  border-color: rgba(78, 168, 222, 0.3);
 }
 
-.form-fieldset--prescriptive legend {
-  color: var(--c-prescriptive);
+.form-fieldset--mapping legend {
+  color: #4ea8de;
 }
 
 /* ─── XML Overlay ───────────────────────────────────────── */
@@ -783,6 +806,7 @@ body {
   padding: 4px 0;
 }
 
+
 .fhir-mapping-list {
   display: flex;
   flex-direction: column;
@@ -850,3 +874,111 @@ body {
   font-size: 11px;
   color: var(--c-success);
 }
+
+/* ─── Global properties panel overrides (no .app-properties wrapper) ───────────────────── */
+.bio-properties-panel {
+  --color-grey-225-10-15: var(--c-surface);
+  --color-grey-225-10-10: var(--c-bg);
+  --color-grey-225-10-20: var(--c-surface2);
+  --color-grey-225-10-25: var(--c-border);
+  --color-grey-225-10-35: var(--c-border);
+  --color-grey-225-10-55: var(--c-text-dim);
+  --color-grey-225-10-75: var(--c-text);
+  --color-grey-225-10-85: #e0e3ec;
+  --color-grey-225-10-95: #f0f1f4;
+  --color-grey-225-10-97: #f0f1f4;
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+.bio-properties-panel-group-header-title {
+  font-weight: 600;
+  color: #101828;
+}
+
+.bio-properties-panel-group-header.open .bio-properties-panel-group-header-title {
+  font-weight: 600;
+  color: #101828;
+}
+
+.bio-properties-panel-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #475467;
+  margin-bottom: 3px;
+}
+
+.bio-properties-panel-description,
+.bio-properties-panel-description p,
+.bio-properties-panel-description span,
+.bio-properties-panel-description div,
+.bio-properties-panel-description code {
+  color: #475467;
+}
+
+.bio-properties-panel-input,
+.bio-properties-panel select,
+.bio-properties-panel textarea,
+.bio-properties-panel input[type="text"] {
+  background: #fff;
+  border: 1px solid #d0d5dd;
+  color: #101828;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  width: 100%;
+}
+
+.bio-properties-panel select,
+.bio-properties-panel select.bio-properties-panel-input {
+  background: #fff;
+  border-color: #d0d5dd;
+  color: #101828;
+}
+
+.bio-properties-panel select option,
+.bio-properties-panel select optgroup {
+  background: #fff;
+  color: #101828;
+}
+
+.bio-properties-panel-dropdown-button__menu {
+  background: #fff;
+  color: #101828;
+}
+
+.bio-properties-panel-dropdown-button__menu-item {
+  color: #101828;
+}
+
+.bio-properties-panel-input::placeholder,
+.bio-properties-panel textarea::placeholder,
+.bio-properties-panel input[type="text"]::placeholder {
+  color: #98a2b3;
+}
+
+.bio-properties-panel select:focus,
+.bio-properties-panel textarea:focus,
+.bio-properties-panel input[type="text"]:focus {
+  outline: none;
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 2px rgba(78, 168, 222, 0.15);
+}
+
+.bio-properties-panel-button {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  background: #4ea8de;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.bio-properties-panel-button:hover { background: #3b82c6; }
+
+/* End global overrides */

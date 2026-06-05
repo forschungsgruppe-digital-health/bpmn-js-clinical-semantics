@@ -4,8 +4,12 @@ import { useService } from 'bpmn-js-properties-panel';
 import {
   getAnnotations,
   addAnnotation,
+  createAnnotationAspectId,
+  getUsedAspectIds,
+  isValidAspectId,
   removeAnnotation
 } from '../../services/AnnotationHelper.js';
+import { resolveTerminologyPropertiesConfig } from '../config.js';
 import {
   normalizeConcepts,
   getConceptLabel,
@@ -19,10 +23,6 @@ const ASPECTS = [
   { value: 'note', label: 'Free-text note' }
 ];
 
-const MODES = [
-  { value: 'descriptive', label: 'Descriptive' },
-  { value: 'prescriptive', label: 'Prescriptive' }
-];
 
 const TRANSFORMS = [
   { value: '', label: '– no target –' },
@@ -35,8 +35,12 @@ export function AnnotationListEntry(props) {
   const { element } = props;
   const moddle = useService('moddle');
   const modeling = useService('modeling');
+  const elementRegistry = useService('elementRegistry', false);
   const terminologyRegistry = useService('terminologyRegistry', false);
   const terminologyProviderLoader = useService('terminologyProviderLoader', false);
+  const terminologyPropertiesConfig = resolveTerminologyPropertiesConfig(
+    useService('terminologyPropertiesConfig', false)
+  );
 
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState(createEmptyForm());
@@ -47,6 +51,8 @@ export function AnnotationListEntry(props) {
   const [searchResults, setSearchResults] = useState([]);
   const [activeSearchResultIndex, setActiveSearchResultIndex] = useState(-1);
   const [selectedProviderId, setSelectedProviderId] = useState('');
+  const [formError, setFormError] = useState('');
+  const [aspectIdError, setAspectIdError] = useState('');
   const searchRequestSequence = useRef(0);
   const searchBlurTimeout = useRef(null);
   const searchSuggestionItemRefs = useRef([]);
@@ -54,11 +60,12 @@ export function AnnotationListEntry(props) {
 
   const bo = element.businessObject;
   const annotations = getAnnotations(bo);
+  const showMappingTarget = terminologyPropertiesConfig.showMappingTarget;
 
   function createEmptyForm() {
     return {
       aspect: 'clinicalContent',
-      mode: 'descriptive',
+      aspectId: '',
       text: '',
       codings: [],
       targetElement: '',
@@ -73,6 +80,39 @@ export function AnnotationListEntry(props) {
 
   function getSelectedProvider() {
     return getRegisteredProviders().find(provider => provider.id === selectedProviderId) || null;
+  }
+
+  function getExistingAspectIds() {
+    if (!elementRegistry?.forEach) {
+      return getUsedAspectIds(bo);
+    }
+
+    const ids = [];
+
+    elementRegistry.forEach((registryElement) => {
+      const businessObject = registryElement.businessObject;
+
+      if (!businessObject) {
+        return;
+      }
+
+      ids.push(...getUsedAspectIds(businessObject));
+    });
+
+    return ids;
+  }
+
+  function getResolvedAspectId(currentFormData) {
+    const trimmedAspectId = (currentFormData.aspectId || '').trim();
+
+    if (trimmedAspectId) {
+      return trimmedAspectId;
+    }
+
+    return createAnnotationAspectId(
+      currentFormData.aspect,
+      getExistingAspectIds()
+    );
   }
 
   async function resolveProviderId(providerId) {
@@ -170,6 +210,8 @@ export function AnnotationListEntry(props) {
     setFormData(createEmptyForm());
     setSelectedProviderId('');
     resetSearchState();
+    setFormError('');
+    setAspectIdError('');
   }
 
   function closeForm() {
@@ -207,6 +249,8 @@ export function AnnotationListEntry(props) {
     searchRequestSequence.current += 1;
     setFormData(nextFormData);
     resetSearchState();
+    setFormError('');
+    setAspectIdError('');
 
     if (refocus) {
       requestAnimationFrame(() => {
@@ -224,8 +268,33 @@ export function AnnotationListEntry(props) {
   }
 
   function handleAdd(nextFormData = formData) {
+    // Prevent adding empty annotations (require free text or at least one coding)
+    const hasText = nextFormData.text && nextFormData.text.trim();
+    const hasCodings = nextFormData.codings && nextFormData.codings.length > 0;
+
+    if (!hasText && !hasCodings) {
+      setFormError('Please provide free text or at least one coding before saving.');
+      return;
+    }
+
+    const existingAspectIds = getExistingAspectIds();
+    const aspectId = getResolvedAspectId(nextFormData);
+
+    if (!isValidAspectId(aspectId)) {
+      setAspectIdError('Aspect ID may only contain letters, numbers, dots, underscores, and hyphens.');
+      return;
+    }
+
+    if (existingAspectIds.includes(aspectId)) {
+      setAspectIdError('Aspect ID must be unique across the diagram.');
+      return;
+    }
+
+    setAspectIdError('');
+    setFormError('');
+
     let target = null;
-    if (nextFormData.mode === 'prescriptive' && nextFormData.targetTransform && nextFormData.targetElement) {
+    if (nextFormData.targetTransform && nextFormData.targetElement) {
       target = {
         element: nextFormData.targetElement,
         transform: nextFormData.targetTransform,
@@ -235,9 +304,10 @@ export function AnnotationListEntry(props) {
 
     addAnnotation(bo, moddle, {
       aspect: nextFormData.aspect,
-      mode: nextFormData.mode,
+      aspectId,
       text: nextFormData.text || undefined,
       codings: nextFormData.codings,
+      existingAspectIds,
       target
     });
 
@@ -415,17 +485,24 @@ export function AnnotationListEntry(props) {
   }
 
   function canSubmitFromCodingArea(currentFormData) {
-    return currentFormData.mode !== 'prescriptive' || !hasTargetData(currentFormData);
+    return !hasTargetData(currentFormData);
   }
 
   function updateField(field, value) {
     setFormData(current => ({ ...current, [field]: value }));
+    if (field === 'text' && value && value.trim()) {
+      setFormError('');
+    }
+    if (field === 'aspect' || field === 'aspectId') {
+      setAspectIdError('');
+    }
   }
 
   const [searchFocused, setSearchFocused] = useState(false);
   const activeSearchResult = searchResults[activeSearchResultIndex >= 0 ? activeSearchResultIndex : 0] || null;
   const searchCompletion = getAutocompleteSuffix(searchTerm, activeSearchResult);
   const showSearchSuggestions = searchFocused && searchResults.length > 0;
+  const resolvedAspectId = getResolvedAspectId(formData);
 
   useEffect(() => {
     if (!showSearchSuggestions || activeSearchResultIndex < 0) {
@@ -472,12 +549,10 @@ export function AnnotationListEntry(props) {
       ${annotations.length > 0 && html`
         <div class="annotation-list">
           ${annotations.map((ann, i) => html`
-            <div class="annotation-item annotation-item--saved annotation-item--${ann.mode || 'descriptive'}">
+            <div class="annotation-item annotation-item--saved">
               <div class="annotation-item__header">
                 <span class="annotation-item__aspect">${getAspectLabel(ann.aspect)}</span>
-                <span class="annotation-item__mode badge badge--${ann.mode || 'descriptive'}">
-                  ${ann.mode === 'prescriptive' ? '⬤ prescriptive' : '○ descriptive'}
-                </span>
+                ${ann.aspectId && html`<code class="coding-code">${ann.aspectId}</code>`}
                 <button
                   class="annotation-item__remove"
                   title="Remove"
@@ -494,7 +569,7 @@ export function AnnotationListEntry(props) {
                   ${c.display && html`<span class="coding-display">${c.display}</span>`}
                 </div>
               `)}
-              ${ann.target && html`
+              ${showMappingTarget && ann.target && html`
                 <div class="annotation-item__target">
                   → <code>${ann.target.element}</code>
                   <span class="target-transform">[${ann.target.transform}]</span>
@@ -521,8 +596,9 @@ export function AnnotationListEntry(props) {
       ${showForm && html`
         <div class="annotation-form" onKeyDown=${handleFormKeyDown}>
           <div class="form-row">
-            <label>Aspect</label>
+            <label class="bio-properties-panel-label">Aspect</label>
             <select
+              class="bio-properties-panel-input"
               value=${formData.aspect}
               onChange=${(e) => updateField('aspect', e.target.value)}
             >
@@ -531,18 +607,32 @@ export function AnnotationListEntry(props) {
           </div>
 
           <div class="form-row">
-            <label>Mode</label>
-            <select
-              value=${formData.mode}
-              onChange=${(e) => updateField('mode', e.target.value)}
-            >
-              ${MODES.map(m => html`<option value=${m.value}>${m.label}</option>`)}
-            </select>
+            <label class="bio-properties-panel-label">Aspect ID</label>
+            <input
+              class=${`bio-properties-panel-input ${aspectIdError ? 'bio-properties-panel-input--error' : ''}`}
+              type="text"
+              placeholder=${resolvedAspectId}
+              value=${formData.aspectId}
+              onInput=${(e) => updateField('aspectId', e.target.value)}
+            />
+          </div>
+
+          ${aspectIdError && html`
+            <div class="form-row">
+              <div class="form-error-text">${aspectIdError}</div>
+            </div>
+          `}
+
+          <div class="form-row">
+            <div class="form-hint">
+              Leave empty to auto-generate.
+            </div>
           </div>
 
           <div class="form-row">
-            <label>Free text</label>
+            <label class="bio-properties-panel-label">Free text</label>
             <textarea
+              class="bio-properties-panel-input"
               rows="2"
               placeholder="Description in natural language..."
               value=${formData.text}
@@ -553,8 +643,9 @@ export function AnnotationListEntry(props) {
           <fieldset class="form-fieldset">
             <legend>Coding (optional)</legend>
               <div class="form-row">
-                <label>Terminology</label>
+                <label class="bio-properties-panel-label">Terminology</label>
                 <select
+                  class="bio-properties-panel-input"
                   value=${selectedProviderId}
                   onChange=${handlePreset}
                  onKeyDownCapture=${!selectedProviderId && canSubmitFromCodingArea(formData) ? handleSubmitOnTab : undefined}
@@ -567,7 +658,7 @@ export function AnnotationListEntry(props) {
              </div>
             ${formData.codings.length > 0 && html`
               <div class="form-row">
-                <label>Selected codings</label>
+                <label class="bio-properties-panel-label">Selected codings</label>
                 <div class="selected-codings">
                   ${formData.codings.map((coding, index) => html`
                     <div class="selected-coding">
@@ -589,7 +680,7 @@ export function AnnotationListEntry(props) {
             `}
             ${selectedProviderId && html`
               <div class="form-row">
-               <label>Search ${searchBusy ? '(searching...)' : ''}</label>
+               <label class="bio-properties-panel-label">Search ${searchBusy ? '(searching...)' : ''}</label>
                 <div class="search-field">
                   <div class="search-input-shell ${searchFocused ? 'search-input-shell--focused' : ''}">
                     <div class="search-input-ghost" aria-hidden="true">
@@ -642,16 +733,27 @@ export function AnnotationListEntry(props) {
                   To submit, press Tab in the empty search field.
                 </div>
               </div>
-              ${searchError && html`<div class="annotation-empty annotation-empty--error">${searchError}</div>`}
             `}
+            ${searchError && html`<div class="annotation-empty annotation-empty--error">${searchError}</div>`}
           </fieldset>
 
-          ${formData.mode === 'prescriptive' && html`
-            <fieldset class="form-fieldset form-fieldset--prescriptive">
+          ${formError && html`<div class="annotation-empty annotation-empty--error">${formError}</div>`}
+
+          <div class="form-row">
+            <button
+              type="button"
+              class="annotation-submit-btn bio-properties-panel-button"
+              onClick=${() => handleAdd()}
+            >Save annotation</button>
+          </div>
+
+          ${showMappingTarget && html`
+            <fieldset class="form-fieldset form-fieldset--mapping">
               <legend>Mapping target (optional)</legend>
               <div class="form-row">
-                <label>FHIRPath (target element)</label>
+                <label class="bio-properties-panel-label">FHIRPath (target element)</label>
                 <input
+                  class="bio-properties-panel-input"
                   type="text"
                   placeholder="e.g. DocumentReference.type"
                   value=${formData.targetElement}
@@ -659,8 +761,9 @@ export function AnnotationListEntry(props) {
                 />
               </div>
               <div class="form-row">
-                <label>Transform</label>
+                <label class="bio-properties-panel-label">Transform</label>
                 <select
+                  class="bio-properties-panel-input"
                   value=${formData.targetTransform}
                   onChange=${(e) => updateField('targetTransform', e.target.value)}
                   onKeyDownCapture=${(formData.targetTransform !== 'fixed' && formData.targetTransform !== 'translate') ? handleSubmitOnTab : undefined}
@@ -672,8 +775,9 @@ export function AnnotationListEntry(props) {
               </div>
               ${(formData.targetTransform === 'fixed' || formData.targetTransform === 'translate') && html`
                 <div class="form-row">
-                  <label>${formData.targetTransform === 'fixed' ? 'Fixed value' : 'ConceptMap URL'}</label>
+                  <label class="bio-properties-panel-label">${formData.targetTransform === 'fixed' ? 'Fixed value' : 'ConceptMap URL'}</label>
                   <input
+                    class="bio-properties-panel-input"
                     type="text"
                     placeholder=${formData.targetTransform === 'fixed' ? 'e.g. final' : 'https://...'}
                     value=${formData.targetValue}

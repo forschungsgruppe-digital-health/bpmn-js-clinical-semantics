@@ -29,11 +29,7 @@ const FHIR_PROVIDER_CONFIGS = [
     displayName: 'SNOMED CT',
     systemUri: 'http://snomed.info/sct',
     valueSetUri: 'http://snomed.info/sct?fhir_vs',
-    baseUrl: DEFAULT_FHIR_BASE_URL,
-    language: 'en',
-    headers: {
-      'Accept-Language': 'en'
-    }
+    baseUrl: DEFAULT_FHIR_BASE_URL
   },
   {
     id: 'loinc',

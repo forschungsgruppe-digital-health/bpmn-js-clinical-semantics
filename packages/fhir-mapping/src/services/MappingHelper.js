@@ -18,7 +18,7 @@
  * @property {string} path - FHIRPath expression (e.g. 'DiagnosticReport.status')
  * @property {string} [semanticRole] - trigger | filter | classifier | identifier | payload
  * @property {string} [fixedValue] - Fixed value for this element
- * @property {string} [terminologyBinding] - Terminology binding reference
+ * @property {string} [terminologyBinding] - Terminology binding reference to `term:annotation@aspectId`
  */
 
 /**
@@ -79,6 +79,23 @@ export function getResourceMappingsContainer(bo) {
 export function getResourceMappings(bo) {
   const container = getResourceMappingsContainer(bo);
   return container?.mappings || [];
+}
+
+export function getBindableTerminologyAnnotations(bo) {
+  if (!bo.extensionElements?.values) {
+    return [];
+  }
+
+  const container = bo.extensionElements.values.find((value) => value.$type === 'term:Annotations');
+
+  return (container?.values || [])
+    .filter((annotation) => annotation.aspectId)
+    .map((annotation) => ({
+      aspect: annotation.aspect,
+      aspectId: annotation.aspectId,
+      text: annotation.text,
+      codings: annotation.codings || []
+    }));
 }
 
 function ensureExtensionElements(bo, moddle) {

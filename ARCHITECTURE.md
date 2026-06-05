@@ -43,7 +43,7 @@ Consider a university hospital modelling its lung cancer diagnostic pathway. The
 
 **bpmn-js-clinical-semantics** closes these gaps by adding two optional, standards-based annotation layers to any BPMN model:
 
-1. **Terminology annotations** (`term:` namespace) enrich BPMN elements with codes from SNOMED CT, LOINC, ICD-10-GM, OPS, IHE XDS, KDL, or any other code system. Each annotation carries an aspect (what facet is being annotated), a mode (descriptive vs. prescriptive), optional free text, and zero or more coded entries with their code system URI.
+1. **Terminology annotations** (`term:` namespace) enrich BPMN elements with codes from SNOMED CT, LOINC, ICD-10-GM, OPS, IHE XDS, KDL, or any other code system. Each annotation carries an aspect (what facet is being annotated), optional free text, and zero or more coded entries with their code system URI.
 
 2. **FHIR resource mappings** (`fhirmap:` namespace) declare which FHIR resource type, profile, interaction pattern, and key elements a BPMN element represents. This enables downstream tooling to generate FHIR transaction bundles, StructureMap references, or SearchParameter queries directly from the process model.
 
@@ -241,7 +241,7 @@ classDiagram
 
     class `term:Annotation` {
         +aspect: string
-        +mode: "descriptive" | "prescriptive"
+        +aspectId: string
         +text?: string
         +codings: Coding[0..*]
         +target?: MappingTarget
@@ -278,7 +278,7 @@ classDiagram
         +path: string
         +semanticRole?: string
         +fixedValue?: string
-        +terminologyBinding?: string
+        +terminologyBinding?: string  // references term:Annotation.aspectId
     }
 
     class `fhirmap:SearchParam` {
@@ -365,7 +365,7 @@ bpmn-js-clinical-semantics/
 Extensible terminology annotation engine. Each BPMN element can carry multiple annotations, each with:
 
 - **`aspect`** -- which semantic facet is annotated: `clinicalContent`, `documentClass`, `documentType`, `note`, `confidentiality`, `status`, `format`, `participant`, or custom values
-- **`mode`** -- `descriptive` (documentation only) or `prescriptive` (normative, with optional mapping target)
+- **`aspectId`** -- stable unique identifier for linking an annotation to FHIR mapping key elements via `terminologyBinding`
 - **`text`** -- free-text description (always available, no code system required)
 - **`codings`** -- 0..* codes from any registered terminology system
 - **`target`** -- optional FHIRPath mapping rule with `element`, `transform` (`copy` | `fixed` | `translate` | `reference`), and `value`
@@ -520,12 +520,14 @@ When annotations and mappings are added via the properties panel, they are persi
 
     <!-- Terminology annotations -->
     <term:annotations>
-      <term:annotation aspect="clinicalContent" mode="descriptive"
+      <term:annotation aspect="clinicalContent"
+                       aspectId="clinical-content-1"
                        text="CT-Befund Thorax mit KM">
         <term:coding system="http://snomed.info/sct"
                      code="169069000" display="CT of chest (procedure)"/>
       </term:annotation>
-      <term:annotation aspect="documentType" mode="prescriptive">
+      <term:annotation aspect="documentType"
+                       aspectId="document-type-1">
         <term:coding system="http://dvmd.de/fhir/CodeSystem/kdl"
                      code="DG020106" display="Ergebnis bildgebender Diagnostik"/>
         <term:target element="DocumentReference.type" transform="copy"/>

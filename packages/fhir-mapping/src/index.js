@@ -26,6 +26,7 @@ export { default as FhirMappingPropertiesPanelModule } from './properties-panel/
 // ─── Helpers ─────────────────────────────────────────────────
 export {
   getResourceMappings,
+  getBindableTerminologyAnnotations,
   addResourceMapping,
   removeResourceMapping,
   exportMappingsAsJson

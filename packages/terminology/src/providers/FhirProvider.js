@@ -27,7 +27,6 @@ export class FhirProvider extends TerminologyProvider {
     this._displayName = config.displayName;
     this._systemUri = config.systemUri;
     this._maxResults = config.maxResults || 15;
-    this._language = config.language;
     
     // Use valueSetUri for the adapter if provided, otherwise fallback to systemUri
     this._adapter = new FhirTerminologyAdapter({
@@ -53,8 +52,7 @@ export class FhirProvider extends TerminologyProvider {
     const result = await this._adapter.search({
       term,
       limit: options.limit ?? this._maxResults,
-      offset: options.offset ?? 0,
-      language: options.language ?? this._language
+      offset: options.offset ?? 0
     });
     
     // Ensure the returned concepts use the correct CodeSystem URI (not the ValueSet URI)

@@ -9,7 +9,7 @@ export {
 // ─── Core ────────────────────────────────────────────────────
 export { TerminologyProvider } from './core/TerminologyProvider.js';
 export { TerminologyRegistry } from './core/TerminologyRegistry.js';
-export { ASPECTS, MODES, TRANSFORMS, CLINICAL_DOMAINS } from './core/types.js';
+export { ASPECTS, TRANSFORMS, CLINICAL_DOMAINS } from './core/types.js';
 
 // ─── Adapters ────────────────────────────────────────────────
 export { SnowstormAdapter } from './adapters/SnowstormAdapter.js';
@@ -34,11 +34,16 @@ export { default as TerminologyModdleDescriptor } from './moddle/clinical.json';
 
 // ─── Properties Panel module (for bpmn-js additionalModules) ─
 export { default as TerminologyPropertiesPanelModule } from './properties-panel/index.js';
+export { createTerminologyPropertiesPanelModule } from './properties-panel/index.js';
+export { DEFAULT_TERMINOLOGY_PROPERTIES_CONFIG } from './properties-panel/config.js';
 
 // ─── Helpers ─────────────────────────────────────────────────
 export {
   getAnnotations,
   addAnnotation,
+  createAnnotationAspectId,
+  getUsedAspectIds,
+  isValidAspectId,
   removeAnnotation,
   getAnnotationsContainer,
   ensureAnnotationsContainer,
