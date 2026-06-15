@@ -44,7 +44,7 @@ export function AnnotationListEntry(props) {
 
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState(createEmptyForm());
-  const [, setRefresh] = useState(0);
+  const [refreshToken, setRefresh] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchBusy, setSearchBusy] = useState(false);
   const [searchError, setSearchError] = useState('');
@@ -78,8 +78,12 @@ export function AnnotationListEntry(props) {
     return terminologyRegistry ? terminologyRegistry.listProviders() : [];
   }
 
+  function getSearchableProviders() {
+    return getRegisteredProviders().filter(provider => provider.capabilities?.search !== false);
+  }
+
   function getSelectedProvider() {
-    return getRegisteredProviders().find(provider => provider.id === selectedProviderId) || null;
+    return getSearchableProviders().find(provider => provider.id === selectedProviderId) || null;
   }
 
   function getExistingAspectIds() {
@@ -498,7 +502,39 @@ export function AnnotationListEntry(props) {
     }
   }
 
+  useEffect(() => {
+    if (!terminologyRegistry || typeof terminologyRegistry.on !== 'function' || typeof terminologyRegistry.off !== 'function') {
+      return undefined;
+    }
+
+    const rerender = () => setRefresh(current => current + 1);
+
+    terminologyRegistry.on('provider:registered', rerender);
+    terminologyRegistry.on('provider:unregistered', rerender);
+
+    return () => {
+      terminologyRegistry.off('provider:registered', rerender);
+      terminologyRegistry.off('provider:unregistered', rerender);
+    };
+  }, [terminologyRegistry]);
+
+  useEffect(() => {
+    if (!selectedProviderId) {
+      return;
+    }
+
+    if (getSearchableProviders().some(provider => provider.id === selectedProviderId)) {
+      return;
+    }
+
+    searchRequestSequence.current += 1;
+    setSelectedProviderId('');
+    resetSearchState();
+  }, [refreshToken, selectedProviderId, terminologyRegistry]);
+
   const [searchFocused, setSearchFocused] = useState(false);
+  const searchableProviders = getSearchableProviders();
+  const hasSearchableProviders = searchableProviders.length > 0;
   const activeSearchResult = searchResults[activeSearchResultIndex >= 0 ? activeSearchResultIndex : 0] || null;
   const searchCompletion = getAutocompleteSuffix(searchTerm, activeSearchResult);
   const showSearchSuggestions = searchFocused && searchResults.length > 0;
@@ -607,7 +643,10 @@ export function AnnotationListEntry(props) {
           </div>
 
           <div class="form-row">
-            <label class="bio-properties-panel-label">Aspect ID</label>
+            <div class="form-row__label">
+              <label class="bio-properties-panel-label">Aspect ID</label>
+              <span class="field-hint-inline">Leave empty to auto-generate.</span>
+            </div>
             <input
               class=${`bio-properties-panel-input ${aspectIdError ? 'bio-properties-panel-input--error' : ''}`}
               type="text"
@@ -642,24 +681,32 @@ export function AnnotationListEntry(props) {
 
           <fieldset class="form-fieldset">
             <legend>Coding (optional)</legend>
-              <div class="form-row">
-                <label class="bio-properties-panel-label">Terminology</label>
-                <select
-                  class="bio-properties-panel-input"
-                  value=${selectedProviderId}
-                  onChange=${handlePreset}
+            ${!hasSearchableProviders ? html`
+             <div class="form-row">
+               <div class="form-hint">
+                 No terminology systems are available right now.
+               </div>
+             </div>
+            ` : html`
+             <div class="form-row">
+               <label class="bio-properties-panel-label">Terminology</label>
+               <select
+                 class="bio-properties-panel-input"
+                 value=${selectedProviderId}
+                 onChange=${handlePreset}
                  onKeyDownCapture=${!selectedProviderId && canSubmitFromCodingArea(formData) ? handleSubmitOnTab : undefined}
                >
                  <option value="">– select –</option>
-                 ${getRegisteredProviders().map(p =>
+                 ${searchableProviders.map(p =>
                    html`<option value=${p.id}>${p.displayName}</option>`
                  )}
                </select>
              </div>
+            `}
             ${formData.codings.length > 0 && html`
-              <div class="form-row">
-                <label class="bio-properties-panel-label">Selected codings</label>
-                <div class="selected-codings">
+             <div class="form-row">
+               <label class="bio-properties-panel-label">Selected codings</label>
+               <div class="selected-codings">
                   ${formData.codings.map((coding, index) => html`
                     <div class="selected-coding">
                       <div class="selected-coding__content">

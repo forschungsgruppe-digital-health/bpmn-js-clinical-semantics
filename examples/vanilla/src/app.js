@@ -28,50 +28,7 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
 import './styles.css';
 
-// ─── Create modeler with BOTH extensions ─────────────────────
-const additionalModules = [];
-const moddleExtensions = {};
-
-if (DEMO_FEATURES.showPropertiesPanel) {
-  additionalModules.push(
-    BpmnPropertiesPanelModule,
-    BpmnPropertiesProviderModule
-  );
-}
-
-if (DEMO_FEATURES.showTerminology) {
-  const terminologyServices = createDemoTerminologyServices();
-  const terminologyServicesModule = createDemoTerminologyModule(terminologyServices);
-
-  additionalModules.push(
-    createTerminologyPropertiesPanelModule({
-      showClinicalDomain: DEMO_FEATURES.showTerminologyClinicalDomain,
-      showAnnotations: DEMO_FEATURES.showTerminologyAnnotations,
-      showMappingTarget: DEMO_FEATURES.showTerminologyMappingTarget
-    }),
-    terminologyServicesModule
-  );
-
-  moddleExtensions.term = TerminologyModdleDescriptor;
-}
-
-if (DEMO_FEATURES.showFhirMapping) {
-  additionalModules.push(FhirMappingPropertiesPanelModule);
-  moddleExtensions.fhirmap = FhirMappingModdleDescriptor;
-}
-
-const modeler = new BpmnModeler({
-  container: '#canvas',
-  ...(DEMO_FEATURES.showPropertiesPanel
-    ? {
-        propertiesPanel: {
-          parent: '#properties'
-        }
-      }
-    : {}),
-  additionalModules,
-  moddleExtensions
-});
+let modeler;
 
 // ─── Load sample diagram ─────────────────────────────────────
 
@@ -90,8 +47,6 @@ async function loadDiagram() {
   }
 }
 
-loadDiagram();
-
 function setVisibility(selector, isVisible) {
   const node = document.querySelector(selector);
 
@@ -104,46 +59,94 @@ function setVisibility(selector, isVisible) {
   return node;
 }
 
-const downloadButton = setVisibility('#btn-download', DEMO_FEATURES.showXmlDownload);
-const xmlToggleButton = setVisibility('#btn-xml-toggle', DEMO_FEATURES.showXmlPreview);
+async function bootstrap() {
+  const additionalModules = [];
+  const moddleExtensions = {};
 
-setVisibility('#properties', DEMO_FEATURES.showPropertiesPanel);
-setVisibility('.app-footer', DEMO_FEATURES.showFooter);
+  if (DEMO_FEATURES.showPropertiesPanel) {
+    additionalModules.push(
+      BpmnPropertiesPanelModule,
+      BpmnPropertiesProviderModule
+    );
+  }
 
-const headerActions = document.querySelector('.app-header__actions');
+  if (DEMO_FEATURES.showTerminology) {
+    const terminologyServices = await createDemoTerminologyServices();
+    const terminologyServicesModule = createDemoTerminologyModule(terminologyServices);
 
-if (headerActions) {
-  headerActions.hidden = !DEMO_FEATURES.showXmlDownload && !DEMO_FEATURES.showXmlPreview;
-}
+    additionalModules.push(
+      createTerminologyPropertiesPanelModule({
+        showClinicalDomain: DEMO_FEATURES.showTerminologyClinicalDomain,
+        showAnnotations: DEMO_FEATURES.showTerminologyAnnotations,
+        showMappingTarget: DEMO_FEATURES.showTerminologyMappingTarget
+      }),
+      terminologyServicesModule
+    );
 
-// ─── XML Download ────────────────────────────────────────────
+    moddleExtensions.term = TerminologyModdleDescriptor;
+  }
 
-if (downloadButton) {
-  downloadButton.addEventListener('click', async () => {
-    const { xml } = await modeler.saveXML({ format: true });
-    const blob = new Blob([xml], { type: 'application/xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'clinical-annotated.bpmn';
-    a.click();
-    URL.revokeObjectURL(url);
+  if (DEMO_FEATURES.showFhirMapping) {
+    additionalModules.push(FhirMappingPropertiesPanelModule);
+    moddleExtensions.fhirmap = FhirMappingModdleDescriptor;
+  }
+
+  modeler = new BpmnModeler({
+    container: '#canvas',
+    ...(DEMO_FEATURES.showPropertiesPanel
+      ? {
+          propertiesPanel: {
+            parent: '#properties'
+          }
+        }
+      : {}),
+    additionalModules,
+    moddleExtensions
   });
-}
 
-// ─── XML Viewer Toggle ──────────────────────────────────────
+  const downloadButton = setVisibility('#btn-download', DEMO_FEATURES.showXmlDownload);
+  const xmlToggleButton = setVisibility('#btn-xml-toggle', DEMO_FEATURES.showXmlPreview);
 
-const xmlOverlay = document.getElementById('xml-overlay');
-const xmlContent = document.getElementById('xml-content');
+  setVisibility('#properties', DEMO_FEATURES.showPropertiesPanel);
+  setVisibility('.app-footer', DEMO_FEATURES.showFooter);
 
-if (xmlToggleButton) {
-  xmlToggleButton.addEventListener('click', async () => {
-    const { xml } = await modeler.saveXML({ format: true });
-    xmlContent.textContent = xml;
-    xmlOverlay.classList.remove('xml-overlay--hidden');
+  const headerActions = document.querySelector('.app-header__actions');
+
+  if (headerActions) {
+    headerActions.hidden = !DEMO_FEATURES.showXmlDownload && !DEMO_FEATURES.showXmlPreview;
+  }
+
+  if (downloadButton) {
+    downloadButton.addEventListener('click', async () => {
+      const { xml } = await modeler.saveXML({ format: true });
+      const blob = new Blob([xml], { type: 'application/xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'clinical-annotated.bpmn';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  const xmlOverlay = document.getElementById('xml-overlay');
+  const xmlContent = document.getElementById('xml-content');
+
+  if (xmlToggleButton) {
+    xmlToggleButton.addEventListener('click', async () => {
+      const { xml } = await modeler.saveXML({ format: true });
+      xmlContent.textContent = xml;
+      xmlOverlay.classList.remove('xml-overlay--hidden');
+    });
+  }
+
+  document.getElementById('btn-xml-close').addEventListener('click', () => {
+    xmlOverlay.classList.add('xml-overlay--hidden');
   });
+
+  await loadDiagram();
 }
 
-document.getElementById('btn-xml-close').addEventListener('click', () => {
-  xmlOverlay.classList.add('xml-overlay--hidden');
+void bootstrap().catch(err => {
+  console.error('Failed to bootstrap demo', err);
 });

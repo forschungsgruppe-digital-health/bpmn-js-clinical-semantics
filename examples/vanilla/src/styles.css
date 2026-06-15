@@ -506,6 +506,22 @@ body {
   font-weight: 500;
 }
 
+.form-row__label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-row__label .bio-properties-panel-label {
+  margin: 0;
+}
+
+.field-hint-inline {
+  color: #667085;
+  font-size: 11px;
+}
+
 .form-hint {
   color: #667085;
   font-size: 11px;

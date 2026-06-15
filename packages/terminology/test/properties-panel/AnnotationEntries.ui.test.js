@@ -157,6 +157,75 @@ describe('terminology properties panel UI', () => {
     expect(screen.queryByText('Mapping target (optional)')).toBeNull();
   });
 
+  it('updates the terminology dropdown when providers change at runtime', async () => {
+    const context = await createTestContext({
+      id: 'Task_DynamicProviders',
+      type: 'bpmn:Task',
+      name: 'Dynamic Providers Task'
+    });
+
+    const providers = [PROVIDERS[0]];
+    const listeners = new Map();
+
+    const terminologyRegistry = {
+      listProviders: () => providers,
+      search: vi.fn(async (term, providerId) => ({
+        items: SEARCH_RESULTS[providerId].filter((concept) =>
+          concept.display.toLowerCase().includes(term.toLowerCase())
+        )
+      })),
+      on(event, listener) {
+        if (!listeners.has(event)) {
+          listeners.set(event, new Set());
+        }
+
+        listeners.get(event).add(listener);
+      },
+      off(event, listener) {
+        listeners.get(event)?.delete(listener);
+      }
+    };
+
+    setServices(context, { terminologyRegistry });
+
+    const view = render(h(AnnotationListEntry, { element: context.element }));
+    fireEvent.click(screen.getByText('+ Add annotation'));
+
+    const terminologySelect = getControlByLabel(view.container, 'Terminology');
+    expect(Array.from(terminologySelect.options).map(option => option.value)).toEqual(['', 'snomed-ct']);
+
+    providers.push(PROVIDERS[1]);
+    await waitFor(() => expect(listeners.get('provider:registered')).toBeDefined());
+    listeners.get('provider:registered').forEach(listener => listener());
+
+    await waitFor(() => {
+      expect(Array.from(terminologySelect.options).map(option => option.value)).toEqual(['', 'snomed-ct', 'loinc']);
+    });
+  });
+
+  it('hides the terminology dropdown when no providers are available', async () => {
+    const context = await createTestContext({
+      id: 'Task_NoProviders',
+      type: 'bpmn:Task',
+      name: 'No Providers Task'
+    });
+
+    setServices(context, {
+      terminologyRegistry: {
+        listProviders: () => [],
+        search: vi.fn(),
+        on: vi.fn(),
+        off: vi.fn()
+      }
+    });
+
+    render(h(AnnotationListEntry, { element: context.element }));
+    fireEvent.click(screen.getByText('+ Add annotation'));
+
+    expect(screen.queryByLabelText('Terminology')).toBeNull();
+    expect(screen.getByText('No terminology systems are available right now.')).toBeTruthy();
+  });
+
   it('persists a manually entered aspect ID', async () => {
     const context = await createTestContext({
       id: 'Task_CustomAspect',

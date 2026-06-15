@@ -18,15 +18,19 @@ export async function loadCodeSystemFromFhir(systemUrl, fhirBaseUrl, fetchFn) {
       `${fhirBaseUrl}/CodeSystem?url=${encodeURIComponent(systemUrl)}`,
       { headers: { Accept: 'application/fhir+json' } }
     );
-    if (res.ok) {
-      const bundle = await res.json();
-      const cs = bundle.entry?.[0]?.resource;
-      if (cs && (cs.title || cs.name)) {
-        displayName = cs.title || cs.name;
-      }
+    if (!res.ok) {
+      throw new Error(`Failed to load CodeSystem metadata for ${systemUrl} from ${fhirBaseUrl}`);
+    }
+    const bundle = await res.json();
+    const cs = bundle.entry?.[0]?.resource;
+    if (!cs) {
+      throw new Error(`CodeSystem ${systemUrl} is not available on ${fhirBaseUrl}`);
+    }
+    if (cs.title || cs.name) {
+      displayName = cs.title || cs.name;
     }
   } catch (err) {
-    console.warn(`Konnte Metadaten für ${systemUrl} nicht abrufen. Nutze Fallback.`);
+    throw new Error(`Failed to load CodeSystem ${systemUrl} from ${fhirBaseUrl}: ${err.message}`);
   }
 
   let valueSetUri = systemUrl;
