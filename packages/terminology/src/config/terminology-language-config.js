@@ -28,5 +28,5 @@ export default {
   // 'param' -> set ValueSet/$expand?displayLanguage=<lang> or Snowstorm ?language=<lang>
   // 'header' -> send Accept-Language: <lang>
   // If undefined, adapter defaults to 'param'.
-  languageStrategy: 'header'
+  languageStrategy: 'param'
 };

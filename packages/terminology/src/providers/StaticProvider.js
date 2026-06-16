@@ -11,18 +11,21 @@ export class StaticProvider extends TerminologyProvider {
    * @param {string} displayName
    * @param {string} systemUri
    * @param {import('../core/types').Concept[]} concepts
+   * @param {string} [version]
    */
-  constructor(id, displayName, systemUri, concepts) {
+  constructor(id, displayName, systemUri, concepts, version) {
     super();
     this._id = id;
     this._displayName = displayName;
     this._systemUri = systemUri;
     this._concepts = concepts;
+    this._version = version || concepts.find(concept => concept.version)?.version;
   }
 
   get id() { return this._id; }
   get displayName() { return this._displayName; }
   get systemUri() { return this._systemUri; }
+  get version() { return this._version; }
   get capabilities() {
     return { search: true, lookup: true, hierarchy: false, validate: true };
   }
@@ -36,13 +39,22 @@ export class StaticProvider extends TerminologyProvider {
     const limit = options.limit ?? 20;
     const offset = options.offset ?? 0;
     return {
-      concepts: matches.slice(offset, offset + limit),
+      concepts: matches.slice(offset, offset + limit).map(concept => (
+        concept.version || !this._version
+          ? concept
+          : { ...concept, version: this._version }
+      )),
       total: matches.length
     };
   }
 
   async lookup(code) {
-    return this._concepts.find(c => c.code === code) ?? null;
+    const concept = this._concepts.find(c => c.code === code) ?? null;
+    if (!concept || concept.version || !this._version) {
+      return concept;
+    }
+
+    return { ...concept, version: this._version };
   }
 
   async validate(code) {
@@ -55,6 +67,10 @@ export class StaticProvider extends TerminologyProvider {
 
   /** Get all concepts (useful for dropdowns). */
   getAll() {
-    return [...this._concepts];
+    return this._concepts.map(concept => (
+      concept.version || !this._version
+        ? concept
+        : { ...concept, version: this._version }
+    ));
   }
 }

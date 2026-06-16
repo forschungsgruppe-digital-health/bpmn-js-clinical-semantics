@@ -123,10 +123,13 @@ export class SnowstormAdapter {
   _mapConcept(item) {
     const fsnTerm = item.fsn?.term || '';
     const semanticTag = fsnTerm.match(/\(([^)]+)\)$/)?.[1] || undefined;
+    const version = item.releasedEffectiveTime ?? item.effectiveTime ?? item.version;
+
     return {
       code: item.conceptId,
       display: item.pt?.term || fsnTerm,
       system: 'http://snomed.info/sct',
+      version: version === undefined || version === null ? undefined : String(version),
       active: item.active,
       properties: {
         fsn: fsnTerm,

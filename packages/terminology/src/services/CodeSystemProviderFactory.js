@@ -15,20 +15,21 @@ function getConceptStatus(concept) {
   return status ? !['retired', 'deprecated'].includes(status) : true;
 }
 
-function extractConcepts(items, systemUri, concepts) {
+function extractConcepts(items, systemUri, version, concepts) {
   for (const item of items || []) {
     if (item.code) {
       concepts.push({
         code: item.code,
         display: item.display || item.code,
         system: systemUri,
+        version,
         active: getConceptStatus(item),
         definition: item.definition
       });
     }
 
     if (Array.isArray(item.concept) && item.concept.length > 0) {
-      extractConcepts(item.concept, systemUri, concepts);
+      extractConcepts(item.concept, systemUri, version, concepts);
     }
   }
 }
@@ -49,12 +50,13 @@ export function createStaticProviderFromCodeSystem(codeSystem, options = {}) {
   }
 
   const concepts = [];
-  extractConcepts(codeSystem.concept || [], options.systemUri || codeSystem.url, concepts);
+  extractConcepts(codeSystem.concept || [], options.systemUri || codeSystem.url, codeSystem.version, concepts);
 
   return new StaticProvider(
     options.id || slugify(codeSystem.id || codeSystem.url),
     options.displayName || codeSystem.title || codeSystem.name || codeSystem.id || codeSystem.url,
     options.systemUri || codeSystem.url,
-    concepts
+    concepts,
+    codeSystem.version
   );
 }

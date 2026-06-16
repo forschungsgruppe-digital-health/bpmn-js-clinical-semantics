@@ -27,6 +27,16 @@ describe('FhirProvider', () => {
     expect(provider.systemUri).toBe('http://fhir.de/CodeSystem/bfarm/icd-10-gm');
   });
 
+  it('should expose a version derived from provider config', () => {
+    const provider = createProvider({
+      expandParameters: {
+        valueSetVersion: '2020'
+      }
+    });
+
+    expect(provider.version).toBe('2020');
+  });
+
   it('should declare search, lookup, validate capabilities', () => {
     const provider = createProvider();
     expect(provider.capabilities).toEqual({

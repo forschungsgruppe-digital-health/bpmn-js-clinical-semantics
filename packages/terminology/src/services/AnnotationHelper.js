@@ -3,8 +3,8 @@
  * on BPMN element businessObjects.
  */
 
-const DEFAULT_ASPECT = 'clinicalContent';
-const ASPECT_ID_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$/;
+const DEFAULT_ANN_PREFIX = 'term-ann';
+const ANN_ID_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$/;
 
 export function getExtensionElement(bo, type) {
   if (!bo.extensionElements) return undefined;
@@ -20,18 +20,35 @@ export function getAnnotations(bo) {
   return container?.values || [];
 }
 
-export function getUsedAspectIds(bo) {
+export function getUsedIds(bo) {
   return getAnnotations(bo)
-    .map(annotation => annotation.aspectId)
+    .map(annotation => annotation.id)
     .filter(Boolean);
 }
 
-export function isValidAspectId(aspectId) {
-  return ASPECT_ID_PATTERN.test((aspectId || '').trim());
+export function getCodingKey(coding) {
+  const system = (coding?.system || '').trim();
+  const code = (coding?.code || '').trim();
+
+  if (!system || !code) {
+    return '';
+  }
+
+  return `${system}|${code}`;
 }
 
-export function createAnnotationAspectId(aspect = DEFAULT_ASPECT, existingIds = []) {
-  const normalizedBase = normalizeAspectIdBase(aspect);
+export function getUsedCodingKeys(bo) {
+  return getAnnotations(bo).flatMap(annotation =>
+    (annotation.codings || []).map(getCodingKey).filter(Boolean)
+  );
+}
+
+export function isValidId(id) {
+  return ANN_ID_PATTERN.test((id || '').trim());
+}
+
+export function createId(existingIds = []) {
+  const normalizedBase = DEFAULT_ANN_PREFIX;
   const idsInUse = new Set(existingIds.filter(Boolean));
 
   let sequence = 1;
@@ -63,14 +80,11 @@ export function ensureAnnotationsContainer(bo, moddle) {
   return container;
 }
 
-export function addAnnotation(bo, moddle, { aspect, aspectId, text, codings, target, existingAspectIds }) {
+export function addAnnotation(bo, moddle, { id, text, codings, target, existingIds }) {
   const container = ensureAnnotationsContainer(bo, moddle);
-  const resolvedAspect = aspect || DEFAULT_ASPECT;
   const props = {
-    aspect: resolvedAspect,
-    aspectId: (aspectId || '').trim() || createAnnotationAspectId(
-      resolvedAspect,
-      existingAspectIds || getUsedAspectIds(bo)
+    id: (id || '').trim() || createId(
+      existingIds || getUsedIds(bo)
     )
   };
   if (text) props.text = text;
@@ -110,22 +124,12 @@ export function removeAnnotation(bo, index) {
   const container = getAnnotationsContainer(bo);
   if (container?.values && index >= 0 && index < container.values.length) {
     const [removedAnnotation] = container.values.splice(index, 1);
-    clearTerminologyBindings(bo, removedAnnotation?.aspectId);
+    clearTerminologyBindings(bo, removedAnnotation?.id);
   }
 }
 
-function normalizeAspectIdBase(aspect) {
-  const normalizedAspect = String(aspect || DEFAULT_ASPECT)
-    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-    .replace(/[^A-Za-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .toLowerCase();
-
-  return normalizedAspect || 'annotation';
-}
-
-function clearTerminologyBindings(bo, aspectId) {
-  if (!aspectId || !bo.extensionElements?.values) {
+function clearTerminologyBindings(bo, id) {
+  if (!id || !bo.extensionElements?.values) {
     return;
   }
 
@@ -134,7 +138,7 @@ function clearTerminologyBindings(bo, aspectId) {
     .forEach((container) => {
       (container.mappings || []).forEach((mapping) => {
         (mapping.keyElements || []).forEach((keyElement) => {
-          if (keyElement.terminologyBinding === aspectId) {
+          if (keyElement.terminologyBinding === id) {
             keyElement.terminologyBinding = undefined;
           }
         });

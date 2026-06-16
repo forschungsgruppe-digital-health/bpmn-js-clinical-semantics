@@ -12,6 +12,7 @@ import { FhirProvider } from '../providers/FhirProvider.js';
 export async function loadCodeSystemFromFhir(systemUrl, fhirBaseUrl, fetchFn) {
   const _fetch = fetchFn || globalThis.fetch.bind(globalThis);
   let displayName = systemUrl.split('/').pop();
+  let version;
 
   try {
     const res = await _fetch(
@@ -29,6 +30,7 @@ export async function loadCodeSystemFromFhir(systemUrl, fhirBaseUrl, fetchFn) {
     if (cs.title || cs.name) {
       displayName = cs.title || cs.name;
     }
+    version = cs.version;
   } catch (err) {
     throw new Error(`Failed to load CodeSystem ${systemUrl} from ${fhirBaseUrl}: ${err.message}`);
   }
@@ -43,6 +45,7 @@ export async function loadCodeSystemFromFhir(systemUrl, fhirBaseUrl, fetchFn) {
     displayName,
     systemUri: systemUrl,
     valueSetUri,
-    baseUrl: fhirBaseUrl
+    baseUrl: fhirBaseUrl,
+    version
   });
 }

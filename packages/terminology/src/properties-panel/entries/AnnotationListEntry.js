@@ -1,12 +1,15 @@
 import { html } from 'htm/preact';
 import { useEffect, useRef, useState } from '@bpmn-io/properties-panel/preact/hooks';
+import { TextAreaEntry, TextFieldEntry } from '@bpmn-io/properties-panel';
 import { useService } from 'bpmn-js-properties-panel';
 import {
   getAnnotations,
   addAnnotation,
-  createAnnotationAspectId,
-  getUsedAspectIds,
-  isValidAspectId,
+  createId,
+  getCodingKey,
+  getUsedIds,
+  getUsedCodingKeys,
+  isValidId,
   removeAnnotation
 } from '../../services/AnnotationHelper.js';
 import { resolveTerminologyPropertiesConfig } from '../config.js';
@@ -15,13 +18,6 @@ import {
   getConceptLabel,
   getAutocompleteSuffix
 } from './search-utils.js';
-
-const ASPECTS = [
-  { value: 'clinicalContent', label: 'Clinical content' },
-  { value: 'documentClass', label: 'Document class (IHE XDS classCode)' },
-  { value: 'documentType', label: 'Document type (IHE XDS typeCode / KDL)' },
-  { value: 'note', label: 'Free-text note' }
-];
 
 
 const TRANSFORMS = [
@@ -52,7 +48,6 @@ export function AnnotationListEntry(props) {
   const [activeSearchResultIndex, setActiveSearchResultIndex] = useState(-1);
   const [selectedProviderId, setSelectedProviderId] = useState('');
   const [formError, setFormError] = useState('');
-  const [aspectIdError, setAspectIdError] = useState('');
   const searchRequestSequence = useRef(0);
   const searchBlurTimeout = useRef(null);
   const searchSuggestionItemRefs = useRef([]);
@@ -64,8 +59,7 @@ export function AnnotationListEntry(props) {
 
   function createEmptyForm() {
     return {
-      aspect: 'clinicalContent',
-      aspectId: '',
+      id: '',
       text: '',
       codings: [],
       targetElement: '',
@@ -86,9 +80,9 @@ export function AnnotationListEntry(props) {
     return getSearchableProviders().find(provider => provider.id === selectedProviderId) || null;
   }
 
-  function getExistingAspectIds() {
+  function getExistingIds() {
     if (!elementRegistry?.forEach) {
-      return getUsedAspectIds(bo);
+      return getUsedIds(bo);
     }
 
     const ids = [];
@@ -100,23 +94,56 @@ export function AnnotationListEntry(props) {
         return;
       }
 
-      ids.push(...getUsedAspectIds(businessObject));
+      ids.push(...getUsedIds(businessObject));
     });
 
     return ids;
   }
 
-  function getResolvedAspectId(currentFormData) {
-    const trimmedAspectId = (currentFormData.aspectId || '').trim();
-
-    if (trimmedAspectId) {
-      return trimmedAspectId;
+  function getExistingCodingKeys() {
+    if (!elementRegistry?.forEach) {
+      return getUsedCodingKeys(bo);
     }
 
-    return createAnnotationAspectId(
-      currentFormData.aspect,
-      getExistingAspectIds()
-    );
+    const keys = [];
+
+    elementRegistry.forEach((registryElement) => {
+      const businessObject = registryElement.businessObject;
+
+      if (!businessObject) {
+        return;
+      }
+
+      keys.push(...getUsedCodingKeys(businessObject));
+    });
+
+    return keys;
+  }
+
+  function getResolvedId(currentFormData) {
+    const trimmedId = (currentFormData.id || '').trim();
+
+    if (trimmedId) {
+      return trimmedId;
+    }
+
+    return createId(getExistingIds());
+  }
+
+  function validateId(value) {
+    const resolvedId = (value || '').trim();
+
+    if (!resolvedId) {
+      return;
+    }
+
+    if (!isValidId(resolvedId)) {
+      return 'ID may only contain letters, numbers, dots, underscores, and hyphens.';
+    }
+
+    if (getExistingIds().includes(resolvedId)) {
+      return 'ID must be unique across the diagram.';
+    }
   }
 
   async function resolveProviderId(providerId) {
@@ -186,7 +213,6 @@ export function AnnotationListEntry(props) {
         return;
       }
 
-      console.error('Terminology search failed:', e);
       setSearchError('Search failed. Please check the terminology system or search term.');
     } finally {
       if (requestId === searchRequestSequence.current) {
@@ -215,7 +241,6 @@ export function AnnotationListEntry(props) {
     setSelectedProviderId('');
     resetSearchState();
     setFormError('');
-    setAspectIdError('');
   }
 
   function closeForm() {
@@ -224,8 +249,11 @@ export function AnnotationListEntry(props) {
   }
 
   function createCodingFromConcept(c) {
+    const selectedProvider = getSelectedProvider();
+
     return {
       system: c.system || getSelectedProvider()?.systemUri || '',
+      version: c.version || selectedProvider?.version || undefined,
       code: c.code || '',
       display: c.display || ''
     };
@@ -240,8 +268,7 @@ export function AnnotationListEntry(props) {
 
     const alreadyExists = formData.codings.some(existing =>
       existing.system === coding.system &&
-      existing.code === coding.code &&
-      (existing.display || '') === (coding.display || '')
+      existing.code === coding.code
     );
 
     const nextCodings = alreadyExists ? formData.codings : [ ...formData.codings, coding ];
@@ -254,7 +281,6 @@ export function AnnotationListEntry(props) {
     setFormData(nextFormData);
     resetSearchState();
     setFormError('');
-    setAspectIdError('');
 
     if (refocus) {
       requestAnimationFrame(() => {
@@ -281,20 +307,24 @@ export function AnnotationListEntry(props) {
       return;
     }
 
-    const existingAspectIds = getExistingAspectIds();
-    const aspectId = getResolvedAspectId(nextFormData);
+    const id = getResolvedId(nextFormData);
 
-    if (!isValidAspectId(aspectId)) {
-      setAspectIdError('Aspect ID may only contain letters, numbers, dots, underscores, and hyphens.');
+    const idError = validateId(id);
+
+    if (idError) {
       return;
     }
 
-    if (existingAspectIds.includes(aspectId)) {
-      setAspectIdError('Aspect ID must be unique across the diagram.');
+    const existingCodingKeys = getExistingCodingKeys();
+    const duplicateCodingKey = (nextFormData.codings || [])
+      .map(getCodingKey)
+      .find((key) => key && existingCodingKeys.includes(key));
+
+    if (duplicateCodingKey) {
+      setFormError('A terminology code with the same system and code is already used in the diagram.');
       return;
     }
 
-    setAspectIdError('');
     setFormError('');
 
     let target = null;
@@ -307,11 +337,9 @@ export function AnnotationListEntry(props) {
     }
 
     addAnnotation(bo, moddle, {
-      aspect: nextFormData.aspect,
-      aspectId,
+      id,
       text: nextFormData.text || undefined,
       codings: nextFormData.codings,
-      existingAspectIds,
       target
     });
 
@@ -497,9 +525,6 @@ export function AnnotationListEntry(props) {
     if (field === 'text' && value && value.trim()) {
       setFormError('');
     }
-    if (field === 'aspect' || field === 'aspectId') {
-      setAspectIdError('');
-    }
   }
 
   useEffect(() => {
@@ -538,7 +563,7 @@ export function AnnotationListEntry(props) {
   const activeSearchResult = searchResults[activeSearchResultIndex >= 0 ? activeSearchResultIndex : 0] || null;
   const searchCompletion = getAutocompleteSuffix(searchTerm, activeSearchResult);
   const showSearchSuggestions = searchFocused && searchResults.length > 0;
-  const resolvedAspectId = getResolvedAspectId(formData);
+  const resolvedId = getResolvedId(formData);
 
   useEffect(() => {
     if (!showSearchSuggestions || activeSearchResultIndex < 0) {
@@ -587,8 +612,7 @@ export function AnnotationListEntry(props) {
           ${annotations.map((ann, i) => html`
             <div class="annotation-item annotation-item--saved">
               <div class="annotation-item__header">
-                <span class="annotation-item__aspect">${getAspectLabel(ann.aspect)}</span>
-                ${ann.aspectId && html`<code class="coding-code">${ann.aspectId}</code>`}
+                ${ann.id && html`<code class="coding-code">${ann.id}</code>`}
                 <button
                   class="annotation-item__remove"
                   title="Remove"
@@ -631,53 +655,27 @@ export function AnnotationListEntry(props) {
       <!-- Add form -->
       ${showForm && html`
         <div class="annotation-form" onKeyDown=${handleFormKeyDown}>
-          <div class="form-row">
-            <label class="bio-properties-panel-label">Aspect</label>
-            <select
-              class="bio-properties-panel-input"
-              value=${formData.aspect}
-              onChange=${(e) => updateField('aspect', e.target.value)}
-            >
-              ${ASPECTS.map(a => html`<option value=${a.value}>${a.label}</option>`)}
-            </select>
-          </div>
+          <${TextFieldEntry}
+            element=${bo}
+            id="annotation-id"
+            label="ID"
+            placeholder=${resolvedId}
+            debounce=${(fn) => fn}
+            getValue=${() => formData.id}
+            setValue=${(value) => updateField('id', value)}
+            validate=${validateId}
+          />
 
-          <div class="form-row">
-            <div class="form-row__label">
-              <label class="bio-properties-panel-label">Aspect ID</label>
-              <span class="field-hint-inline">Leave empty to auto-generate.</span>
-            </div>
-            <input
-              class=${`bio-properties-panel-input ${aspectIdError ? 'bio-properties-panel-input--error' : ''}`}
-              type="text"
-              placeholder=${resolvedAspectId}
-              value=${formData.aspectId}
-              onInput=${(e) => updateField('aspectId', e.target.value)}
-            />
-          </div>
-
-          ${aspectIdError && html`
-            <div class="form-row">
-              <div class="form-error-text">${aspectIdError}</div>
-            </div>
-          `}
-
-          <div class="form-row">
-            <div class="form-hint">
-              Leave empty to auto-generate.
-            </div>
-          </div>
-
-          <div class="form-row">
-            <label class="bio-properties-panel-label">Free text</label>
-            <textarea
-              class="bio-properties-panel-input"
-              rows="2"
-              placeholder="Description in natural language..."
-              value=${formData.text}
-              onInput=${(e) => updateField('text', e.target.value)}
-            />
-          </div>
+          <${TextAreaEntry}
+            element=${bo}
+            id="annotation-text"
+            label="Free text"
+            placeholder="Description in natural language..."
+            debounce=${(fn) => fn}
+            rows=${2}
+            getValue=${() => formData.text}
+            setValue=${(value) => updateField('text', value)}
+          />
 
           <fieldset class="form-fieldset">
             <legend>Coding (optional)</legend>
@@ -781,10 +779,10 @@ export function AnnotationListEntry(props) {
                 </div>
               </div>
             `}
-            ${searchError && html`<div class="annotation-empty annotation-empty--error">${searchError}</div>`}
+            ${searchError && html`<div class="bio-properties-panel-error">${searchError}</div>`}
           </fieldset>
 
-          ${formError && html`<div class="annotation-empty annotation-empty--error">${formError}</div>`}
+          ${formError && html`<div class="bio-properties-panel-error">${formError}</div>`}
 
           <div class="form-row">
             <button
@@ -839,20 +837,6 @@ export function AnnotationListEntry(props) {
       `}
     </div>
   `;
-}
-
-function getAspectLabel(aspect) {
-  const map = {
-    clinicalContent: 'Clinical content',
-    documentClass: 'Document class',
-    documentType: 'Document type',
-    note: 'Note',
-    confidentiality: 'Confidentiality',
-    status: 'Status',
-    format: 'Format',
-    participant: 'Participant'
-  };
-  return map[aspect] || aspect;
 }
 
 function getSystemShortName(uri, registry) {

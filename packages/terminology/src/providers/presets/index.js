@@ -19,6 +19,8 @@ export { loadCodeSystemFromFhir } from '../../services/FhirCodeSystemLoader.js';
 
 // ─── IHE XDS classCode ──────────────────────────────────────
 
+const IHE_XDS_CLASS_CODE_VERSION = '2021-06-25T13:44:47';
+
 const IHE_XDS_CLASS_CODES = [
   { code: 'ADM', display: 'Administratives Dokument' },
   { code: 'ANF', display: 'Anforderung' },
@@ -36,18 +38,21 @@ const IHE_XDS_CLASS_CODES = [
   { code: 'VER', display: 'Verordnung' },
   { code: 'VID', display: 'Videodaten' },
   { code: 'MED', display: 'Medikation' }
-].map(c => ({ ...c, system: 'http://ihe-d.de/CodeSystems/IHEXDSclassCode' }));
+].map(c => ({ ...c, system: 'http://ihe-d.de/CodeSystems/IHEXDSclassCode', version: IHE_XDS_CLASS_CODE_VERSION }));
 
 export function createIheXdsClassCodeProvider() {
   return new StaticProvider(
     'ihe-xds-class',
     'IHE XDS classCode',
     'http://ihe-d.de/CodeSystems/IHEXDSclassCode',
-    IHE_XDS_CLASS_CODES
+    IHE_XDS_CLASS_CODES,
+    IHE_XDS_CLASS_CODE_VERSION
   );
 }
 
 // ─── IHE XDS typeCode ────────────────────────────────────────
+
+const IHE_XDS_TYPE_CODE_VERSION = '2020-02-07T07:55:58';
 
 const IHE_XDS_TYPE_CODES = [
   { code: 'ABRE', display: 'Abrechnungsdokument' },
@@ -72,18 +77,21 @@ const IHE_XDS_TYPE_CODES = [
   { code: 'STRA', display: 'Strahlentherapiedokumentation' },
   { code: 'TRFU', display: 'Transfusionsdokumentation' },
   { code: 'VERO', display: 'Verordnungen' }
-].map(c => ({ ...c, system: 'http://ihe-d.de/CodeSystems/IHEXDStypeCode' }));
+].map(c => ({ ...c, system: 'http://ihe-d.de/CodeSystems/IHEXDStypeCode', version: IHE_XDS_TYPE_CODE_VERSION }));
 
 export function createIheXdsTypeCodeProvider() {
   return new StaticProvider(
     'ihe-xds-type',
     'IHE XDS typeCode',
     'http://ihe-d.de/CodeSystems/IHEXDStypeCode',
-    IHE_XDS_TYPE_CODES
+    IHE_XDS_TYPE_CODES,
+    IHE_XDS_TYPE_CODE_VERSION
   );
 }
 
 // ─── KDL (DVMD Klinische Dokumentenklassen-Liste) ────────────
+
+const KDL_VERSION = '2024';
 
 const KDL_CODES = [
   { code: 'AD010101', display: 'Arztbrief' },
@@ -104,14 +112,15 @@ const KDL_CODES = [
   { code: 'SD160107', display: 'Tumorkonferenzprotokoll' },
   { code: 'VL160101', display: 'Verlaufsdokumentation ärztlich' },
   { code: 'VL160105', display: 'Pflegebericht' }
-].map(c => ({ ...c, system: 'http://dvmd.de/fhir/CodeSystem/kdl' }));
+].map(c => ({ ...c, system: 'http://dvmd.de/fhir/CodeSystem/kdl', version: KDL_VERSION }));
 
 export function createKdlProvider(concepts) {
   return new StaticProvider(
     'kdl',
     'KDL (Klinische Dokumentenklassen-Liste)',
     'http://dvmd.de/fhir/CodeSystem/kdl',
-    concepts || KDL_CODES
+    concepts || KDL_CODES,
+    KDL_VERSION
   );
 }
 
@@ -150,7 +159,12 @@ export async function loadKdlFromFhir(fhirBaseUrl, fetchFn) {
   function extract(items) {
     for (const item of items) {
       if (item.code && item.display) {
-        concepts.push({ code: item.code, display: item.display, system: 'http://dvmd.de/fhir/CodeSystem/kdl' });
+        concepts.push({
+          code: item.code,
+          display: item.display,
+          system: 'http://dvmd.de/fhir/CodeSystem/kdl',
+          version: cs.version || KDL_VERSION
+        });
       }
       if (item.concept) extract(item.concept);
     }

@@ -38,12 +38,7 @@
       "superClass": [ "Element" ],
       "properties": [
         {
-          "name": "aspect",
-          "isAttr": true,
-          "type": "String"
-        },
-        {
-          "name": "aspectId",
+          "name": "id",
           "isAttr": true,
           "type": "String"
         },
@@ -68,9 +63,9 @@
       "superClass": [ "Element" ],
       "properties": [
         { "name": "system", "isAttr": true, "type": "String" },
+        { "name": "version", "isAttr": true, "type": "String" },
         { "name": "code", "isAttr": true, "type": "String" },
-        { "name": "display", "isAttr": true, "type": "String" },
-        { "name": "version", "isAttr": true, "type": "String" }
+        { "name": "display", "isAttr": true, "type": "String" }
       ]
     },
     {

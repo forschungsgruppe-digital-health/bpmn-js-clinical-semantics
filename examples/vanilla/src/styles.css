@@ -490,8 +490,17 @@ body {
   padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   color: #101828;
+}
+
+.annotation-form .bio-properties-panel-entry {
+  margin: 0 !important;
+}
+
+.annotation-form .bio-properties-panel-textfield,
+.annotation-form .bio-properties-panel-textarea {
+  margin: 0;
 }
 
 .form-row {

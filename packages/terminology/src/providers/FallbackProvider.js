@@ -44,6 +44,7 @@ export class FallbackProvider extends TerminologyProvider {
   get id() { return this._id; }
   get displayName() { return this._displayName; }
   get systemUri() { return this._systemUri; }
+  get version() { return this._primaryProvider.version || this._fallbackProvider.version; }
   get capabilities() {
     return {
       search: Boolean(this._primaryProvider.capabilities?.search || this._fallbackProvider.capabilities?.search),

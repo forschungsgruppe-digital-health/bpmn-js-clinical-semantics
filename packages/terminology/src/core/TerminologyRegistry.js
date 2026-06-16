@@ -79,6 +79,7 @@ export class TerminologyRegistry {
       id: p.id,
       displayName: p.displayName,
       systemUri: p.systemUri,
+      version: p.version,
       capabilities: p.capabilities
     }));
   }

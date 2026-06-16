@@ -34,6 +34,7 @@ describe('SnowstormAdapter', () => {
             conceptId: '233604007',
             pt: { term: 'Pneumonia' },
             fsn: { term: 'Pneumonia (disorder)' },
+            releasedEffectiveTime: 20240901,
             active: true,
             definitionStatus: 'PRIMITIVE'
           }
@@ -48,6 +49,7 @@ describe('SnowstormAdapter', () => {
         code: '233604007',
         display: 'Pneumonia',
         system: 'http://snomed.info/sct',
+        version: '20240901',
         active: true,
         properties: {
           fsn: 'Pneumonia (disorder)',
@@ -98,6 +100,7 @@ describe('SnowstormAdapter', () => {
         conceptId: '169069000',
         pt: { term: 'CT of chest' },
         fsn: { term: 'CT of chest (procedure)' },
+        releasedEffectiveTime: 20240901,
         active: true,
         definitionStatus: 'FULLY_DEFINED'
       };
@@ -107,6 +110,7 @@ describe('SnowstormAdapter', () => {
       expect(concept.code).toBe('169069000');
       expect(concept.display).toBe('CT of chest');
       expect(concept.system).toBe('http://snomed.info/sct');
+      expect(concept.version).toBe('20240901');
     });
 
     it('should return null for non-OK response', async () => {

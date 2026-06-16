@@ -43,7 +43,7 @@ For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE
 
 - [x] Multi-code annotation of any BPMN element (Tasks, DataObjects, Events, Gateways, MessageFlows)
 - [x] Pluggable provider architecture with built-in support for SNOMED CT (via Snowstorm), any FHIR-hosted code system (LOINC, ICD-10-GM, OPS, ATC, ICD-O-3), package-backed HL7 terminology resources, IHE XDS classCode/typeCode, and KDL
-- [x] Aspect-based annotation model (clinicalContent, documentClass, documentType, note, confidentiality, status, format, participant)
+- [x] Annotation model with stable `id` bindings and optional coded entries
 - [x] Optional FHIRPath mapping targets
 - [x] Extensibility without code changes -- new terminology systems via `TerminologyProvider` interface
 - [x] Offline-capable static providers for small code systems (IHE XDS, KDL)
@@ -155,8 +155,7 @@ import {
   createPackageFallbackProvider,
   createTerminologyModule,
   createTerminologyServices,
-  addAnnotation,
-  ASPECTS
+  addAnnotation
 } from '@bpmn-js-clinical-semantics/terminology';
 import actCodeCodeSystem from 'hl7.terminology.r4/CodeSystem-v3-ActCode.json';
 
@@ -191,8 +190,7 @@ const TerminologyServicesModule = createTerminologyModule(terminologyServices);
 
 // Add an annotation to a BPMN element's businessObject
 addAnnotation(businessObject, moddle, {
-  aspect: ASPECTS.CLINICAL_CONTENT,
-  aspectId: 'clinical-content-1',
+  id: 'term-ann-1',
   text: 'CT-Thorax mit Kontrastmittel',
   codings: [{ system: 'http://snomed.info/sct', code: '169069000', display: 'CT of chest' }]
 });
@@ -253,8 +251,7 @@ Annotations and mappings are persisted as standard BPMN 2.0 extension elements:
                   term:clinicalDomain="diagnostics">
   <bpmn2:extensionElements>
     <term:annotations>
-      <term:annotation aspect="clinicalContent"
-                       aspectId="clinical-content-1"
+      <term:annotation id="term-ann-1"
                        text="CT-Befund Thorax mit KM">
         <term:coding system="http://snomed.info/sct"
                      code="169069000" display="CT of chest (procedure)"/>

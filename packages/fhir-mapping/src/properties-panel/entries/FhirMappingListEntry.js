@@ -160,7 +160,7 @@ export function FhirMappingListEntry(props) {
               <select class="bio-properties-panel-input" value=${form.keBinding} onChange=${e => u('keBinding', e.target.value)}>
                 <option value="">– none –</option>
                 ${terminologyAnnotations.map((annotation) => html`
-                  <option value=${annotation.aspectId}>${getTerminologyBindingLabel(annotation.aspectId, terminologyAnnotations)}</option>
+                  <option value=${annotation.id}>${getTerminologyBindingLabel(annotation.id, terminologyAnnotations)}</option>
                 `)}
               </select>
             </div>
@@ -187,15 +187,14 @@ function shortenUrl(url) {
   return parts.length > 3 ? '…/' + parts.slice(-2).join('/') : url;
 }
 
-function getTerminologyBindingLabel(aspectId, annotations) {
-  const annotation = annotations.find((entry) => entry.aspectId === aspectId);
+function getTerminologyBindingLabel(id, annotations) {
+  const annotation = annotations.find((entry) => entry.id === id);
 
   if (!annotation) {
-    return aspectId;
+    return id;
   }
 
-  const aspect = annotation.aspect || 'aspect';
   const text = annotation.text ? ` - ${annotation.text}` : '';
 
-  return `${annotation.aspectId} (${aspect})${text}`;
+  return `${annotation.id}${text}`;
 }

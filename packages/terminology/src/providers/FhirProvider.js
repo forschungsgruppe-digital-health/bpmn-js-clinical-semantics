@@ -26,6 +26,13 @@ export class FhirProvider extends TerminologyProvider {
     this._id = config.id;
     this._displayName = config.displayName;
     this._systemUri = config.systemUri;
+    this._version = config.version
+      || config.lookupParameters?.version
+      || config.expandParameters?.valueSetVersion
+      || config.expandParameters?.version
+      || (typeof config.expandParameters?.['system-version'] === 'string'
+        ? config.expandParameters['system-version'].split('|')[1]
+        : undefined);
     this._maxResults = config.maxResults || 15;
     
     // Use valueSetUri for the adapter if provided, otherwise fallback to systemUri
@@ -44,6 +51,7 @@ export class FhirProvider extends TerminologyProvider {
   get id() { return this._id; }
   get displayName() { return this._displayName; }
   get systemUri() { return this._systemUri; }
+  get version() { return this._version; }
   get capabilities() {
     return { search: true, lookup: true, hierarchy: false, validate: true };
   }
@@ -57,13 +65,24 @@ export class FhirProvider extends TerminologyProvider {
     
     // Ensure the returned concepts use the correct CodeSystem URI (not the ValueSet URI)
     if (result && result.items) {
-      result.items.forEach(c => c.system = this._systemUri);
+      result.items.forEach(c => {
+        c.system = this._systemUri;
+        if (!c.version && this._version) {
+          c.version = this._version;
+        }
+      });
     }
     
     return result;
   }
 
   async lookup(code) {
-    return this._adapter.lookup(code);
+    const concept = await this._adapter.lookup(code);
+
+    if (concept && !concept.version && this._version) {
+      concept.version = this._version;
+    }
+
+    return concept;
   }
 }

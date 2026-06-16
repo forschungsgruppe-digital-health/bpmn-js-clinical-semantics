@@ -100,17 +100,6 @@
  * @property {Record<string, string>} [headers]
  */
 
-export const ASPECTS = {
-  CLINICAL_CONTENT: 'clinicalContent',
-  DOCUMENT_CLASS: 'documentClass',
-  DOCUMENT_TYPE: 'documentType',
-  NOTE: 'note',
-  CONFIDENTIALITY: 'confidentiality',
-  STATUS: 'status',
-  FORMAT: 'format',
-  PARTICIPANT: 'participant'
-};
-
 export const TRANSFORMS = {
   COPY: 'copy',
   FIXED: 'fixed',

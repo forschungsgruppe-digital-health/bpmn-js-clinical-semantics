@@ -157,11 +157,13 @@ export class FhirTerminologyAdapter {
 
       const display = this._getParameterValue(data, 'display');
       const name = this._getParameterValue(data, 'name');
+      const version = this._getParameterValue(data, 'version');
 
       return {
         code,
         display: display || name || code,
         system: this._systemUri,
+        version,
         active: true
       };
     } catch {

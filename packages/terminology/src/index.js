@@ -9,7 +9,7 @@ export {
 // ─── Core ────────────────────────────────────────────────────
 export { TerminologyProvider } from './core/TerminologyProvider.js';
 export { TerminologyRegistry } from './core/TerminologyRegistry.js';
-export { ASPECTS, TRANSFORMS, CLINICAL_DOMAINS } from './core/types.js';
+export { TRANSFORMS, CLINICAL_DOMAINS } from './core/types.js';
 
 // ─── Adapters ────────────────────────────────────────────────
 export { SnowstormAdapter } from './adapters/SnowstormAdapter.js';
@@ -41,9 +41,11 @@ export { DEFAULT_TERMINOLOGY_PROPERTIES_CONFIG } from './properties-panel/config
 export {
   getAnnotations,
   addAnnotation,
-  createAnnotationAspectId,
-  getUsedAspectIds,
-  isValidAspectId,
+  createId,
+  getUsedIds,
+  getCodingKey,
+  getUsedCodingKeys,
+  isValidId,
   removeAnnotation,
   getAnnotationsContainer,
   ensureAnnotationsContainer,

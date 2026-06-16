@@ -82,7 +82,8 @@ export async function createDemoTerminologyServices() {
     providers: [
       new SnomedCtProvider({
         baseUrl: DEFAULT_SNOWSTORM_BASE_URL,
-        branch: 'MAIN'
+        branch: 'MAIN',
+        languageStrategy: 'header'
       }),
       createPackageCollectionProvider({
         id: 'hl7-terminology-r4-package',

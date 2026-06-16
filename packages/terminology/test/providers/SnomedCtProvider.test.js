@@ -39,18 +39,21 @@ describe('SnomedCtProvider', () => {
   describe('search()', () => {
     it('should delegate to SnowstormAdapter with correct params', async () => {
       const fetchFn = createMockFetch({
-        items: [{ conceptId: '233604007', pt: { term: 'Pneumonia' }, fsn: { term: 'Pneumonia (disorder)' }, active: true }],
+        items: [{ conceptId: '233604007', pt: { term: 'Pneumonia' }, fsn: { term: 'Pneumonia (disorder)' }, releasedEffectiveTime: 20240901, active: true }],
         total: 1
       });
       const provider = createProvider({ fetchFn });
 
       const result = await provider.search('pneumonia', { limit: 5 });
       expect(result.items).toHaveLength(1);
+      expect(result.items[0].version).toBe('20240901');
 
       const calledUrl = new URL(fetchFn.mock.calls[0][0]);
+      const calledHeaders = fetchFn.mock.calls[0][1].headers;
       expect(calledUrl.searchParams.get('term')).toBe('pneumonia');
       expect(calledUrl.searchParams.get('limit')).toBe('5');
-      expect(calledUrl.searchParams.get('language')).toBe('de');
+      expect(calledUrl.searchParams.get('language')).toBeNull();
+      expect(calledHeaders['Accept-Language']).toBe('de');
     });
 
     it('should pass ECL constraint from default config', async () => {

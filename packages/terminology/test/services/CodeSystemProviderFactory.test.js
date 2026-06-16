@@ -7,6 +7,7 @@ describe('createStaticProviderFromCodeSystem()', () => {
       resourceType: 'CodeSystem',
       id: 'v3-ActCode',
       url: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
+      version: '4.0.0',
       title: 'HL7 v3 ActCode',
       concept: [
         {
@@ -26,6 +27,7 @@ describe('createStaticProviderFromCodeSystem()', () => {
     expect(provider.systemUri).toBe('http://terminology.hl7.org/CodeSystem/v3-ActCode');
     expect(provider.getAll()).toHaveLength(3);
     expect(provider.getAll()[1].code).toBe('AA');
+    expect(provider.getAll()[1].version).toBe('4.0.0');
   });
 
   it('should mark retired and deprecated concepts as inactive', async () => {

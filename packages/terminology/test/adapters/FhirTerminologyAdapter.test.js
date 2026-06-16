@@ -167,7 +167,8 @@ describe('FhirTerminologyAdapter', () => {
       const mockFetch = createMockFetch({
         parameter: [
           { name: 'display', valueString: 'Bösartige Neubildung des Bronchus' },
-          { name: 'name', valueString: 'ICD-10-GM' }
+          { name: 'name', valueString: 'ICD-10-GM' },
+          { name: 'version', valueString: '2024' }
         ]
       });
 
@@ -188,6 +189,7 @@ describe('FhirTerminologyAdapter', () => {
         code: 'C34.1',
         display: 'Bösartige Neubildung des Bronchus',
         system: SYSTEM_URI,
+        version: '2024',
         active: true
       });
     });

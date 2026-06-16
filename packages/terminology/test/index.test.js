@@ -32,7 +32,6 @@ describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
 
   it('should export type constants', async () => {
     const mod = await import('../src/core/types.js');
-    expect(mod.ASPECTS).toBeDefined();
     expect(mod.TRANSFORMS).toBeDefined();
     expect(mod.CLINICAL_DOMAINS).toBeDefined();
   });
@@ -80,9 +79,11 @@ describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
     const mod = await import('../src/services/AnnotationHelper.js');
     expect(mod.getAnnotations).toBeDefined();
     expect(mod.addAnnotation).toBeDefined();
-    expect(mod.createAnnotationAspectId).toBeDefined();
-    expect(mod.getUsedAspectIds).toBeDefined();
-    expect(mod.isValidAspectId).toBeDefined();
+    expect(mod.createId).toBeDefined();
+    expect(mod.getUsedIds).toBeDefined();
+    expect(mod.getCodingKey).toBeDefined();
+    expect(mod.getUsedCodingKeys).toBeDefined();
+    expect(mod.isValidId).toBeDefined();
     expect(mod.removeAnnotation).toBeDefined();
     expect(mod.getAnnotationsContainer).toBeDefined();
     expect(mod.ensureAnnotationsContainer).toBeDefined();

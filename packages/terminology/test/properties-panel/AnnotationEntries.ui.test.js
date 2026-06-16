@@ -30,14 +30,85 @@ vi.mock('@bpmn-io/properties-panel/preact/hooks', () => ({
   useState
 }));
 
+vi.mock('@bpmn-io/properties-panel', () => ({
+  TextFieldEntry(props) {
+    const [localValue, setLocalValue] = useState(props.getValue(props.element) || '');
+    const error = props.validate ? props.validate(localValue) : null;
+
+    useEffect(() => {
+      setLocalValue(props.getValue(props.element) || '');
+    }, [ props.element, props.getValue ]);
+
+    return h('div', {
+      class: `bio-properties-panel-entry ${error ? 'has-error' : ''}`,
+      'data-entry-id': props.id
+    }, [
+      h('div', { class: 'bio-properties-panel-textfield' }, [
+        h('label', {
+          class: 'bio-properties-panel-label',
+          for: `bio-properties-panel-${props.id}`
+        }, props.label),
+        h('input', {
+          id: `bio-properties-panel-${props.id}`,
+          class: 'bio-properties-panel-input',
+          type: 'text',
+          value: localValue,
+          placeholder: props.placeholder,
+          onInput: (event) => {
+            const value = event.target.value;
+            setLocalValue(value);
+            props.setValue(value, props.validate ? props.validate(value) : null);
+          }
+        })
+      ]),
+      error ? h('div', { class: 'bio-properties-panel-error' }, error) : null,
+      props.description ? h('div', { class: 'bio-properties-panel-description' }, props.description) : null
+    ]);
+  },
+  TextAreaEntry(props) {
+    const [localValue, setLocalValue] = useState(props.getValue(props.element) || '');
+    const error = props.validate ? props.validate(localValue) : null;
+
+    useEffect(() => {
+      setLocalValue(props.getValue(props.element) || '');
+    }, [ props.element, props.getValue ]);
+
+    return h('div', {
+      class: `bio-properties-panel-entry ${error ? 'has-error' : ''}`,
+      'data-entry-id': props.id
+    }, [
+      h('div', { class: 'bio-properties-panel-textarea' }, [
+        h('label', {
+          class: 'bio-properties-panel-label',
+          for: `bio-properties-panel-${props.id}`
+        }, props.label),
+        h('textarea', {
+          id: `bio-properties-panel-${props.id}`,
+          class: 'bio-properties-panel-input',
+          rows: props.rows || 2,
+          value: localValue,
+          placeholder: props.placeholder,
+          onInput: (event) => {
+            const value = event.target.value;
+            setLocalValue(value);
+            props.setValue(value, props.validate ? props.validate(value) : null);
+          }
+        })
+      ]),
+      error ? h('div', { class: 'bio-properties-panel-error' }, error) : null,
+      props.description ? h('div', { class: 'bio-properties-panel-description' }, props.description) : null
+    ]);
+  }
+}));
+
 const PROVIDERS = [
   { id: 'snomed-ct', displayName: 'SNOMED CT', systemUri: 'http://snomed.info/sct' },
   { id: 'loinc', displayName: 'LOINC', systemUri: 'http://loinc.org' },
-  { id: 'ops', displayName: 'OPS', systemUri: 'http://fhir.de/CodeSystem/bfarm/ops' },
-  { id: 'atc', displayName: 'ATC', systemUri: 'http://www.whocc.no/atc' },
-  { id: 'kdl', displayName: 'KDL', systemUri: 'http://dvmd.de/fhir/CodeSystem/kdl' },
-  { id: 'ihe-xds-type', displayName: 'IHE XDS typeCode', systemUri: 'http://ihe-d.de/CodeSystems/IHEXDStypeCode' },
-  { id: 'ihe-xds-class', displayName: 'IHE XDS classCode', systemUri: 'http://ihe-d.de/CodeSystems/IHEXDSclassCode' }
+  { id: 'ops', displayName: 'OPS', systemUri: 'http://fhir.de/CodeSystem/bfarm/ops', version: '2021' },
+  { id: 'atc', displayName: 'ATC', systemUri: 'http://www.whocc.no/atc', version: '2025.0.0' },
+  { id: 'kdl', displayName: 'KDL', systemUri: 'http://dvmd.de/fhir/CodeSystem/kdl', version: '2024' },
+  { id: 'ihe-xds-type', displayName: 'IHE XDS typeCode', systemUri: 'http://ihe-d.de/CodeSystems/IHEXDStypeCode', version: '2020-02-07T07:55:58' },
+  { id: 'ihe-xds-class', displayName: 'IHE XDS classCode', systemUri: 'http://ihe-d.de/CodeSystems/IHEXDSclassCode', version: '2021-06-25T13:44:47' }
 ];
 
 const SEARCH_RESULTS = {
@@ -54,20 +125,20 @@ const SEARCH_RESULTS = {
     { code: '18776-5', display: 'Plan of care note', system: 'http://loinc.org' }
   ],
   ops: [
-    { code: '5-324', display: 'Simple lobectomy and bilobectomy of the lung', system: 'http://fhir.de/CodeSystem/bfarm/ops' }
+    { code: '5-324', display: 'Simple lobectomy and bilobectomy of the lung', system: 'http://fhir.de/CodeSystem/bfarm/ops', version: '2021' }
   ],
   atc: [
-    { code: 'L01XA01', display: 'Cisplatin', system: 'http://www.whocc.no/atc' }
+    { code: 'L01XA01', display: 'Cisplatin', system: 'http://www.whocc.no/atc', version: '2025.0.0' }
   ],
   kdl: [
-    { code: 'AD010101', display: 'Medical discharge report', system: 'http://dvmd.de/fhir/CodeSystem/kdl' }
+    { code: 'AD010101', display: 'Medical discharge report', system: 'http://dvmd.de/fhir/CodeSystem/kdl', version: '2024' }
   ],
   'ihe-xds-type': [
-    { code: 'ERGE', display: 'Diagnostic imaging results', system: 'http://ihe-d.de/CodeSystems/IHEXDStypeCode' }
+    { code: 'ERGE', display: 'Diagnostic imaging results', system: 'http://ihe-d.de/CodeSystems/IHEXDStypeCode', version: '2020-02-07T07:55:58' }
   ],
   'ihe-xds-class': [
-    { code: 'BEF', display: 'Clinical reports', system: 'http://ihe-d.de/CodeSystems/IHEXDSclassCode' },
-    { code: 'BRI', display: 'Physician letters', system: 'http://ihe-d.de/CodeSystems/IHEXDSclassCode' }
+    { code: 'BEF', display: 'Clinical reports', system: 'http://ihe-d.de/CodeSystems/IHEXDSclassCode', version: '2021-06-25T13:44:47' },
+    { code: 'BRI', display: 'Physician letters', system: 'http://ihe-d.de/CodeSystems/IHEXDSclassCode', version: '2021-06-25T13:44:47' }
   ]
 };
 
@@ -132,7 +203,7 @@ describe('terminology properties panel UI', () => {
 
     expect(xml).toContain('id="Task_Staging"');
     expect(xml).toContain('term:clinicalDomain="staging"');
-    expect(xml).toContain('<term:annotation aspect="clinicalContent" aspectId="clinical-content-1" text="Clinical TNM staging to determine tumor stage">');
+    expect(xml).toContain('<term:annotation id="term-ann-1" text="Clinical TNM staging to determine tumor stage">');
     expect(xml).toContain('<term:coding system="http://snomed.info/sct" code="254292007" display="Tumor staging (tumor staging)"');
     expect(xml).toContain('<term:coding system="http://loinc.org" code="21908-9" display="Stage group.clinical Cancer"');
     expect(xml).not.toContain('fhirmap:');
@@ -226,9 +297,9 @@ describe('terminology properties panel UI', () => {
     expect(screen.getByText('No terminology systems are available right now.')).toBeTruthy();
   });
 
-  it('persists a manually entered aspect ID', async () => {
+  it('persists a manually entered ID', async () => {
     const context = await createTestContext({
-      id: 'Task_CustomAspect',
+      id: 'Task_CustomAnn',
       type: 'bpmn:Task',
       name: 'Configured Task'
     });
@@ -237,20 +308,152 @@ describe('terminology properties panel UI', () => {
 
     const annotationView = render(h(AnnotationListEntry, { element: context.element }));
     await createAnnotation(annotationView.container, {
-      aspect: 'documentType',
-      aspectId: 'thorax-report-type',
+      id: 'thorax-report-type',
       text: 'Thorax report',
       codings: []
     });
 
     const xml = await serializeXml(context.moddle, context.definitions);
 
-    expect(xml).toContain('<term:annotation aspect="documentType" aspectId="thorax-report-type" text="Thorax report" />');
+    expect(xml).toContain('<term:annotation id="thorax-report-type" text="Thorax report" />');
   });
 
-  it('marks the aspect ID field and shows its error below the field', async () => {
+  it('persists the terminology code system version in XML', async () => {
     const context = await createTestContext({
-      id: 'Task_InvalidAspect',
+      id: 'Task_VersionedCode',
+      type: 'bpmn:Task',
+      name: 'Versioned Code Task'
+    });
+
+    setServices(context, {
+      terminologyRegistry: {
+        listProviders: () => PROVIDERS,
+        search: vi.fn(async (term, providerId) => ({
+          items: [{
+            code: '254292007',
+            display: 'Tumor staging (tumor staging)',
+            system: 'http://snomed.info/sct',
+            version: '2024-09'
+          }]
+        })),
+        on: vi.fn(),
+        off: vi.fn()
+      }
+    });
+
+    const annotationView = render(h(AnnotationListEntry, { element: context.element }));
+    await createAnnotation(annotationView.container, {
+      text: 'Versioned coding',
+      codings: [
+        {
+          providerId: 'snomed-ct',
+          searchTerm: 'Tumor staging',
+          resultLabel: 'Tumor staging (tumor staging)'
+        }
+      ]
+    });
+
+    const xml = await serializeXml(context.moddle, context.definitions);
+
+    expect(xml).toContain('<term:coding system="http://snomed.info/sct" version="2024-09" code="254292007" display="Tumor staging (tumor staging)"');
+  });
+
+  it('persists the SNOMED release version in XML', async () => {
+    const context = await createTestContext({
+      id: 'Task_SnomedVersion',
+      type: 'bpmn:Task',
+      name: 'SNOMED Version Task'
+    });
+
+    setServices(context, {
+      terminologyRegistry: {
+        listProviders: () => PROVIDERS,
+        search: vi.fn(async () => ({
+          items: [{
+            code: '233604007',
+            display: 'Pneumonia',
+            system: 'http://snomed.info/sct',
+            version: '20240901'
+          }]
+        })),
+        on: vi.fn(),
+        off: vi.fn()
+      }
+    });
+
+    const annotationView = render(h(AnnotationListEntry, { element: context.element }));
+    await createAnnotation(annotationView.container, {
+      text: 'SNOMED coding',
+      codings: [
+        {
+          providerId: 'snomed-ct',
+          searchTerm: 'pneumonia',
+          resultLabel: 'Pneumonia'
+        }
+      ]
+    });
+
+    const xml = await serializeXml(context.moddle, context.definitions);
+
+    expect(xml).toContain('<term:coding system="http://snomed.info/sct" version="20240901" code="233604007" display="Pneumonia"');
+  });
+
+  it('blocks duplicate terminology codes with the same system', async () => {
+    const context = await createTestContext({
+      id: 'Task_DuplicateCode',
+      type: 'bpmn:Task',
+      name: 'Duplicate Code Task'
+    });
+
+    setServices(context);
+
+    const view = render(h(AnnotationListEntry, { element: context.element }));
+
+    await createAnnotation(view.container, {
+      text: 'First annotation',
+      codings: [
+        {
+          providerId: 'snomed-ct',
+          searchTerm: 'Tumor staging',
+          resultLabel: 'Tumor staging (tumor staging)'
+        }
+      ]
+    });
+
+    fireEvent.click(screen.getByText('+ Add annotation'));
+    fireEvent.input(getControlByLabel(view.container, 'Free text'), {
+      target: { value: 'Second annotation' }
+    });
+    fireEvent.change(getControlByLabel(view.container, 'Terminology'), {
+      target: { value: 'snomed-ct' }
+    });
+
+    const searchInput = getControlByLabel(view.container, 'Search');
+    fireEvent.focus(searchInput);
+    fireEvent.input(searchInput, {
+      target: { value: 'Tumor staging' }
+    });
+
+    const suggestion = await waitFor(() => {
+      const match = Array.from(view.container.querySelectorAll('.search-suggestion'))
+        .find((node) => node.querySelector('.search-suggestion__label')?.textContent === 'Tumor staging (tumor staging)');
+
+      expect(match).toBeTruthy();
+      return match;
+    });
+
+    fireEvent.mouseDown(suggestion);
+    fireEvent.click(screen.getByText('Save annotation'));
+
+    expect(screen.getByText('A terminology code with the same system and code is already used in the diagram.')).toBeTruthy();
+
+    const xml = await serializeXml(context.moddle, context.definitions);
+    expect((xml.match(/<term:annotation\b/g) || [])).toHaveLength(1);
+  });
+
+  it('marks the ID field and shows its error below the field', async () => {
+    const context = await createTestContext({
+      id: 'Task_InvalidAnn',
       type: 'bpmn:Task',
       name: 'Configured Task'
     });
@@ -259,7 +462,7 @@ describe('terminology properties panel UI', () => {
 
     const view = render(h(AnnotationListEntry, { element: context.element }));
     fireEvent.click(screen.getByText('+ Add annotation'));
-    fireEvent.input(getControlByLabel(view.container, 'Aspect ID'), {
+    fireEvent.input(getControlByLabel(view.container, 'ID'), {
       target: { value: 'invalid id' }
     });
     fireEvent.input(getControlByLabel(view.container, 'Free text'), {
@@ -267,8 +470,8 @@ describe('terminology properties panel UI', () => {
     });
     fireEvent.click(screen.getByText('Save annotation'));
 
-    expect(screen.getByText('Aspect ID may only contain letters, numbers, dots, underscores, and hyphens.')).toBeTruthy();
-    expect(getControlByLabel(view.container, 'Aspect ID').className).toContain('bio-properties-panel-input--error');
+    expect(screen.getByText('ID may only contain letters, numbers, dots, underscores, and hyphens.')).toBeTruthy();
+    expect(getControlByLabel(view.container, 'ID').closest('.bio-properties-panel-entry').className).toContain('has-error');
   });
 
   it('recreates the chemotherapy task without adding a mapping target', async () => {
@@ -309,9 +512,9 @@ describe('terminology properties panel UI', () => {
 
     expect(xml).toContain('id="Task_Chemo"');
     expect(xml).toContain('term:clinicalDomain="therapy"');
-    expect(xml).toContain('<term:annotation aspect="clinicalContent" aspectId="clinical-content-1" text="Cisplatin-based doublet chemotherapy for inoperable lung cancer Stage III-IV">');
+    expect(xml).toContain('<term:annotation id="term-ann-1" text="Cisplatin-based doublet chemotherapy for inoperable lung cancer Stage III-IV">');
     expect(xml).toContain('<term:coding system="http://snomed.info/sct" code="367336001" display="Chemotherapy (procedure)"');
-    expect(xml).toContain('<term:coding system="http://www.whocc.no/atc" code="L01XA01" display="Cisplatin"');
+    expect(xml).toContain('<term:coding system="http://www.whocc.no/atc" version="2025.0.0" code="L01XA01" display="Cisplatin"');
     expect(xml).not.toContain('<term:target');
   });
 
@@ -333,8 +536,6 @@ describe('terminology properties panel UI', () => {
     const annotationView = render(h(AnnotationListEntry, { element: context.element }));
 
     await createAnnotation(annotationView.container, {
-      aspect: 'documentType',
-      
       text: 'Medical discharge report upon completion of follow-up',
       codings: [
         {
@@ -351,8 +552,6 @@ describe('terminology properties panel UI', () => {
     });
 
     await createAnnotation(annotationView.container, {
-      aspect: 'documentClass',
-      
       codings: [
         {
           providerId: 'ihe-xds-class',
@@ -367,11 +566,11 @@ describe('terminology properties panel UI', () => {
 
     expect(xml).toContain('id="DataObj_DischargeLetter"');
     expect(xml).toContain('term:clinicalDomain="documentation"');
-    expect(xml).toContain('<term:annotation aspect="documentType" aspectId="document-type-1" text="Medical discharge report upon completion of follow-up">');
+    expect(xml).toContain('<term:annotation id="term-ann-1" text="Medical discharge report upon completion of follow-up">');
     expect(xml).toContain('<term:coding system="http://loinc.org" code="18842-5" display="Discharge summary"');
-    expect(xml).toContain('<term:coding system="http://dvmd.de/fhir/CodeSystem/kdl" code="AD010101" display="Medical discharge report"');
-    expect(xml).toContain('<term:annotation aspect="documentClass" aspectId="document-class-1">');
-    expect(xml).toContain('<term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" code="BRI" display="Physician letters"');
+    expect(xml).toContain('<term:coding system="http://dvmd.de/fhir/CodeSystem/kdl" version="2024" code="AD010101" display="Medical discharge report"');
+    expect(xml).toContain('<term:annotation id="term-ann-2">');
+    expect(xml).toContain('<term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" version="2021-06-25T13:44:47" code="BRI" display="Physician letters"');
   });
 
   it('recreates the MRI data object annotations via the UI', async () => {
@@ -392,8 +591,6 @@ describe('terminology properties panel UI', () => {
     const annotationView = render(h(AnnotationListEntry, { element: context.element }));
 
     await createAnnotation(annotationView.container, {
-      aspect: 'documentType',
-      
       text: 'MRI scan report of the thorax as input document for TNM staging',
       codings: [
         {
@@ -410,8 +607,6 @@ describe('terminology properties panel UI', () => {
     });
 
     await createAnnotation(annotationView.container, {
-      aspect: 'documentClass',
-      
       codings: [
         {
           providerId: 'ihe-xds-class',
@@ -426,10 +621,10 @@ describe('terminology properties panel UI', () => {
 
     expect(xml).toContain('id="DataObj_MRI"');
     expect(xml).toContain('term:clinicalDomain="diagnostics"');
-    expect(xml).toContain('<term:annotation aspect="documentType" aspectId="document-type-1" text="MRI scan report of the thorax as input document for TNM staging">');
+    expect(xml).toContain('<term:annotation id="term-ann-1" text="MRI scan report of the thorax as input document for TNM staging">');
     expect(xml).toContain('<term:coding system="http://loinc.org" code="18748-4" display="Diagnostic imaging study"');
-    expect(xml).toContain('<term:coding system="http://ihe-d.de/CodeSystems/IHEXDStypeCode" code="ERGE" display="Diagnostic imaging results"');
-    expect(xml).toContain('<term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" code="BEF" display="Clinical reports"');
+    expect(xml).toContain('<term:coding system="http://ihe-d.de/CodeSystems/IHEXDStypeCode" version="2020-02-07T07:55:58" code="ERGE" display="Diagnostic imaging results"');
+    expect(xml).toContain('<term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" version="2021-06-25T13:44:47" code="BEF" display="Clinical reports"');
   });
 
   it('recreates the terminology-only reference cross section via the UI', async () => {
@@ -447,8 +642,6 @@ describe('terminology properties panel UI', () => {
 
     await setClinicalDomain(context, 'DataObj_MRI', 'diagnostics');
     await addAnnotationToElement(context, 'DataObj_MRI', {
-      aspect: 'documentType',
-      
       text: 'MRI scan report of the thorax as input document for TNM staging',
       codings: [
         {
@@ -464,8 +657,6 @@ describe('terminology properties panel UI', () => {
       ]
     });
     await addAnnotationToElement(context, 'DataObj_MRI', {
-      aspect: 'documentClass',
-      
       codings: [
         {
           providerId: 'ihe-xds-class',
@@ -535,8 +726,6 @@ describe('terminology properties panel UI', () => {
 
     await setClinicalDomain(context, 'DataObj_DischargeLetter', 'documentation');
     await addAnnotationToElement(context, 'DataObj_DischargeLetter', {
-      aspect: 'documentType',
-      
       text: 'Medical discharge report upon completion of follow-up',
       codings: [
         {
@@ -552,8 +741,6 @@ describe('terminology properties panel UI', () => {
       ]
     });
     await addAnnotationToElement(context, 'DataObj_DischargeLetter', {
-      aspect: 'documentClass',
-      
       codings: [
         {
           providerId: 'ihe-xds-class',
@@ -586,7 +773,7 @@ describe('terminology properties panel UI', () => {
     expect(xml).toContain('id="Gateway_Split"');
     expect(xml).toContain('Treatment decision based on TNM stage: Stage I-II (operable) vs. Stage III-IV (inoperable)');
     expect(xml).toContain('id="Task_Surgery"');
-    expect(xml).toContain('<term:coding system="http://fhir.de/CodeSystem/bfarm/ops" code="5-324" display="Simple lobectomy and bilobectomy of the lung"');
+    expect(xml).toContain('<term:coding system="http://fhir.de/CodeSystem/bfarm/ops" version="2021" code="5-324" display="Simple lobectomy and bilobectomy of the lung"');
     expect(xml).toContain('id="Task_Followup"');
     expect(xml).toContain('<term:coding system="http://loinc.org" code="18776-5" display="Plan of care note"');
     expect(xml).not.toContain('fhirmap:');
@@ -691,15 +878,9 @@ function setServices(context, overrides = {}) {
 async function createAnnotation(container, config) {
   fireEvent.click(screen.getByText('+ Add annotation'));
 
-  if (config.aspect) {
-    fireEvent.change(getControlByLabel(container, 'Aspect'), {
-      target: { value: config.aspect }
-    });
-  }
-
-  if (config.aspectId) {
-    fireEvent.input(getControlByLabel(container, 'Aspect ID'), {
-      target: { value: config.aspectId }
+  if (config.id) {
+    fireEvent.input(getControlByLabel(container, 'ID'), {
+      target: { value: config.id }
     });
   }
 
