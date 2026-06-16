@@ -152,6 +152,7 @@ const modeler = new BpmnModeler({
 import {
   SnomedCtProvider,
   createKdlProvider,
+  createPackageProvider,
   createPackageFallbackProvider,
   createTerminologyModule,
   createTerminologyServices,
@@ -163,16 +164,11 @@ const terminologyServices = createTerminologyServices({
   providers: [
     new SnomedCtProvider({ baseUrl: 'https://snowstorm.example.com' }),
     createKdlProvider(),
-    createPackageFallbackProvider({
-      id: 'hl7-v3-actcode',
-      displayName: 'HL7 v3 ActCode',
-      systemUri: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
-      codeSystem: actCodeCodeSystem,
-      fallbackFhirConfig: {
-        systemUri: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
-        valueSetUri: 'http://terminology.hl7.org/ValueSet/v3-ActCode',
-        baseUrl: 'https://fhir.example.com'
-      }
+  ],
+  packageProviders: [
+    createPackageProvider({
+      packageName: 'hl7.terminology.r4',
+      codeSystem: actCodeCodeSystem
     })
   ],
   loaderConfig: {
@@ -196,11 +192,13 @@ addAnnotation(businessObject, moddle, {
 });
 ```
 
-`createPackageTerminologyProvider()` and `createPackageFallbackProvider()` are the public extension points for package-backed terminology. Install any package that ships FHIR `CodeSystem` JSON resources, import the JSON you need, and register it through your own app-level config file. In this repository, that consumer-owned bootstrap lives in `examples/vanilla/src/terminology-config.js`, while the demo's concrete package dependencies are declared in `examples/vanilla/package.json`. For your own app, create an equivalent config file next to your modeler setup and pass the resulting services/module into `bpmn-js`.
+`PackageProvider` / `createPackageProvider()` and `createPackageFallbackProvider()` are the public extension points for package-backed terminology. Install any package that ships FHIR `CodeSystem` JSON resources, import the JSON you need, and register it through your own app-level config file. In this repository, that consumer-owned bootstrap lives in `examples/vanilla/src/terminology-config.js`, while the demo's concrete package dependencies are declared in `examples/vanilla/package.json`. For your own app, create an equivalent config file next to your modeler setup and pass the resulting services/module into `bpmn-js`.
+
+`PackageProvider` is the first-class provider wrapper for package-shipped CodeSystem JSON. Use it when you want one installed code system to behave like `FhirProvider` or `SnomedCtProvider`; use `createPackageCollectionProvider()` when you want several package resources exposed as one combined entry.
 
 ### Adding another terminology package in the demo
 
-The demo already uses this pattern with `hl7.terminology.r4`. The package is installed in `examples/vanilla/package.json`, its `CodeSystem-*.json` resources are loaded with `import.meta.glob(...)`, and then everything is exposed as one searchable provider via `createPackageCollectionProvider(...)`.
+The demo already uses this pattern with `hl7.terminology.r4`. The package is installed in `examples/vanilla/package.json`, its `CodeSystem-*.json` resources are loaded with `import.meta.glob(...)`, and then each resource is registered as its own `PackageProvider`.
 
 1. Install the package into the demo workspace:
 
@@ -222,17 +220,18 @@ const MY_PACKAGE_CODE_SYSTEMS = Object.values(import.meta.glob(
 ));
 ```
 
-3. Register the package contents as a provider:
+3. Register the package contents as providers:
 
 ```js
-createPackageCollectionProvider({
-  id: 'my-package',
-  displayName: 'My Terminology Package',
-  codeSystems: MY_PACKAGE_CODE_SYSTEMS
-})
+MY_PACKAGE_CODE_SYSTEMS.map(codeSystem =>
+  createPackageProvider({
+    packageName: 'my-terminology-package',
+    codeSystem
+  })
+)
 ```
 
-4. Add that provider to the `providers` array passed to `createTerminologyServices(...)`.
+4. Add those providers to the `packageProviders` array passed to `createTerminologyServices(...)`.
 
 This is consumer-side wiring, not library internals: the library provides the helper functions, while the demo shows how an application uses them. A `.npmrc` is not required when the dependency is installed from a direct URL or from the default npm registry; it is only needed when the package must be fetched from a custom registry such as GitHub Packages.
 

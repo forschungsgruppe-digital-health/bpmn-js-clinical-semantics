@@ -41,7 +41,7 @@ function extractConcepts(items, systemUri, version, concepts) {
  * `hl7.terminology.r4`, but it also works with any other FHIR CodeSystem JSON.
  *
  * @param {import('@types/fhir').fhir4.CodeSystem} codeSystem
- * @param {{ id?: string, displayName?: string, systemUri?: string }} [options]
+ * @param {{ id?: string, displayName?: string, systemUri?: string, version?: string }} [options]
  * @returns {StaticProvider}
  */
 export function createStaticProviderFromCodeSystem(codeSystem, options = {}) {
@@ -57,6 +57,6 @@ export function createStaticProviderFromCodeSystem(codeSystem, options = {}) {
     options.displayName || codeSystem.title || codeSystem.name || codeSystem.id || codeSystem.url,
     options.systemUri || codeSystem.url,
     concepts,
-    codeSystem.version
+    options.version || codeSystem.version
   );
 }

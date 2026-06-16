@@ -3,7 +3,7 @@ import {
   createIheXdsTypeCodeProvider,
   SnomedCtProvider,
   createKdlProvider,
-  createPackageCollectionProvider,
+  createPackageProvider,
   createTerminologyModule,
   createTerminologyServices
 } from '@bpmn-js-clinical-semantics/terminology';
@@ -15,6 +15,13 @@ const HL7_PACKAGE_CODE_SYSTEMS = Object.values(import.meta.glob(
     import: 'default'
   }
 ));
+
+const HL7_PACKAGE_PROVIDERS = HL7_PACKAGE_CODE_SYSTEMS.map(codeSystem =>
+  createPackageProvider({
+    packageName: 'hl7.terminology.r4',
+    codeSystem
+  })
+);
 
 const DEFAULT_FHIR_BASE_URL = import.meta.env.VITE_FHIR_BASE_URL || 'https://r4.ontoserver.csiro.au/fhir';
 // const DEFAULT_FHIR_BASE_URL = import.meta.env.VITE_FHIR_BASE_URL || 'https://implementation-demo.snomedtools.org/snowstorm-lite/fhir';
@@ -84,13 +91,9 @@ export async function createDemoTerminologyServices() {
         baseUrl: DEFAULT_SNOWSTORM_BASE_URL,
         branch: 'MAIN',
         languageStrategy: 'header'
-      }),
-      createPackageCollectionProvider({
-        id: 'hl7-terminology-r4-package',
-        displayName: 'HL7 Terminology R4 Package',
-        codeSystems: HL7_PACKAGE_CODE_SYSTEMS
       })
     ],
+    packageProviders: HL7_PACKAGE_PROVIDERS,
     fhirProviders: FHIR_PROVIDER_CONFIGS,
     loaderConfig: {
       fhirBaseUrl: DEFAULT_FHIR_BASE_URL

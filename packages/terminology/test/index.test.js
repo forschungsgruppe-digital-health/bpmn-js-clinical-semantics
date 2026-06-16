@@ -61,6 +61,11 @@ describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
     expect(mod.StaticProvider).toBeDefined();
   });
 
+  it('should export PackageProvider', async () => {
+    const mod = await import('../src/providers/PackageProvider.js');
+    expect(mod.PackageProvider).toBeDefined();
+  });
+
   it('should export FallbackProvider', async () => {
     const mod = await import('../src/providers/FallbackProvider.js');
     expect(mod.FallbackProvider).toBeDefined();
@@ -102,6 +107,7 @@ describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
 
   it('should export TerminologyServices helpers', async () => {
     const mod = await import('../src/services/TerminologyServices.js');
+    expect(mod.createPackageProvider).toBeDefined();
     expect(mod.createPackageTerminologyProvider).toBeDefined();
     expect(mod.createPackageCollectionProvider).toBeDefined();
     expect(mod.createPackageFallbackProvider).toBeDefined();
