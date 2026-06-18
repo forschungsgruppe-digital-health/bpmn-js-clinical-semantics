@@ -39,3 +39,6 @@ coverage/
 
 # Package tarballs
 *.tgz
+
+# Local-only analysis report (intentionally not committed)
+/CODE-HEALTH-TOOLING-REPORT.md
