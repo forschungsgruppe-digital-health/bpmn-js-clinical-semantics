@@ -408,14 +408,15 @@ Configuration lives in [`release-please-config.json`](release-please-config.json
    - `feat:` → MINOR (`0.1.0` → `0.2.0`)
    - `feat!:` or a `BREAKING CHANGE:` footer → MAJOR (`0.1.0` → `1.0.0`)
    - `docs:`, `refactor:`, `chore:`, `test:`, … → no release on their own.
-2. **release-please opens (and keeps updating) a single release PR** titled like
-   `chore: release 0.2.0`. It bumps all three publishable packages — `terminology`,
-   `fhir-mapping`, `vue` — to the **same** version (lockstep, via the `linked-versions` plugin),
-   updates each `CHANGELOG.md`, updates `vue`'s peer-dependency ranges on the sibling packages
-   (`node-workspace` plugin), and updates `.release-please-manifest.json`.
-3. **A maintainer merges the release PR.** On merge, release-please creates one git tag and one
-   GitHub Release. Because `include-component-in-tag` is `false`, the tag is a plain `v<version>`
-   (e.g. `v0.2.0`) shared by all three packages.
+2. **release-please opens (and keeps updating) a single release PR** titled `chore: release main`.
+   It bumps the publishable package(s) that have releasable commits, updates each `CHANGELOG.md`,
+   updates `vue`'s peer-dependency ranges on the sibling packages (`node-workspace` plugin), and
+   updates `.release-please-manifest.json`. Packages released together are kept at the same version
+   (the `linked-versions` plugin) — see the lockstep note below.
+3. **A maintainer merges the release PR — with a _merge commit_, NOT a squash** (release-please needs
+   the merge commit on `main` to tag the release; squashing breaks tag creation). On merge,
+   release-please creates a git tag and a GitHub Release **per released package**
+   (`include-component-in-tag: true`), e.g. `vue-v0.1.2`.
 4. **The `publish` job runs automatically** (same workflow, gated on `releases_created`) and
    pushes all three packages to GitHub Packages (`https://npm.pkg.github.com`). No provenance
    attestation is produced — npm provenance is a public-npm-registry feature and is not supported

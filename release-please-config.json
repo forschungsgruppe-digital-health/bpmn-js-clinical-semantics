@@ -26,6 +26,6 @@
       "components": ["terminology", "fhir-mapping", "vue"]
     }
   ],
-  "include-component-in-tag": false,
+  "include-component-in-tag": true,
   "separate-pull-requests": false
 }
