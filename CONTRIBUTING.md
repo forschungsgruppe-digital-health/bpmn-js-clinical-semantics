@@ -423,10 +423,14 @@ Configuration lives in [`release-please-config.json`](release-please-config.json
 
 ### Lockstep versioning
 
-The three publishable packages are versioned together. If one has a `feat:` and another only a
-`fix:` in the same release window, the **highest** bump wins and all three move to that version.
-The private packages (the repo root `clinical-bpmn` and the `clinical-bpmn-demo` example) are
-never versioned or published — they are simply absent from `release-please-config.json`.
+The three publishable packages are kept in sync **when they are released together**: if several
+have releasable commits in the same window, the **highest** bump wins and those packages move to the
+same version (the `linked-versions` plugin). Practical limit to be aware of: release-please does
+**not** force-release a package that has *no* releasable commits, so a change touching only one
+package (e.g. a `fix:` in `vue`) bumps only that package — the versions reconcile on the next release
+that spans the group. The private packages (the repo root `clinical-bpmn` and the
+`clinical-bpmn-demo` example) are never versioned or published — they are simply absent from
+`release-please-config.json`.
 
 ### Publish scope
 
@@ -437,12 +441,11 @@ is `forschungsgruppe-digital-health` — they match, so `npm publish` to
 the registry for this scope as described in
 [Configuring npm for the GitHub registry](#configuring-npm-for-the-github-registry).
 
-### Current release state
+### Release history
 
-As of writing, **no release has been cut yet** — the three packages remain at `0.1.0` (pre-release)
-and nothing has been published to GitHub Packages. The first release happens automatically once a
-`feat:`/`fix:` commit lands on `main` and the resulting release PR is merged. This is intentional
-pre-release state, not a workflow fault.
+The **first** managed release is **v0.1.1**, driven by a `vue` fix: `vue` → 0.1.1, with
+`terminology` and `fhir-mapping` first-published at `0.1.0` (they had no releasable commits — see the
+lockstep note above). Subsequent releases follow the automated flow above.
 
 ### Ownership, hotfixes & deprecation
 
