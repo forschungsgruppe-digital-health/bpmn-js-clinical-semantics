@@ -12,6 +12,6 @@ npm run check:packages
 ```
 
 It enforces npm / bpmn.io publishing conventions: accepted name prefix
-(`@bpmn-js-clinical-semantics/*`, `bpmn-js-*`, or `bpmnlint-plugin-*`), ESM (`"type": "module"`),
+(`@forschungsgruppe-digital-health/*`, `bpmn-js-*`, or `bpmnlint-plugin-*`), ESM (`"type": "module"`),
 a declared license, an entry point (`main` / `exports`), peer dependencies, and the publish
 registry config (see `AGENTS.md`).

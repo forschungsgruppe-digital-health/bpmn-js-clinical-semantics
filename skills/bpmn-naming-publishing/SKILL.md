@@ -17,7 +17,7 @@ npm run check:packages        # node tools/check-package-conventions.mjs
 
 **Errors (block):**
 
-- Package name uses an accepted prefix: `@bpmn-js-clinical-semantics/*`,
+- Package name uses an accepted prefix: `@forschungsgruppe-digital-health/*`,
   `bpmn-js-*`, or `bpmnlint-plugin-*`.
 - `"type": "module"` — the repo ships raw ESM, no build step.
 - A `license` is declared (`Apache-2.0`).

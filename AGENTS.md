@@ -9,8 +9,8 @@ do not duplicate it.
 ## What this repo is
 
 Two independent bpmn-js extension libraries that add clinical semantics to BPMN
-2.0 via standard `<extensionElements>` — `@bpmn-js-clinical-semantics/terminology`
-(`term:`) and `@bpmn-js-clinical-semantics/fhir-mapping` (`fhirmap:`), plus a Vue
+2.0 via standard `<extensionElements>` — `@forschungsgruppe-digital-health/terminology`
+(`term:`) and `@forschungsgruppe-digital-health/fhir-mapping` (`fhirmap:`), plus a Vue
 wrapper. npm-workspaces monorepo, raw ESM (no build step for libraries), JS +
 JSDoc, Vitest. Setup and commands: `CONTRIBUTING.md`.
 
@@ -73,7 +73,7 @@ location; the skills above are the shared, repo-committed equivalent. See [`skil
 ## Conventions (enforced or expected)
 
 - ESM only (`"type": "module"`); JS + JSDoc, no TypeScript.
-- Package names: `@bpmn-js-clinical-semantics/*` (or `bpmn-js-*` / `bpmnlint-plugin-*`).
+- Package names: `@forschungsgruppe-digital-health/*` (or `bpmn-js-*` / `bpmnlint-plugin-*`).
 - Conventional Commits; scope = package name (`terminology`, `fhir-mapping`, `vue`, `demo`).
 - `npm install --legacy-peer-deps` (overlapping bpmn-js peer ranges).
 

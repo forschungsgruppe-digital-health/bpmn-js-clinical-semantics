@@ -70,7 +70,7 @@ Both annotation layers are stored as BPMN 2.0 `extensionElements` in the standar
 ```mermaid
 graph TB
     subgraph "Monorepo: bpmn-js-clinical-semantics"
-        subgraph "Package: @bpmn-js-clinical-semantics/terminology"
+        subgraph "Package: @forschungsgruppe-digital-health/terminology"
             direction TB
             TR[TerminologyRegistry]
             TP_IFACE["TerminologyProvider\n(Interface)"]
@@ -85,7 +85,7 @@ graph TB
             THELPER[AnnotationHelper]
         end
 
-        subgraph "Package: @bpmn-js-clinical-semantics/fhir-mapping"
+        subgraph "Package: @forschungsgruppe-digital-health/fhir-mapping"
             direction TB
             FMODDLE["moddle: fhir-mapping.json\n(fhirmap: namespace)"]
             FPANEL["FhirMappingProperties\nProvider"]
@@ -93,7 +93,7 @@ graph TB
             FTYPES["Types\nFHIR_RESOURCE_TYPES\nSEMANTIC_ROLES"]
         end
 
-        subgraph "Package: @bpmn-js-clinical-semantics/vue"
+        subgraph "Package: @forschungsgruppe-digital-health/vue"
             direction TB
             UT[useTerminology]
             UFM[useFhirMapping]
@@ -303,7 +303,7 @@ classDiagram
 bpmn-js-clinical-semantics/
 |
 +-- packages/
-|   +-- terminology/                  @bpmn-js-clinical-semantics/terminology
+|   +-- terminology/                  @forschungsgruppe-digital-health/terminology
 |   |   +-- src/
 |   |   |   +-- core/                 TerminologyProvider (interface), TerminologyRegistry, types
 |   |   |   +-- adapters/             SnowstormAdapter, FhirTerminologyAdapter
@@ -314,7 +314,7 @@ bpmn-js-clinical-semantics/
 |   |   |   +-- services/             AnnotationHelper (read/write annotations on businessObjects)
 |   |   +-- test/                     Unit tests (139 tests)
 |   |
-|   +-- fhir-mapping/                 @bpmn-js-clinical-semantics/fhir-mapping
+|   +-- fhir-mapping/                 @forschungsgruppe-digital-health/fhir-mapping
 |   |   +-- src/
 |   |   |   +-- core/                 types (FHIR_RESOURCE_TYPES, INTERACTIONS, DIRECTIONS, SEMANTIC_ROLES)
 |   |   |   +-- moddle/               fhir-mapping.json  -- BPMN moddle extension (fhirmap: namespace)
@@ -322,7 +322,7 @@ bpmn-js-clinical-semantics/
 |   |   |   +-- services/             MappingHelper (read/write/export FHIR mappings)
 |   |   +-- test/                     Unit tests (34 tests)
 |   |
-|   +-- vue/                          @bpmn-js-clinical-semantics/vue
+|   +-- vue/                          @forschungsgruppe-digital-health/vue
 |       +-- src/composables/          useTerminology(), useFhirMapping()
 |
 +-- examples/
@@ -350,7 +350,7 @@ bpmn-js-clinical-semantics/
 
 ## Package Details
 
-### `@bpmn-js-clinical-semantics/terminology`
+### `@forschungsgruppe-digital-health/terminology`
 
 Extensible terminology annotation engine. Each BPMN element can carry multiple annotations, each with:
 
@@ -372,7 +372,7 @@ Extensible terminology annotation engine. Each BPMN element can carry multiple a
 
 Adding a new terminology system requires zero changes to existing code. Implement `TerminologyProvider` and call `registry.register()`. For FHIR-hosted code systems, reuse `FhirProvider`. For small static code systems, use `StaticProvider`.
 
-### `@bpmn-js-clinical-semantics/fhir-mapping`
+### `@forschungsgruppe-digital-health/fhir-mapping`
 
 FHIR resource-level mapping. Each BPMN element can declare:
 
@@ -384,7 +384,7 @@ FHIR resource-level mapping. Each BPMN element can declare:
 - **`keyElements`** -- FHIRPath elements with semantic roles (`trigger`, `filter`, `classifier`, `identifier`, `payload`), fixed values, and terminology bindings
 - **`searchParams`** -- FHIR SearchParameters for `search`-type interactions
 
-### `@bpmn-js-clinical-semantics/vue`
+### `@forschungsgruppe-digital-health/vue`
 
 Thin Vue 3 wrapper providing `useTerminology()` and `useFhirMapping()` composables for building custom sidebars or search UIs. Both composables react to the bpmn-js selection and expose reactive state.
 
@@ -395,7 +395,7 @@ Thin Vue 3 wrapper providing `useTerminology()` and `useFhirMapping()` composabl
 ### Option A: FHIR-hosted code system (no custom adapter)
 
 ```js
-import { FhirProvider, TerminologyRegistry } from '@bpmn-js-clinical-semantics/terminology';
+import { FhirProvider, TerminologyRegistry } from '@forschungsgruppe-digital-health/terminology';
 
 const registry = new TerminologyRegistry();
 
@@ -410,7 +410,7 @@ registry.register(new FhirProvider({
 ### Option B: Static code system (no server)
 
 ```js
-import { StaticProvider } from '@bpmn-js-clinical-semantics/terminology';
+import { StaticProvider } from '@forschungsgruppe-digital-health/terminology';
 
 registry.register(new StaticProvider(
   'my-codes',
@@ -426,7 +426,7 @@ registry.register(new StaticProvider(
 ### Option C: Custom API (new adapter + provider)
 
 ```js
-import { TerminologyProvider } from '@bpmn-js-clinical-semantics/terminology';
+import { TerminologyProvider } from '@forschungsgruppe-digital-health/terminology';
 
 class OncotreeProvider extends TerminologyProvider {
   get id() { return 'oncotree'; }

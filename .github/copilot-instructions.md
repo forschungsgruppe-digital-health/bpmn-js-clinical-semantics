@@ -40,5 +40,5 @@ command before proposing a commit or PR.
 - Clinical data goes only in `<extensionElements>` under the custom prefix (`term:` / `fhirmap:`),
   never in the `bpmn:` / `bpmndi:` namespace, and never by changing the BPMN core structure.
 - Renaming or removing a moddle type/property is a breaking (MAJOR) change and needs human sign-off.
-- ESM only; package names use `@bpmn-js-clinical-semantics/*` (or `bpmn-js-*` / `bpmnlint-plugin-*`).
+- ESM only; package names use `@forschungsgruppe-digital-health/*` (or `bpmn-js-*` / `bpmnlint-plugin-*`).
 - Install with `npm install --legacy-peer-deps`.

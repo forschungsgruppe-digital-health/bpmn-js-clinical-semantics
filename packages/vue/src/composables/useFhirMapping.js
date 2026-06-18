@@ -9,7 +9,7 @@ import { ref, inject } from 'vue';
 export function useFhirMapping() {
   let getResourceMappings;
   try {
-    ({ getResourceMappings } = require('@bpmn-js-clinical-semantics/fhir-mapping'));
+    ({ getResourceMappings } = require('@forschungsgruppe-digital-health/fhir-mapping'));
   } catch {
     getResourceMappings = () => [];
   }

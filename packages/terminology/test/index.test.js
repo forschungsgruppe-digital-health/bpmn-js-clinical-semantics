@@ -7,7 +7,7 @@ import { describe, it, expect } from 'vitest';
  * resolved in a pure unit-test environment.
  */
 
-describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
+describe('@forschungsgruppe-digital-health/terminology – core exports', () => {
   it('should export FHIR version configuration', async () => {
     const mod = await import('../src/core/fhir-version.js');
     expect(mod.ACTIVE_FHIR_VERSION).toBeDefined();

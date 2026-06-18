@@ -1,5 +1,5 @@
 {
-  "name": "@bpmn-js-clinical-semantics/vue",
+  "name": "@forschungsgruppe-digital-health/vue",
   "version": "0.1.0",
   "description": "Vue 3 wrapper and composables for clinical BPMN extensions",
   "type": "module",
@@ -9,12 +9,12 @@
     "bpmn-js": ">=15.0.0",
     "bpmn-js-properties-panel": ">=5.0.0",
     "@bpmn-io/properties-panel": ">=3.0.0",
-    "@bpmn-js-clinical-semantics/terminology": ">=0.1.0",
-    "@bpmn-js-clinical-semantics/fhir-mapping": ">=0.1.0"
+    "@forschungsgruppe-digital-health/terminology": ">=0.1.0",
+    "@forschungsgruppe-digital-health/fhir-mapping": ">=0.1.0"
   },
   "peerDependenciesMeta": {
-    "@bpmn-js-clinical-semantics/terminology": { "optional": true },
-    "@bpmn-js-clinical-semantics/fhir-mapping": { "optional": true }
+    "@forschungsgruppe-digital-health/terminology": { "optional": true },
+    "@forschungsgruppe-digital-health/fhir-mapping": { "optional": true }
   },
   "license": "Apache-2.0",
   "repository": {

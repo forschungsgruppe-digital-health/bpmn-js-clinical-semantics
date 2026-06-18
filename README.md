@@ -39,7 +39,7 @@ For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE
 
 ## Features
 
-### Terminology Annotations (`@bpmn-js-clinical-semantics/terminology`)
+### Terminology Annotations (`@forschungsgruppe-digital-health/terminology`)
 
 - [x] Multi-code annotation of any BPMN element (Tasks, DataObjects, Events, Gateways, MessageFlows)
 - [x] Pluggable provider architecture with built-in support for SNOMED CT (via Snowstorm), any FHIR-hosted code system (LOINC, ICD-10-GM, OPS, ATC, ICD-O-3), IHE XDS classCode/typeCode, and KDL
@@ -54,7 +54,7 @@ For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE
 - [ ] Import terminology bindings from existing FHIR profiles
 - [ ] Bulk export of annotations as FHIR CodeSystem/ValueSet resources
 
-### FHIR Resource Mapping (`@bpmn-js-clinical-semantics/fhir-mapping`)
+### FHIR Resource Mapping (`@forschungsgruppe-digital-health/fhir-mapping`)
 
 - [x] Resource-level FHIR mapping (resourceType, profile URL, interaction, direction)
 - [x] Key element binding with FHIRPath expressions, semantic roles, fixed values, and terminology bindings
@@ -66,7 +66,7 @@ For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE
 - [ ] FHIR R5 SubscriptionTopic support
 - [ ] Automated conformance checking against FHIR profiles
 
-### Vue Integration (`@bpmn-js-clinical-semantics/vue`)
+### Vue Integration (`@forschungsgruppe-digital-health/vue`)
 
 - [x] `useTerminology()` and `useFhirMapping()` composables for Vue 3
 - [ ] Additional framework integrations (React, Angular)
@@ -86,9 +86,9 @@ For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE
 
 | Package | Description | Install |
 |---|---|---|
-| [`@bpmn-js-clinical-semantics/terminology`](packages/terminology/) | Terminology annotation engine, providers, moddle extension, properties panel | `npm i @bpmn-js-clinical-semantics/terminology` |
-| [`@bpmn-js-clinical-semantics/fhir-mapping`](packages/fhir-mapping/) | FHIR resource mapping, moddle extension, properties panel | `npm i @bpmn-js-clinical-semantics/fhir-mapping` |
-| [`@bpmn-js-clinical-semantics/vue`](packages/vue/) | Vue 3 composables (`useTerminology`, `useFhirMapping`) | `npm i @bpmn-js-clinical-semantics/vue` |
+| [`@forschungsgruppe-digital-health/terminology`](packages/terminology/) | Terminology annotation engine, providers, moddle extension, properties panel | `npm i @forschungsgruppe-digital-health/terminology` |
+| [`@forschungsgruppe-digital-health/fhir-mapping`](packages/fhir-mapping/) | FHIR resource mapping, moddle extension, properties panel | `npm i @forschungsgruppe-digital-health/fhir-mapping` |
+| [`@forschungsgruppe-digital-health/vue`](packages/vue/) | Vue 3 composables (`useTerminology`, `useFhirMapping`) | `npm i @forschungsgruppe-digital-health/vue` |
 
 Either package can be installed independently. The Vue package is optional and only needed for Vue 3 projects.
 
@@ -106,7 +106,7 @@ Packages are published to the [GitHub Package Registry](https://docs.github.com/
 ### Install
 
 ```bash
-npm install @bpmn-js-clinical-semantics/terminology @bpmn-js-clinical-semantics/fhir-mapping
+npm install @forschungsgruppe-digital-health/terminology @forschungsgruppe-digital-health/fhir-mapping
 ```
 
 ### Integrate into your bpmn-js modeler
@@ -121,12 +121,12 @@ import {
 import {
   TerminologyModdleDescriptor,
   TerminologyPropertiesPanelModule
-} from '@bpmn-js-clinical-semantics/terminology';
+} from '@forschungsgruppe-digital-health/terminology';
 
 import {
   FhirMappingModdleDescriptor,
   FhirMappingPropertiesPanelModule
-} from '@bpmn-js-clinical-semantics/fhir-mapping';
+} from '@forschungsgruppe-digital-health/fhir-mapping';
 
 const modeler = new BpmnModeler({
   container: '#canvas',
@@ -155,7 +155,7 @@ import {
   createKdlProvider,
   addAnnotation,
   ASPECTS
-} from '@bpmn-js-clinical-semantics/terminology';
+} from '@forschungsgruppe-digital-health/terminology';
 
 // Set up providers
 const registry = new TerminologyRegistry();

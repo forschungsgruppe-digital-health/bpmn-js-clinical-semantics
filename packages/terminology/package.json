@@ -1,5 +1,5 @@
 {
-  "name": "@bpmn-js-clinical-semantics/terminology",
+  "name": "@forschungsgruppe-digital-health/terminology",
   "version": "0.1.0",
   "description": "Extensible semantic terminology annotations for BPMN process models",
   "type": "module",

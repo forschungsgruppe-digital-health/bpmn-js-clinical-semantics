@@ -57,9 +57,9 @@ This is a **monorepo** managed with [npm workspaces](https://docs.npmjs.com/cli/
 
 | Workspace | Package name | Purpose |
 |---|---|---|
-| `packages/terminology` | `@bpmn-js-clinical-semantics/terminology` | Terminology annotation engine, providers, adapters, moddle extension, properties panel |
-| `packages/fhir-mapping` | `@bpmn-js-clinical-semantics/fhir-mapping` | FHIR resource mapping, moddle extension, properties panel |
-| `packages/vue` | `@bpmn-js-clinical-semantics/vue` | Vue 3 composables (optional framework integration) |
+| `packages/terminology` | `@forschungsgruppe-digital-health/terminology` | Terminology annotation engine, providers, adapters, moddle extension, properties panel |
+| `packages/fhir-mapping` | `@forschungsgruppe-digital-health/fhir-mapping` | FHIR resource mapping, moddle extension, properties panel |
+| `packages/vue` | `@forschungsgruppe-digital-health/vue` | Vue 3 composables (optional framework integration) |
 | `examples/vanilla` | `clinical-bpmn-demo` (private) | Interactive demo app, not published |
 
 ### Key files
@@ -348,14 +348,14 @@ The workflow first runs the full test suite on Node 18 and 20. On success, it in
 
 ### Package registry
 
-Packages are published to the **GitHub Package Registry** under the `@bpmn-js-clinical-semantics` scope.
+Packages are published to the **GitHub Package Registry** under the `@forschungsgruppe-digital-health` scope.
 
 ### Configuring npm for the GitHub registry
 
 Add to your project's `.npmrc` (or create one):
 
 ```ini
-@bpmn-js-clinical-semantics:registry=https://npm.pkg.github.com
+@forschungsgruppe-digital-health:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
@@ -371,16 +371,16 @@ Each package defines explicit `exports` in its `package.json`. Consumers can imp
 
 ```js
 // Main entry point
-import { ... } from '@bpmn-js-clinical-semantics/terminology';
+import { ... } from '@forschungsgruppe-digital-health/terminology';
 
 // Moddle descriptor (for moddleExtensions config)
-import descriptor from '@bpmn-js-clinical-semantics/terminology/moddle';
+import descriptor from '@forschungsgruppe-digital-health/terminology/moddle';
 
 // Properties panel module (for additionalModules config)
-import module from '@bpmn-js-clinical-semantics/terminology/properties-panel';
+import module from '@forschungsgruppe-digital-health/terminology/properties-panel';
 
 // Preset factory functions
-import { createKdlProvider } from '@bpmn-js-clinical-semantics/terminology/providers/presets';
+import { createKdlProvider } from '@forschungsgruppe-digital-health/terminology/providers/presets';
 ```
 
 ---
@@ -421,14 +421,14 @@ The three publishable packages are versioned together. If one has a `feat:` and 
 The private packages (the repo root `clinical-bpmn` and the `clinical-bpmn-demo` example) are
 never versioned or published — they are simply absent from `release-please-config.json`.
 
-### One-time prerequisite (publish scope)
+### Publish scope
 
-> ⚠️ GitHub Packages requires the npm scope (`@bpmn-js-clinical-semantics`) to **match the owning
-> GitHub account/organization name** (lowercased). The repository owner is
-> `forschungsgruppe-digital-health`, which does **not** match. Until the repo is owned by an
-> account/org literally named `bpmn-js-clinical-semantics`, **or** the three packages are renamed
-> to `@forschungsgruppe-digital-health/*`, the `npm publish` steps will fail with `403`/`404`. The
-> release-PR / tagging / GitHub-Release steps are unaffected; only the registry push depends on this.
+GitHub Packages requires the npm scope to **match the owning GitHub account/organization name**
+(lowercased). The packages are scoped `@forschungsgruppe-digital-health/*` and the repository owner
+is `forschungsgruppe-digital-health` — they match, so `npm publish` to
+`https://npm.pkg.github.com` is authorized with the workflow's `GITHUB_TOKEN`. Consumers configure
+the registry for this scope as described in
+[Configuring npm for the GitHub registry](#configuring-npm-for-the-github-registry).
 
 ---
 

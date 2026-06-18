@@ -41,13 +41,10 @@ jobs:
           node-version: 20
           registry-url: https://npm.pkg.github.com
           # MUST be the package-name scope so setup-node writes
-          # `@bpmn-js-clinical-semantics:registry=https://npm.pkg.github.com` into .npmrc.
-          # NOTE: GitHub Packages requires this scope to equal the owning org/user name
-          # (lowercased). The repo owner is `forschungsgruppe-digital-health`, which does
-          # NOT match `@bpmn-js-clinical-semantics` — the publish steps will 403/404 until
-          # the scope and the owning account are reconciled (see CONTRIBUTING.md →
-          # "Releasing with release-please"). Tagging / GitHub Release are unaffected.
-          scope: "@bpmn-js-clinical-semantics"
+          # `@forschungsgruppe-digital-health:registry=https://npm.pkg.github.com` into .npmrc.
+          # This scope matches the owning org `forschungsgruppe-digital-health`, which is what
+          # GitHub Packages requires (scope == owning account, lowercased) for publish to succeed.
+          scope: "@forschungsgruppe-digital-health"
 
       - run: npm ci --legacy-peer-deps
 

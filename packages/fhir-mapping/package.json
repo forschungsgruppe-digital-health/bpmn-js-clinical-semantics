@@ -1,5 +1,5 @@
 {
-  "name": "@bpmn-js-clinical-semantics/fhir-mapping",
+  "name": "@forschungsgruppe-digital-health/fhir-mapping",
   "version": "0.1.0",
   "description": "FHIR resource mapping for BPMN process models with FHIRPath targets",
   "type": "module",

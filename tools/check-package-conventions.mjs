@@ -7,7 +7,7 @@
  *
  *   ERROR (exit 1):
  *     - name uses an accepted prefix:
- *         @bpmn-js-clinical-semantics/*  |  bpmn-js-*  |  bpmnlint-plugin-*
+ *         @forschungsgruppe-digital-health/*  |  bpmn-js-*  |  bpmnlint-plugin-*
  *     - "type": "module"            (the repo ships raw ESM, no build step)
  *     - a license is declared
  *     - has an entry point          (main and/or exports)
@@ -31,7 +31,7 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const packagesDir = join(repoRoot, 'packages');
 
 const ACCEPTED_NAME = (name) =>
-  name.startsWith('@bpmn-js-clinical-semantics/') ||
+  name.startsWith('@forschungsgruppe-digital-health/') ||
   name.startsWith('bpmn-js-') ||
   name.startsWith('bpmnlint-plugin-');
 
@@ -81,7 +81,7 @@ for (const file of files) {
     err(
       label,
       `name "${pkg.name}" does not match an accepted prefix ` +
-        '(@bpmn-js-clinical-semantics/*, bpmn-js-*, bpmnlint-plugin-*)'
+        '(@forschungsgruppe-digital-health/*, bpmn-js-*, bpmnlint-plugin-*)'
     );
 
   if (!pkg.license) err(label, 'missing "license"');

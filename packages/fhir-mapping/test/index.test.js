@@ -7,7 +7,7 @@ import { describe, it, expect } from 'vitest';
  * resolved in a pure unit-test environment.
  */
 
-describe('@bpmn-js-clinical-semantics/fhir-mapping – core exports', () => {
+describe('@forschungsgruppe-digital-health/fhir-mapping – core exports', () => {
   it('should export FHIR type constants', async () => {
     const mod = await import('../src/core/types.js');
     expect(mod.FHIR_RESOURCE_TYPES).toBeDefined();

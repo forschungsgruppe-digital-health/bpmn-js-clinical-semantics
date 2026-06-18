@@ -431,8 +431,8 @@ This is a deliberate design choice (see [AGENTS.md](AGENTS.md) hard rules): clin
 
 | Package (npm name) | Prefix | moddle `name` | Namespace URI | `xml.tagAlias` |
 |---|---|---|---|---|
-| `@bpmn-js-clinical-semantics/terminology` | `term:` | `ClinicalTerminology` | `https://clinical-bpmn.org/terminology/v1` | `lowerCase` |
-| `@bpmn-js-clinical-semantics/fhir-mapping` | `fhirmap:` | `FhirMapping` | `https://clinical-bpmn.org/fhir-mapping/v1` | `lowerCase` |
+| `@forschungsgruppe-digital-health/terminology` | `term:` | `ClinicalTerminology` | `https://clinical-bpmn.org/terminology/v1` | `lowerCase` |
+| `@forschungsgruppe-digital-health/fhir-mapping` | `fhirmap:` | `FhirMapping` | `https://clinical-bpmn.org/fhir-mapping/v1` | `lowerCase` |
 
 Both descriptors use the two structural idioms from §6a:
 
@@ -523,16 +523,16 @@ Both packages use the canonical three-subpath `exports` plus a barrel that re-ex
 
 ```javascript
 // subpath style
-import descriptor from '@bpmn-js-clinical-semantics/terminology/moddle';
-import panel      from '@bpmn-js-clinical-semantics/terminology/properties-panel';
+import descriptor from '@forschungsgruppe-digital-health/terminology/moddle';
+import panel      from '@forschungsgruppe-digital-health/terminology/properties-panel';
 
 // named (barrel) style — what the README quick start uses
 import {
   TerminologyModdleDescriptor, TerminologyPropertiesPanelModule
-} from '@bpmn-js-clinical-semantics/terminology';
+} from '@forschungsgruppe-digital-health/terminology';
 import {
   FhirMappingModdleDescriptor, FhirMappingPropertiesPanelModule
-} from '@bpmn-js-clinical-semantics/fhir-mapping';
+} from '@forschungsgruppe-digital-health/fhir-mapping';
 ```
 
 A consumer wires both extensions exactly as the abstract types describe — `moddleExtensions` keyed by prefix registers the XML schema (a), `additionalModules` registers the panel providers (c) (see [README § Quick Start](README.md#quick-start)):

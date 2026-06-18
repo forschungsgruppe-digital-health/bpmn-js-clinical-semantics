@@ -4,17 +4,17 @@ import {
   BpmnPropertiesProviderModule
 } from 'bpmn-js-properties-panel';
 
-// ─── Import from @bpmn-js-clinical-semantics/terminology ──────────────────
+// ─── Import from @forschungsgruppe-digital-health/terminology ──────────────────
 import {
   TerminologyModdleDescriptor,
   TerminologyPropertiesPanelModule
-} from '@bpmn-js-clinical-semantics/terminology';
+} from '@forschungsgruppe-digital-health/terminology';
 
-// ─── Import from @bpmn-js-clinical-semantics/fhir-mapping ────────────────
+// ─── Import from @forschungsgruppe-digital-health/fhir-mapping ────────────────
 import {
   FhirMappingModdleDescriptor,
   FhirMappingPropertiesPanelModule
-} from '@bpmn-js-clinical-semantics/fhir-mapping';
+} from '@forschungsgruppe-digital-health/fhir-mapping';
 
 // ─── CSS ─────────────────────────────────────────────────────
 import 'bpmn-js/dist/assets/diagram-js.css';
