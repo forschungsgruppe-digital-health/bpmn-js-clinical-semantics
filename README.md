@@ -3,8 +3,15 @@
 [![CI](https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics/actions/workflows/ci.yml/badge.svg)](https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A518-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+![Status](https://img.shields.io/badge/status-under%20development-orange.svg)
 
 **Semantic clinical annotations and FHIR resource mapping for BPMN process models.**
+
+> ⚠️ **Status: under active development — not for production use.**
+> This is a **research prototype** developed in the MiHUB project (TU Dresden / Forschungsgruppe
+> Digital Health). The public API, the moddle schema, and the published packages may change without
+> notice, and the libraries have not been production-hardened or independently security-reviewed.
+> **Do not use it to process real patient data — only synthetic test data.**
 
 Two independent [bpmn-js](https://github.com/bpmn-io/bpmn-js) extension libraries that add clinical context to BPMN diagrams without modifying the BPMN standard. Each library provides a moddle extension (for XML serialization) and a properties panel provider (for interactive editing). Both annotation layers are stored as standard BPMN 2.0 `extensionElements`, preserving full backwards compatibility with every BPMN engine and viewer.
 
