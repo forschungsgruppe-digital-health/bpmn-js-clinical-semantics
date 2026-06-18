@@ -13,3 +13,7 @@ _Summarizes fundamental design decisions and strategies that form the cornerston
 **Provider/Adapter pattern for terminology access.** The `TerminologyProvider` interface defines a uniform contract (search, lookup, validate, getHierarchy). Concrete providers (`SnomedCtProvider`, `FhirProvider`, `StaticProvider`) implement this interface and optionally delegate to protocol-specific adapters (`SnowstormAdapter`, `FhirTerminologyAdapter`). This two-layer design means a new terminology system can often be added by configuring an existing adapter rather than writing an entirely new provider.
 
 **Registry as a facade.** The `TerminologyRegistry` aggregates all providers and exposes `search`, `searchAll`, `lookup`, and `validate` as a single entry point. The properties panel depends on this abstraction, not on individual providers (Dependency Inversion Principle).
+
+---
+
+[← Architecture index](../ARCHITECTURE.md)

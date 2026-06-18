@@ -75,3 +75,7 @@ graph TB
     style TR fill:#059669,color:#fff
     style TP_IFACE fill:#059669,color:#fff
 ```
+
+---
+
+[← Architecture index](../ARCHITECTURE.md)

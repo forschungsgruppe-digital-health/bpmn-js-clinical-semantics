@@ -170,3 +170,7 @@ FHIR resource-level mapping. Each BPMN element can declare:
 ### `@forschungsgruppe-digital-health/vue`
 
 Thin Vue 3 wrapper providing `useTerminology()` and `useFhirMapping()` composables for building custom sidebars or search UIs. Both composables react to the bpmn-js selection and expose reactive state.
+
+---
+
+[← Architecture index](../ARCHITECTURE.md)

@@ -189,3 +189,7 @@ The two namespaces (`term:` and `fhirmap:`) are independent. Non-clinical BPMN t
 | **Interface Segregation** | `TerminologyProvider` has four methods (`search`, `lookup`, `validate`, `getHierarchy`), two of which have default implementations. The `capabilities` object declares which methods are meaningful. |
 | **Dependency Inversion** | The properties panel depends on `TerminologyRegistry` (abstraction), not on `SnomedCtProvider` (implementation). Adapters are injected into providers via constructor configuration. |
 | **Separation of Concerns** | Terminology annotations and FHIR mappings are separate packages with separate moddle namespaces. They can be used independently or together. |
+
+---
+
+[← Architecture index](../ARCHITECTURE.md)

@@ -278,3 +278,7 @@ These user stories define the minimum viable product for the FHIR resource mappi
 | P2 | US-F13 Mapping validation | 5 | US-F10, US-F11 |
 
 **Total MVP Story Points:** 67
+
+---
+
+[← Project README](../../README.md)

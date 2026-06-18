@@ -23,4 +23,7 @@ The architecture documentation follows the [arc42](https://arc42.org/) template 
 | 11 | Risks and Technical Debt | [architecture/11_risks_and_technical_debt.md](architecture/11_risks_and_technical_debt.md) |
 | 12 | Glossary | [architecture/12_glossary.md](architecture/12_glossary.md) |
 
+**Status:** chapters **1, 3, 4, 5, 8** carry the current content; chapters **2, 6, 7, 9, 10, 11, 12**
+are arc42 placeholders (_"Not yet documented"_) to be filled as the project matures.
+
 > The arc42 template is licensed under Creative Commons. See [arc42.org](https://arc42.org/), the [official documentation](https://docs.arc42.org/), and the [template repository](https://github.com/arc42/arc42-template) for details on each chapter's purpose.

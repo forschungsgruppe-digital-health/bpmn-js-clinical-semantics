@@ -210,3 +210,7 @@ These user stories define the minimum viable product for the terminology annotat
 | P2 | US-T11 FHIR version config | 2 | — |
 
 **Total MVP Story Points:** 46
+
+---
+
+[← Project README](../../README.md)

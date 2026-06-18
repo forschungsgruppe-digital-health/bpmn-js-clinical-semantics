@@ -44,7 +44,7 @@ The `--legacy-peer-deps` flag is required because bpmn-js and bpmn-js-properties
 ### Verify the setup
 
 ```bash
-npm test       # Run all tests (173 tests across 2 packages)
+npm test       # Run all tests (terminology + fhir-mapping)
 npm run build  # Build the demo app to docs/
 npm run dev    # Start the dev server at http://localhost:5173
 ```
@@ -176,6 +176,7 @@ npx vitest --watch                                 # Watch mode (from a package 
 - **Mock fetch for adapter/provider tests.** Pass a `fetchFn` parameter to providers and adapters to inject mock implementations. See `test/adapters/SnowstormAdapter.test.js` for examples.
 - **Mock moddle for helper tests.** Create a minimal `{ create(type, props) { return { $type: type, ...props }; } }` mock. See `test/services/AnnotationHelper.test.js`.
 - **Properties panel modules are excluded from unit tests** because they depend on bpmn-js peer dependencies that are not fully available in the test environment. UI-level testing should be done via the demo app or integration tests.
+- **The `vue` package has no unit tests** for the same reason — its composables wrap a live bpmn-js modeler instance, so they are exercised through the demo app (`examples/vanilla`) rather than Vitest.
 
 ### Test coverage targets
 
@@ -244,7 +245,12 @@ against the BPMN core XSD in the editor.
 
 `skills/bpmn-conformance`, `skills/moddle-extension-review` and
 `skills/bpmn-naming-publishing` orchestrate these same tools (vendor-neutral
-`SKILL.md`; Claude Code discovers them via `.claude/skills`).
+`SKILL.md`; Claude Code discovers them via `.claude/skills`, Codex/Copilot via `.agents/skills`).
+
+The repo also vendors general **code-health skills** (detection-only): `dead-code-detector`,
+`feature-inventarist`, `docs-auditor`, `security-reviewer`, `arc42-generator`, `test-generator`,
+plus slash-commands under `.claude/commands/`. See [`skills/README.md`](skills/README.md) for what
+each does and when to invoke it.
 
 ---
 
@@ -262,6 +268,7 @@ against the BPMN core XSD in the editor.
 - Never push directly to `main`. Always use pull requests.
 - Keep feature branches short-lived (days, not weeks).
 - Rebase on `main` before merging to keep history linear.
+- PRs target `main`. CI and the conformance gate run on `main` and on PRs-to-`main`; the GitHub Pages deploy and release-please run on `main` pushes only.
 
 ---
 
@@ -359,7 +366,7 @@ Add to your project's `.npmrc` (or create one):
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-For local development, set `GITHUB_TOKEN` to a personal access token with `read:packages` scope. For CI publishing, use the `GITHUB_TOKEN` secret available in GitHub Actions.
+For local development, set `GITHUB_TOKEN` to a personal access token with `read:packages` scope. For CI publishing, use the `GITHUB_TOKEN` secret available in GitHub Actions. The CI path needs no manual `.npmrc`: the release-please publish job's `actions/setup-node` step (with `registry-url` + `scope: "@forschungsgruppe-digital-health"`) writes it, and `NODE_AUTH_TOKEN` is the workflow's `secrets.GITHUB_TOKEN` — see [`.github/workflows/release-please.yml`](.github/workflows/release-please.yml).
 
 ### What gets published
 
@@ -429,6 +436,29 @@ is `forschungsgruppe-digital-health` — they match, so `npm publish` to
 `https://npm.pkg.github.com` is authorized with the workflow's `GITHUB_TOKEN`. Consumers configure
 the registry for this scope as described in
 [Configuring npm for the GitHub registry](#configuring-npm-for-the-github-registry).
+
+### Current release state
+
+As of writing, **no release has been cut yet** — the three packages remain at `0.1.0` (pre-release)
+and nothing has been published to GitHub Packages. The first release happens automatically once a
+`feat:`/`fix:` commit lands on `main` and the resulting release PR is merged. This is intentional
+pre-release state, not a workflow fault.
+
+### Ownership, hotfixes & deprecation
+
+- **Ownership.** A repository maintainer (TU Dresden / Forschungsgruppe Digital Health) reviews and
+  merges the release PR. A moddle-descriptor change that renames or removes a type/property is a
+  **breaking (MAJOR)** change and needs an explicit maintainer sign-off before merge (see
+  [AGENTS.md](AGENTS.md) and the `moddle-extension-review` skill). This is a **human gate** — CI
+  validates schema correctness (bpmnlint + roundtrip) but does not auto-detect breaking changes.
+- **Hotfixes.** To patch an already-released version without shipping unrelated `main` work, branch
+  from the release tag (`git switch -c fix/x.y.z vX.Y.Z`), land the `fix:` there, and let
+  release-please cut the patch when it merges to `main`.
+- **Deprecation.** Mark a deprecated export/type in its JSDoc and the `CHANGELOG`, keep it for at
+  least one further MINOR release, and remove it only in a MAJOR bump.
+- **Peer ranges.** The `node-workspace` plugin auto-bumps `vue`'s `peerDependencies` on the sibling
+  packages during a release; keep `updatePeerDependencies: true` in `release-please-config.json` if
+  you edit it.
 
 ---
 

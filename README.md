@@ -80,12 +80,15 @@ For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE
 
 ### Tooling and Quality
 
-- [x] 173 unit tests covering core modules, adapters, providers, helpers, and public API
+- [x] Unit-test suite covering core modules, adapters, providers, helpers, and public API
 - [x] CI pipeline on Node 18 and 20
 - [x] GitHub Pages deployment of interactive demo
 - [ ] TypeScript type definitions (.d.ts)
 - [ ] End-to-end tests with bpmn-js integration
-- [ ] Automated release pipeline with changelog generation
+- [x] Automated release pipeline with changelog generation (release-please)
+
+> MVP scope and acceptance criteria for the terminology and FHIR-mapping features live in the
+> user stories under [`docs/user-stories/`](docs/user-stories/).
 
 ---
 
@@ -115,6 +118,12 @@ Packages are published to the [GitHub Package Registry](https://docs.github.com/
 ```bash
 npm install @forschungsgruppe-digital-health/terminology @forschungsgruppe-digital-health/fhir-mapping
 ```
+
+> ⚠️ These packages are published to **GitHub Packages**, not the public npm registry — configure the
+> `@forschungsgruppe-digital-health` scope first (see
+> [CONTRIBUTING.md](CONTRIBUTING.md#configuring-npm-for-the-github-registry)). They are pre-1.0 and no
+> release has been cut yet (see the status banner above), so a bare `npm install` will not resolve them
+> until the first release is published.
 
 ### Integrate into your bpmn-js modeler
 
@@ -181,7 +190,7 @@ addAnnotation(businessObject, moddle, {
 });
 ```
 
-For adding custom terminology systems (FHIR-hosted, static, or custom API), see [ARCHITECTURE.md -- Extending with a New Terminology System](ARCHITECTURE.md#extending-with-a-new-terminology-system).
+For adding custom terminology systems (FHIR-hosted, static, or custom API), see [architecture/08 — Extending with a New Terminology System](architecture/08_crosscutting_concepts.md#extending-with-a-new-terminology-system).
 
 ---
 
@@ -256,7 +265,7 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the full c
 git clone https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics.git
 cd bpmn-js-clinical-semantics
 npm install --legacy-peer-deps
-npm test        # 173 tests
+npm test        # run the test suite
 npm run dev     # interactive demo at http://localhost:5173
 ```
 

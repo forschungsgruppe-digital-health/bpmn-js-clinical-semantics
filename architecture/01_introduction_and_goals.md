@@ -33,3 +33,7 @@ Consider a university hospital modelling its lung cancer diagnostic pathway. The
 2. **FHIR resource mappings** (`fhirmap:` namespace) declare which FHIR resource type, profile, interaction pattern, and key elements a BPMN element represents. This enables downstream tooling to generate FHIR transaction bundles, StructureMap references, or SearchParameter queries directly from the process model.
 
 Both annotation layers are stored as BPMN 2.0 `extensionElements` in the standard XML format. Non-clinical BPMN tools simply ignore them; clinical tools can read and process them. The approach preserves full backwards compatibility with every BPMN 2.0 engine and viewer.
+
+---
+
+[← Architecture index](../ARCHITECTURE.md)  ·  [Developer primer (EXTENDING-BPMN-IO.md)](../EXTENDING-BPMN-IO.md)

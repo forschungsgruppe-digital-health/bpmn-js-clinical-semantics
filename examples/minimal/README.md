@@ -1,5 +1,8 @@
 # Minimal Example: Lung Cancer Treatment Decision
 
+> Part of **[bpmn-js-clinical-semantics](../../README.md)** — this annotated diagram is the default
+> example shown in the [live demo](../../README.md#demo-and-github-pages).
+
 This directory contains a minimal, self-contained example that demonstrates the mapping between BPMN process models and FHIR R4 resources. It is intended for onboarding new developers and for testing the `fhirmap:` extension.
 
 ## Clinical Scenario

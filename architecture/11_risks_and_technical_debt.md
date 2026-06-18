@@ -3,3 +3,7 @@
 _Identifies and prioritizes technical risks, vulnerabilities, and accumulated technical debt with suggested mitigation measures._
 
 _Not yet documented._
+
+---
+
+[← Architecture index](../ARCHITECTURE.md)
