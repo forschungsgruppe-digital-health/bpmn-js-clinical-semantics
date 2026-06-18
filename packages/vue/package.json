@@ -1,6 +1,6 @@
 {
   "name": "@forschungsgruppe-digital-health/vue",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Vue 3 wrapper and composables for clinical BPMN extensions",
   "type": "module",
   "main": "src/index.js",
