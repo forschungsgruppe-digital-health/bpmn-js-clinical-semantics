@@ -17,6 +17,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - [Pull Requests](#pull-requests)
 - [GitHub Pages Deployment](#github-pages-deployment)
 - [Packaging and Publishing](#packaging-and-publishing)
+- [Releasing with release-please](#releasing-with-release-please)
 - [Release Process](#release-process)
 - [Troubleshooting](#troubleshooting)
 
@@ -384,7 +385,58 @@ import { createKdlProvider } from '@bpmn-js-clinical-semantics/terminology/provi
 
 ---
 
+## Releasing with release-please
+
+Releases are automated with [release-please](https://github.com/googleapis/release-please)
+(manifest mode). You do **not** hand-edit version numbers or tag releases manually — you write
+[Conventional Commits](https://www.conventionalcommits.org/), and the tooling does the rest.
+Configuration lives in [`release-please-config.json`](release-please-config.json) and
+[`.release-please-manifest.json`](.release-please-manifest.json); the workflow is
+[`.github/workflows/release-please.yml`](.github/workflows/release-please.yml).
+
+### How the automated release works
+
+1. **Merge Conventional Commits to `main`.** Commit types map to SemVer:
+   - `fix:` → PATCH (`0.1.0` → `0.1.1`)
+   - `feat:` → MINOR (`0.1.0` → `0.2.0`)
+   - `feat!:` or a `BREAKING CHANGE:` footer → MAJOR (`0.1.0` → `1.0.0`)
+   - `docs:`, `refactor:`, `chore:`, `test:`, … → no release on their own.
+2. **release-please opens (and keeps updating) a single release PR** titled like
+   `chore: release 0.2.0`. It bumps all three publishable packages — `terminology`,
+   `fhir-mapping`, `vue` — to the **same** version (lockstep, via the `linked-versions` plugin),
+   updates each `CHANGELOG.md`, updates `vue`'s peer-dependency ranges on the sibling packages
+   (`node-workspace` plugin), and updates `.release-please-manifest.json`.
+3. **A maintainer merges the release PR.** On merge, release-please creates one git tag and one
+   GitHub Release. Because `include-component-in-tag` is `false`, the tag is a plain `v<version>`
+   (e.g. `v0.2.0`) shared by all three packages.
+4. **The `publish` job runs automatically** (same workflow, gated on `releases_created`) and
+   pushes all three packages to GitHub Packages (`https://npm.pkg.github.com`). No provenance
+   attestation is produced — npm provenance is a public-npm-registry feature and is not supported
+   on GitHub Packages.
+
+### Lockstep versioning
+
+The three publishable packages are versioned together. If one has a `feat:` and another only a
+`fix:` in the same release window, the **highest** bump wins and all three move to that version.
+The private packages (the repo root `clinical-bpmn` and the `clinical-bpmn-demo` example) are
+never versioned or published — they are simply absent from `release-please-config.json`.
+
+### One-time prerequisite (publish scope)
+
+> ⚠️ GitHub Packages requires the npm scope (`@bpmn-js-clinical-semantics`) to **match the owning
+> GitHub account/organization name** (lowercased). The repository owner is
+> `forschungsgruppe-digital-health`, which does **not** match. Until the repo is owned by an
+> account/org literally named `bpmn-js-clinical-semantics`, **or** the three packages are renamed
+> to `@forschungsgruppe-digital-health/*`, the `npm publish` steps will fail with `403`/`404`. The
+> release-PR / tagging / GitHub-Release steps are unaffected; only the registry push depends on this.
+
+---
+
 ## Release Process
+
+> **Superseded — releases are automated.** Use [Releasing with release-please](#releasing-with-release-please)
+> above. The steps below are retained only as a record of the **SemVer policy** and as a manual
+> fallback; do **not** run the `npm version`, `git tag`, or `npm publish` steps by hand anymore.
 
 ### Version numbering
 

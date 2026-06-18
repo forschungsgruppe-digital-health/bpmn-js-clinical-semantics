@@ -1,0 +1,66 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+# Single-workflow pattern: release-please opens/maintains the release PR; when that
+# PR is merged it tags + creates the GitHub Release, and the gated `publish` job
+# pushes the three packages to GitHub Packages. A separate publish workflow is not
+# needed — `releases_created` is read directly from the release-please step.
+permissions:
+  contents: write # create tags + GitHub Releases, commit version bumps
+  pull-requests: write # open/update the release PR
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+    steps:
+      - uses: googleapis/release-please-action@v5
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.releases_created == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # publish to GitHub Packages
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://npm.pkg.github.com
+          # MUST be the package-name scope so setup-node writes
+          # `@bpmn-js-clinical-semantics:registry=https://npm.pkg.github.com` into .npmrc.
+          # NOTE: GitHub Packages requires this scope to equal the owning org/user name
+          # (lowercased). The repo owner is `forschungsgruppe-digital-health`, which does
+          # NOT match `@bpmn-js-clinical-semantics` — the publish steps will 403/404 until
+          # the scope and the owning account are reconciled (see CONTRIBUTING.md →
+          # "Releasing with release-please"). Tagging / GitHub Release are unaffected.
+          scope: "@bpmn-js-clinical-semantics"
+
+      - run: npm ci --legacy-peer-deps
+
+      # Raw-src publish (no build step). Publish each workspace explicitly so the private
+      # packages (root + demo) are never attempted and order is deterministic.
+      - run: npm publish --workspace=packages/terminology
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: npm publish --workspace=packages/fhir-mapping
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: npm publish --workspace=packages/vue
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

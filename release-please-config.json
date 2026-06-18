@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    "packages/terminology": {
+      "component": "terminology",
+      "release-type": "node"
+    },
+    "packages/fhir-mapping": {
+      "component": "fhir-mapping",
+      "release-type": "node"
+    },
+    "packages/vue": {
+      "component": "vue",
+      "release-type": "node"
+    }
+  },
+  "plugins": [
+    {
+      "type": "node-workspace",
+      "updatePeerDependencies": true,
+      "merge": false
+    },
+    {
+      "type": "linked-versions",
+      "groupName": "clinical-bpmn",
+      "components": ["terminology", "fhir-mapping", "vue"]
+    }
+  ],
+  "include-component-in-tag": false,
+  "separate-pull-requests": false
+}
