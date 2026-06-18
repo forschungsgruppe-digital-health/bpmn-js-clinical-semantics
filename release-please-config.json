@@ -3,15 +3,18 @@
   "packages": {
     "packages/terminology": {
       "component": "terminology",
-      "release-type": "node"
+      "release-type": "node",
+      "release-as": "0.1.1"
     },
     "packages/fhir-mapping": {
       "component": "fhir-mapping",
-      "release-type": "node"
+      "release-type": "node",
+      "release-as": "0.1.1"
     },
     "packages/vue": {
       "component": "vue",
-      "release-type": "node"
+      "release-type": "node",
+      "release-as": "0.1.1"
     }
   },
   "plugins": [
