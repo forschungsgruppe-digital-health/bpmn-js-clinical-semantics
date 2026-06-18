@@ -5,11 +5,11 @@ node_modules/
 dist/
 *.tsbuildinfo
 
-# docs/ is the tracked documentation home; ignore only local/generated artifacts there
-# (the GitHub Pages site is built in CI, not committed; sample.bpmn is a local scratch fixture)
-/docs/index.html
-/docs/assets/
+# docs/ is the tracked documentation home; only the local scratch fixture is ignored
 /docs/sample.bpmn
+
+# GitHub Pages build output (demo app; built into site/ by Vite, deployed in CI)
+/site/
 
 # OS files
 .DS_Store
