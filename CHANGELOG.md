@@ -23,8 +23,8 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Consolidated the narrative documentation under [`docs/`](docs/) as the single point of
-  truth — the arc42 architecture docs (`docs/ARCHITECTURE.md` + `docs/architecture/`) and
-  the BPMN/bpmn.io extension primer (`docs/EXTENDING-BPMN-IO.md`). Only the conventional
+  truth — the arc42 architecture docs (`docs/ARCHITECTURE.md` + `docs/arc42/`) and
+  the BPMN/bpmn.io extension primer (`docs/EXTENDING.md`). Only the conventional
   files remain at the repository root (`README.md`, `LICENSE`, `CONTRIBUTING.md`,
   `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, `AGENTS.md`, `CLAUDE.md`).
 - The Vue 3 integration is now the private, unpublished

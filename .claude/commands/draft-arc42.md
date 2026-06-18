@@ -6,8 +6,8 @@ allowed-tools: Task, Read, Grep, Glob, Write, Bash
 # Draft arc42: $ARGUMENTS
 
 Argument format (optional): output mode — "refresh" (default; fill `_Not yet
-documented._` stubs in the existing `docs/architecture/NN_*.md` set in place) or
-"single" (write a fresh standalone `docs/architecture/arc42.md`).
+documented._` stubs in the existing `docs/arc42/NN_*.md` set in place) or
+"single" (write a fresh standalone `docs/arc42/arc42.md`).
 
 GOAL: Produce an arc42 architecture documentation skeleton following the official
 12-section structure, filling ONLY code-derivable content and marking everything
@@ -15,7 +15,7 @@ else as ⚠️ HUMAN INPUT REQUIRED. No speculation.
 
 Steps:
 1. **Read the existing arc42 first.** This repo ALREADY ships a hand-written
-   arc42 under `docs/architecture/` (one numbered file per section,
+   arc42 under `docs/arc42/` (one numbered file per section,
    `01_introduction_and_goals.md` … `12_glossary.md`, `# N. Title` headings, arc42
    v9), indexed by `docs/ARCHITECTURE.md`. Do NOT overwrite filled sections. In refresh
    mode, only replace `_Not yet documented._` stubs with code-derived drafts marked
@@ -27,9 +27,9 @@ Steps:
    `fhirmap:`, types), the conformance tooling under `tools/*.mjs` / `tools/*.sh`
    and the npm scripts wiring them, the git hooks `.githooks/`, CI under `.github/`,
    and the committed prose (`AGENTS.md`, `docs/ARCHITECTURE.md`, `CONTRIBUTING.md`,
-   `README.md`, `docs/EXTENDING-BPMN-IO.md`, `examples/`, `docs/user-stories/`).
-3. **Assemble the output** per the argument: refresh the `docs/architecture/NN_*.md`
-   files in place (default), or write a fresh `docs/architecture/arc42.md` (single).
+   `README.md`, `docs/EXTENDING.md`, `examples/`, `docs/user-stories/`).
+3. **Assemble the output** per the argument: refresh the `docs/arc42/NN_*.md`
+   files in place (default), or write a fresh `docs/arc42/arc42.md` (single).
 4. **Verify the provenance note** is present at the top of any file you create or
    substantially fill, and that every section either contains DERIVED draft content
    (marked for verification, cited to its source file) or the ⚠️ placeholder. No
@@ -39,7 +39,7 @@ Steps:
    the publish→install→host-app distribution topology to GitHub Packages under
    `@forschungsgruppe-digital-health`, NOT runtime infrastructure), and there is NO
    `docs/adr/` directory (§9 references `docs/ARCHITECTURE.md` and
-   `docs/architecture/09_architecture_decisions.md` — do not invent ADR files).
+   `docs/arc42/09_architecture_decisions.md` — do not invent ADR files).
 6. **Cross-link** the conformance/publishing skills as evidence rather than
    re-deriving their rules: `skills/bpmn-conformance` (the BPMN 2.0 gate
    `npm run check:conformance`; evidence for §6/§8), `skills/moddle-extension-review`

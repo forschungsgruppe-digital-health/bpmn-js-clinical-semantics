@@ -36,7 +36,7 @@ default**, so the debt persists in tree while CI stays green.
 `examples/vanilla/vite.config.js` built the demo into the repository-root `docs/`
 directory with `emptyOutDir: true`, so a local `npm run build` would wipe the same
 directory the **tracked, hand-authored** arc42 chapters, `ARCHITECTURE.md`,
-`EXTENDING-BPMN-IO.md`, user-stories and concepts live in.
+`EXTENDING.md`, user-stories and concepts live in.
 
 **Fix applied:** the Vite output has been moved out of `docs/` to a separate,
 gitignored `site/` directory; `emptyOutDir` now only ever wipes `site/`, never the
@@ -119,7 +119,7 @@ script**, so `npm test` (which runs `--workspaces --if-present`) skips it entire
 | ID | Item | Evidence |
 |---|---|---|
 | MAT-1 | **Pre-1.0.** The two publishable packages (`terminology`, `fhir-mapping`) are published at version `0.1.0` (GitHub Release `v0.1.2` exists); the `demo` package is private (`"private": true`) and excluded from release-please/publishing. Per SemVer, the public API is unstable and may change without a major bump. | `.release-please-manifest.json` (`terminology`/`fhir-mapping` = `0.1.0`); GitHub Release `v0.1.2`; `packages/demo/package.json` (`"private": true`); release-please configured via `.github/workflows/release-please.yml` + `release-please-config.json`. |
-| MAT-2 | **Several arc42 chapters are code-derived drafts, and others are not yet documented.** Chapters 1, 3, 4, 5, 8 are filled; the remaining chapters (incl. this one) are code-derived drafts that require human verification and the marked human-input fields completed. | The `architecture/01..12` set; per-chapter content/placeholders. |
+| MAT-2 | **Several arc42 chapters are code-derived drafts, and others are not yet documented.** Chapters 1, 3, 4, 5, 8 are filled; the remaining chapters (incl. this one) are code-derived drafts that require human verification and the marked human-input fields completed. | The `arc42/01..12` set; per-chapter content/placeholders. |
 
 > _Requires human input: target version/stability milestone for the first ≥ 1.0
 > release and a documentation-completeness owner/deadline for the arc42 set._

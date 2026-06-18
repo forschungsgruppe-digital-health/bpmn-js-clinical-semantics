@@ -50,4 +50,4 @@ The project is owned by **TU Dresden / Forschungsgruppe Digital Health (FGDH)**.
 
 ---
 
-[← Architecture index](../ARCHITECTURE.md)  ·  [Developer primer (EXTENDING-BPMN-IO.md)](../EXTENDING-BPMN-IO.md)
+[← Architecture index](../ARCHITECTURE.md)  ·  [Developer primer (EXTENDING.md)](../EXTENDING.md)

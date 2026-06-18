@@ -121,8 +121,8 @@ bpmn-js-clinical-semantics/
 |       +-- lung-cancer-staging-fhir.json      Exported FHIR mapping
 |
 +-- docs/                             Tracked documentation home (arc42 chapters under
-|                                     docs/architecture/, docs/ARCHITECTURE.md,
-|                                     docs/EXTENDING-BPMN-IO.md, docs/user-stories/)
+|                                     docs/arc42/, docs/ARCHITECTURE.md,
+|                                     docs/EXTENDING.md, docs/user-stories/)
 |                                     -- the built GitHub Pages site goes to site/ (gitignored)
 |
 +-- .github/

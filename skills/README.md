@@ -23,7 +23,7 @@ General code-health skills, **invoked on demand** (not auto-gated on a file patt
 | [`feature-inventarist`](feature-inventarist/SKILL.md) | build a Feature Inventory Matrix across the packages (preliminary maturity) |
 | [`docs-auditor`](docs-auditor/SKILL.md) | role-aware docs ↔ code consistency / coverage / link audit + small consolidation plan |
 | [`security-reviewer`](security-reviewer/SKILL.md) | review secrets, PII in fixtures, supply chain, unsafe XML/DOM sinks |
-| [`arc42-generator`](arc42-generator/SKILL.md) | derive / refresh the arc42 skeleton (the `architecture/` chapters) from code |
+| [`arc42-generator`](arc42-generator/SKILL.md) | derive / refresh the arc42 skeleton (the `arc42/` chapters) from code |
 | [`test-generator`](test-generator/SKILL.md) | write Vitest characterization tests before a refactor |
 
 Companion slash-commands live in [`.claude/commands/`](../.claude/commands/): `classify-feature`,

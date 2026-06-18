@@ -463,7 +463,7 @@ Both descriptors use the two structural idioms from §6a:
    }
    ```
 
-The full type hierarchies are: **terminology** — `Annotatable` (extends) + `Annotations` → `Annotation` → `Coding`; **fhir-mapping** — `MappedElement` (extends) + `ResourceMappings` → `ResourceMapping` → `KeyElement` / `SearchParam`. The class diagrams for both are in [architecture/08 § Annotation and Mapping Data Model](architecture/08_crosscutting_concepts.md#annotation-and-mapping-data-model).
+The full type hierarchies are: **terminology** — `Annotatable` (extends) + `Annotations` → `Annotation` → `Coding`; **fhir-mapping** — `MappedElement` (extends) + `ResourceMappings` → `ResourceMapping` → `KeyElement` / `SearchParam`. The class diagrams for both are in [arc42/08 § Annotation and Mapping Data Model](arc42/08_crosscutting_concepts.md#annotation-and-mapping-data-model).
 
 > **`tagAlias: lowerCase`** lowercases the *first* letter of a moddle PascalCase type name to produce the XML tag — so `Annotations` serializes as `<term:annotations>` and `ResourceMappings` as `<fhirmap:resourceMappings>`.
 >

@@ -189,7 +189,7 @@ addAnnotation(businessObject, moddle, {
 });
 ```
 
-For adding custom terminology systems (FHIR-hosted, static, or custom API), see [docs/architecture/08 — Extending with a New Terminology System](docs/architecture/08_crosscutting_concepts.md#extending-with-a-new-terminology-system).
+For adding custom terminology systems (FHIR-hosted, static, or custom API), see [docs/arc42/08 — Extending with a New Terminology System](docs/arc42/08_crosscutting_concepts.md#extending-with-a-new-terminology-system).
 
 ---
 
@@ -250,7 +250,7 @@ npm run dev
 |---|---|---|
 | [README.md](README.md) | All users | Overview, features, quick start, usage examples |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Contributors, integrators | Design decisions, UML diagrams, data model, project structure, extensibility |
-| [docs/EXTENDING-BPMN-IO.md](docs/EXTENDING-BPMN-IO.md) | New contributors, extension developers | Primer: BPMN & BPMN XML, the standard extension mechanism, the bpmn.io toolkit, the five ways to extend bpmn.io, and how this repo maps onto them — with links to the OMG and bpmn.io sources |
+| [docs/EXTENDING.md](docs/EXTENDING.md) | New contributors, extension developers | Primer: BPMN & BPMN XML, the standard extension mechanism, the bpmn.io toolkit, the five ways to extend bpmn.io, and how this repo maps onto them — with links to the OMG and bpmn.io sources |
 | [docs/concepts/synthea-gmf-module-mapping.md](docs/concepts/synthea-gmf-module-mapping.md) | Contributors, researchers | Concept/proposal: a bpmn.io properties-panel extension that maps BPMN patient pathways onto the Synthea Generic Module Framework to generate Synthea modules (not yet implemented) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributors | Development setup, coding standards, testing, branching, release process |
 | [AGENTS.md](AGENTS.md) | AI coding agents (all tools) | Single-source operational context: the quality gate, conventions, hard rules; CLAUDE.md imports it |

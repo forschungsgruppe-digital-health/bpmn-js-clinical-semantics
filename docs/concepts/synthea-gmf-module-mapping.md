@@ -31,8 +31,8 @@ the GMF state type. So a single annotated BPMN diagram becomes the one source of
   the patient portal, demos, and research, without touching real data.
 - **It fits this repo's trajectory.** The repo already adds clinical semantics to BPMN purely
   via standard `<extensionElements>` (`term:`, `fhirmap:`) — see
-  [docs/EXTENDING-BPMN-IO.md](../EXTENDING-BPMN-IO.md) and
-  [docs/architecture/08](../architecture/08_crosscutting_concepts.md). A `synthea:` layer is the
+  [docs/EXTENDING.md](../EXTENDING.md) and
+  [docs/arc42/08](../arc42/08_crosscutting_concepts.md). A `synthea:` layer is the
   natural next worked example of "extending bpmn.io", and it can lean on what is already there.
 - **It serves the wider MiHUB goal.** Synthetic pathway-conformant patients are useful input
   for the patient portal's FHIR compartments and for SMART-on-FHIR smoke tests. This concept is
@@ -336,7 +336,7 @@ an ADR before implementation._
   modules (FHIR compartments, SMART smoke tests).
 - It composes with the existing [`term:`](../../packages/terminology/) and
   [`fhirmap:`](../../packages/fhir-mapping/) layers and would become a sixth worked example in
-  [docs/EXTENDING-BPMN-IO.md](../EXTENDING-BPMN-IO.md).
+  [docs/EXTENDING.md](../EXTENDING.md).
 
 ## 13. References
 
@@ -344,9 +344,9 @@ an ADR before implementation._
   and the [Module Builder][builder].
 - [Synthea project][synthea] (synthetic patient generator).
 - OMG BPMN 2.0 specification — <https://www.omg.org/spec/BPMN/2.0.2/>.
-- This repo: [docs/EXTENDING-BPMN-IO.md](../EXTENDING-BPMN-IO.md),
+- This repo: [docs/EXTENDING.md](../EXTENDING.md),
   [docs/ARCHITECTURE.md](../ARCHITECTURE.md),
-  [docs/architecture/08](../architecture/08_crosscutting_concepts.md),
+  [docs/arc42/08](../arc42/08_crosscutting_concepts.md),
   [`packages/terminology`](../../packages/terminology/),
   [`packages/fhir-mapping`](../../packages/fhir-mapping/).
 
