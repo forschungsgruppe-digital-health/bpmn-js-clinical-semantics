@@ -34,6 +34,20 @@ Consider a university hospital modelling its lung cancer diagnostic pathway. The
 
 Both annotation layers are stored as BPMN 2.0 `extensionElements` in the standard XML format. Non-clinical BPMN tools simply ignore them; clinical tools can read and process them. The approach preserves full backwards compatibility with every BPMN 2.0 engine and viewer.
 
+## Quality Goals
+
+The following quality goals are enforced by the conformance tooling and are the architectural drivers for the annotation design:
+
+- **Backwards compatibility** with non-clinical BPMN 2.0 tools — annotations live in `extensionElements` and are ignored by engines and viewers that do not understand them.
+- **Lossless, stable extension serialization** — clinical annotations survive a moddle read/write roundtrip without loss or reordering.
+- **BPMN structural conformance** — annotated models remain valid BPMN 2.0 (bpmnlint structure plus XSD core validation).
+
+These goals and the checks that enforce them are detailed in [chapter 10](10_quality_requirements.md). A prioritised/weighted quality tree (relative weighting and trade-offs between these goals) is _Requires human input_.
+
+## Stakeholders
+
+The project is owned by **TU Dresden / Forschungsgruppe Digital Health (FGDH)**. The documentation addresses the audiences named above: **contributors** (working on the libraries) and **integrators** (embedding the annotations in their own BPMN tooling). Concrete stakeholder roles, expectations, and decision authority are _Requires human input_ (no `CODEOWNERS` or `CONTRIBUTORS` file exists in the repository).
+
 ---
 
 [← Architecture index](../ARCHITECTURE.md)  ·  [Developer primer (EXTENDING-BPMN-IO.md)](../EXTENDING-BPMN-IO.md)

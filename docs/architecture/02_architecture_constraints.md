@@ -43,9 +43,9 @@ Source: `packages/*/package.json` `peerDependencies` / `peerDependenciesMeta`. T
 
 | Constraint | Value | Source / evidence |
 |---|---|---|
-| Registry | Published to **GitHub Packages** (`https://npm.pkg.github.com`) | `publishConfig.registry` in each package; `release-please.yml` publish job |
+| Registry | Published to **GitHub Packages** (`https://npm.pkg.github.com`) by a **decoupled `publish.yml`** workflow (`on: release: published`, idempotent — skips already-published versions), not by `release-please.yml` | `publishConfig.registry` in each package; `.github/workflows/publish.yml` |
 | Package scope | **`@forschungsgruppe-digital-health/*`** (scope must equal the owning org for GitHub Packages) | package names; `release-please.yml` comment on `scope` |
-| Versioning | **Linked versions** across `terminology` / `fhir-mapping` (the private `demo` package is excluded from release-please), automated by **release-please** (Conventional-Commits → SemVer) | `release-please-config.json` (`linked-versions`, `node-workspace`) |
+| Versioning | **Linked versions** across `terminology` / `fhir-mapping` (the `demo` package is excluded because it is not listed in `release-please-config.json`), automated by **release-please** (Conventional-Commits → SemVer); tags/releases are **per-component** (`include-component-in-tag: true`, e.g. `terminology-v0.1.x`), not one consolidated `v<version>` tag | `release-please-config.json` (`linked-versions`, `node-workspace`, `include-component-in-tag`) |
 | Demo distribution | Demo app deployed to **GitHub Pages** on push to `main` | `deploy.yml` (builds `examples/vanilla`, uploads `docs/`) |
 | License | **Apache-2.0** | `license` field in root + all packages; `LICENSE` |
 

@@ -6,6 +6,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ## Table of Contents
 
+- [Code of Conduct](#code-of-conduct)
 - [Development Setup](#development-setup)
 - [Repository Layout](#repository-layout)
 - [Development Workflow](#development-workflow)
@@ -20,6 +21,15 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - [Releasing with release-please](#releasing-with-release-please)
 - [Release Process](#release-process)
 - [Troubleshooting](#troubleshooting)
+
+---
+
+## Code of Conduct
+
+This project is governed by our [Code of Conduct](CODE_OF_CONDUCT.md) (based on the
+Contributor Covenant, version 2.1). By participating you are expected to uphold it; please
+report unacceptable behavior as described there. Notable repository-level changes are
+recorded in the [CHANGELOG](CHANGELOG.md) (Keep a Changelog format).
 
 ---
 
@@ -347,7 +357,7 @@ The demo app is automatically deployed to GitHub Pages via the [`deploy.yml`](.g
 
 ### How it works
 
-The workflow first runs the full test suite on Node 18 and 20. On success, it installs dependencies, runs `npm run build` (which builds the Vite demo app to `docs/` at the repository root), uploads the `docs/` directory as a Pages artifact, and deploys it. This ensures the demo is only deployed when all tests pass.
+The workflow first runs the full test suite on Node 18 and 20. On success, it installs dependencies, runs `npm run build` (which builds the Vite demo app to `site/` at the repository root), uploads the `site/` directory as a Pages artifact, and deploys it. This ensures the demo is only deployed when all tests pass.
 
 ---
 
@@ -366,7 +376,7 @@ Add to your project's `.npmrc` (or create one):
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-For local development, set `GITHUB_TOKEN` to a personal access token with `read:packages` scope. For CI publishing, use the `GITHUB_TOKEN` secret available in GitHub Actions. The CI path needs no manual `.npmrc`: the release-please publish job's `actions/setup-node` step (with `registry-url` + `scope: "@forschungsgruppe-digital-health"`) writes it, and `NODE_AUTH_TOKEN` is the workflow's `secrets.GITHUB_TOKEN` — see [`.github/workflows/release-please.yml`](.github/workflows/release-please.yml).
+For local development, set `GITHUB_TOKEN` to a personal access token with `read:packages` scope. For CI publishing, use the `GITHUB_TOKEN` secret available in GitHub Actions. The CI path needs no manual `.npmrc`: the publish workflow's `actions/setup-node` step (with `registry-url` + `scope: "@forschungsgruppe-digital-health"`) writes it, and `NODE_AUTH_TOKEN` is the workflow's `secrets.GITHUB_TOKEN` — see [`.github/workflows/publish.yml`](.github/workflows/publish.yml).
 
 ### What gets published
 

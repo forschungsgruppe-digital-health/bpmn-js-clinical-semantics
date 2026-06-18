@@ -112,18 +112,27 @@ bpmn-js-clinical-semantics/
 |
 +-- examples/
 |   +-- vanilla/                      Interactive demo app (Vite + bpmn-js)
-|       +-- src/app.js                Modeler setup with both extensions
-|       +-- public/sample.bpmn        Sample lung cancer diagnostic pathway
-|       +-- index.html                Demo UI
+|   |   +-- src/app.js                Modeler setup with both extensions
+|   |   +-- public/sample.bpmn        Sample lung cancer diagnostic pathway
+|   |   +-- index.html                Demo UI
+|   +-- minimal/                      Lung-cancer staging fixtures (no build step)
+|       +-- lung-cancer-staging.bpmn           Plain BPMN pathway
+|       +-- lung-cancer-staging-annotated.bpmn term:/fhirmap: annotated variant
+|       +-- lung-cancer-staging-fhir.json      Exported FHIR mapping
 |
-+-- docs/                             Built demo app for GitHub Pages (generated, not committed)
++-- docs/                             Tracked documentation home (arc42 chapters under
+|                                     docs/architecture/, docs/ARCHITECTURE.md,
+|                                     docs/EXTENDING-BPMN-IO.md, docs/user-stories/)
+|                                     -- the built GitHub Pages site goes to site/ (gitignored)
 |
 +-- .github/
 |   +-- workflows/
-|       +-- ci.yml                    CI: lint, test, build (Node 18 + 20)
+|       +-- ci.yml                    CI: lint, test, build (Node 18 + 20) + conformance job
 |       +-- deploy.yml                GitHub Pages deployment on push to main
+|       +-- release-please.yml        Release PR + per-component tags/releases
+|       +-- publish.yml               Publish to GitHub Packages on release: published
 |
-+-- ARCHITECTURE.md                   This file
++-- ARCHITECTURE.md                   Architecture index (docs/ARCHITECTURE.md)
 +-- CONTRIBUTING.md                   Development, packaging, and release guide
 +-- LICENSE                           Apache License 2.0
 +-- README.md                         Project overview and quick start
