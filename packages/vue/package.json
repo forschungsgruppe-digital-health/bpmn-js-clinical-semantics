@@ -4,6 +4,9 @@
   "description": "Vue 3 wrapper and composables for clinical BPMN extensions",
   "type": "module",
   "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
   "peerDependencies": {
     "vue": ">=3.3.0",
     "bpmn-js": ">=15.0.0",
