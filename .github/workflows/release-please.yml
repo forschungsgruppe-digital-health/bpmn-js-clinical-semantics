@@ -5,10 +5,10 @@ on:
     branches:
       - main
 
-# Single-workflow pattern: release-please opens/maintains the release PR; when that
-# PR is merged it tags + creates the GitHub Release, and the gated `publish` job
-# pushes the three packages to GitHub Packages. A separate publish workflow is not
-# needed — `releases_created` is read directly from the release-please step.
+# release-please maintains the release PR and tags releases. Publishing is
+# DECOUPLED into publish.yml (triggered `on: release: published`) so that a
+# created release reliably pushes the packages to GitHub Packages, independent of
+# release-please's release-creation step.
 permissions:
   contents: write # create tags + GitHub Releases, commit version bumps
   pull-requests: write # open/update the release PR
@@ -16,48 +16,9 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    outputs:
-      releases_created: ${{ steps.release.outputs.releases_created }}
     steps:
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5
-        id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
-
-  publish:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.releases_created == 'true' }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write # publish to GitHub Packages
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: 20
-          registry-url: https://npm.pkg.github.com
-          # MUST be the package-name scope so setup-node writes
-          # `@forschungsgruppe-digital-health:registry=https://npm.pkg.github.com` into .npmrc.
-          # This scope matches the owning org `forschungsgruppe-digital-health`, which is what
-          # GitHub Packages requires (scope == owning account, lowercased) for publish to succeed.
-          scope: "@forschungsgruppe-digital-health"
-
-      - run: npm ci --legacy-peer-deps
-
-      # Raw-src publish (no build step). Publish each workspace explicitly so the private
-      # packages (root + demo) are never attempted and order is deterministic.
-      - run: npm publish --workspace=packages/terminology
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: npm publish --workspace=packages/fhir-mapping
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: npm publish --workspace=packages/vue
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
