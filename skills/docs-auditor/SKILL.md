@@ -18,10 +18,10 @@ usability across contributor roles, and propose **at most three** consolidation 
 Discover the doc surface; do not assume a fixed list. Enumerate with
 `git ls-files '*.md' '*.mdx' 'AGENTS*' 'CLAUDE*' '*.adoc'` plus a glob sweep, then group:
 
-- **Root governance/onboarding:** `README.md`, `CONTRIBUTING.md`, `ARCHITECTURE.md`,
-  `AGENTS.md`, `CLAUDE.md`, `EXTENDING-BPMN-IO.md`, `LICENSE`, any `CODE-HEALTH-*` /
+- **Root governance/onboarding:** `README.md`, `CONTRIBUTING.md`, `docs/ARCHITECTURE.md`,
+  `AGENTS.md`, `CLAUDE.md`, `docs/EXTENDING-BPMN-IO.md`, `LICENSE`, any `CODE-HEALTH-*` /
   status / report files, `CHANGELOG`/release-please output.
-- **`architecture/`:** the arc42 sections `01_…`–`12_…` (introduction & goals,
+- **`docs/architecture/`:** the arc42 sections `01_…`–`12_…` (introduction & goals,
   constraints, context, solution strategy, building blocks, runtime, deployment,
   crosscutting, decisions, quality, risks, glossary).
 - **`docs/`:** user stories (`docs/user-stories/*-mvp.md`), any design notes. The
@@ -79,7 +79,7 @@ Evaluate each role against each concern. Every finding is tagged with its
 ## 3. What to detect
 
 - **Inconsistencies** — two docs that contradict; status/version/date drift (e.g. a
-  README that disagrees with `ARCHITECTURE.md` or the user stories); stale claims (a
+  README that disagrees with `docs/ARCHITECTURE.md` or the user stories); stale claims (a
   doc names a package, script, file, moddle prefix/namespace URI, or convention that no
   longer matches the repo — e.g. a script renamed in `package.json`, a prefix that
   differs from the moddle descriptor `prefix`, a peer range that diverged); broken or
@@ -98,7 +98,7 @@ Evaluate each role against each concern. Every finding is tagged with its
   inbound link from any other doc and not reachable from the README's navigation) and
   **missing cross-references** between docs that clearly relate but don't link each
   other (e.g. a user story not linked from the package it specifies; an arc42 section
-  not linked from `ARCHITECTURE.md`; a deep doc with no "back to index" link; a skill
+  not linked from `docs/ARCHITECTURE.md`; a deep doc with no "back to index" link; a skill
   not surfaced in `skills/README.md`). Goal: the docs form ONE navigable, connected
   web, not islands.
 
@@ -164,7 +164,7 @@ Always cite evidence as `file:line`.
   README); (3) **proposed links to add** — a concrete `from-doc → to-doc` list (with the
   one-line reason) that would connect related docs into one navigable web (e.g. link
   each user story from the package README it specifies; link each arc42 section from
-  `ARCHITECTURE.md`; add a "back to index" link to deep docs; surface every skill in
+  `docs/ARCHITECTURE.md`; add a "back to index" link to deep docs; surface every skill in
   `skills/README.md`; cross-link `AGENTS.md` ↔ `CONTRIBUTING.md` ↔ the conformance
   skills). Read-only: **propose** the links; do not write them. If there are no broken
   links and the graph is well-connected, say so.
@@ -188,7 +188,7 @@ Always cite evidence as `file:line`.
 ## 7. Edge cases (avoid false positives)
 
 - **Intentional layering is not duplication.** A lean `README.md` that points to
-  `ARCHITECTURE.md`/`CONTRIBUTING.md` for depth is good information architecture — do
+  `docs/ARCHITECTURE.md`/`CONTRIBUTING.md` for depth is good information architecture — do
   not flag the overlap.
 - **Single-source skills are not "duplicated."** `skills/<name>/SKILL.md` is the one
   source; the `.github/` and `.claude`/`.agents` pointer files reference it by design.

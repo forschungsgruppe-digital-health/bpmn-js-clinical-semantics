@@ -3,7 +3,7 @@
 Operational context for AI coding agents (Claude Code, Codex, Cursor, Gemini CLI,
 Copilot — anything that reads the open AGENTS.md standard). Single source of truth:
 tool-specific files (e.g. `CLAUDE.md`) only point here. Keep this lean — the
-project narrative lives in `README.md`, `ARCHITECTURE.md` and `CONTRIBUTING.md`;
+project narrative lives in `README.md`, `docs/ARCHITECTURE.md` and `CONTRIBUTING.md`;
 do not duplicate it.
 
 ## What this repo is
@@ -97,6 +97,6 @@ demand, detection-only): `dead-code-detector`, `feature-inventarist`, `docs-audi
 ## Where to look first
 
 - Conformance tooling: `tools/` + `skills/bpmn-conformance/SKILL.md`
-- Design rationale, data model, UML: `ARCHITECTURE.md`
+- Design rationale, data model, UML: `docs/ARCHITECTURE.md`
 - Setup, testing, release, publishing: `CONTRIBUTING.md`
 - Moddle schemas: `packages/*/src/moddle/*.json`

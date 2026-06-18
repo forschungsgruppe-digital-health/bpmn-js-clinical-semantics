@@ -2,7 +2,7 @@
 
 This document is the index to the architecture documentation of **bpmn-js-clinical-semantics**. It describes the design decisions, component architecture, data model, and project structure of the libraries — for contributors, integrators, and anyone interested in understanding how they work under the hood.
 
-For usage instructions, see the [README](README.md). For contributor workflow, see [CONTRIBUTING.md](CONTRIBUTING.md).
+For usage instructions, see the [README](../README.md). For contributor workflow, see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 The architecture documentation follows the [arc42](https://arc42.org/) template (version 9). It is split into one Markdown file per arc42 chapter, located in the [`architecture/`](architecture/) directory.
 

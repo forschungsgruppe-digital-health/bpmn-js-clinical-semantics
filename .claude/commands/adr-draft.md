@@ -7,19 +7,19 @@ allowed-tools: Read, Write, Grep, Glob
 
 Draft an Architecture Decision Record for: $ARGUMENTS
 
-This repo records design decisions inside the arc42 docs under `architecture/`, not
+This repo records design decisions inside the arc42 docs under `docs/architecture/`, not
 in a separate `docs/adr/` tree. Decision rationale currently lives in
-`architecture/04_solution_strategy.md`; formal ADRs are collected in
-`architecture/09_architecture_decisions.md` (see its header note). Add the new ADR
+`docs/architecture/04_solution_strategy.md`; formal ADRs are collected in
+`docs/architecture/09_architecture_decisions.md` (see its header note). Add the new ADR
 as a self-contained section appended to that file — do not invent a new directory or
 template that the repo does not have.
 
-1. Read `architecture/09_architecture_decisions.md` and `architecture/04_solution_strategy.md`
+1. Read `docs/architecture/09_architecture_decisions.md` and `docs/architecture/04_solution_strategy.md`
    first, to match existing tone and avoid duplicating a decision already captured in
    the solution strategy.
-2. Number the ADR sequentially: scan `architecture/09_architecture_decisions.md` for the
+2. Number the ADR sequentially: scan `docs/architecture/09_architecture_decisions.md` for the
    highest existing `ADR-NNNN` heading and use the next one (start at `ADR-0001` if none).
-3. Append a new section to `architecture/09_architecture_decisions.md` with this structure:
+3. Append a new section to `docs/architecture/09_architecture_decisions.md` with this structure:
    - **Title:** `## ADR-NNNN — <decision> [PROPOSED]`
    - **Context:** why this decision is needed now (what in the codebase or constraints
      forces it). Reference concrete repo facts where relevant: npm-workspaces ESM monorepo
@@ -34,8 +34,8 @@ template that the repo does not have.
      moddle namespaces/prefixes (`term:`, `fhirmap:`), publishing/versioning (a renamed or
      removed moddle type/property is a breaking MAJOR change), and backward compatibility
      of serialized BPMN extension data.
-4. Cross-link related material: the relevant arc42 section(s) under `architecture/`,
-   `AGENTS.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md`, affected `packages/*`, moddle
+4. Cross-link related material: the relevant arc42 section(s) under `docs/architecture/`,
+   `AGENTS.md`, `docs/ARCHITECTURE.md`, `CONTRIBUTING.md`, affected `packages/*`, moddle
    descriptors, and any prior `ADR-NNNN` in the same file.
 5. If the decision touches a moddle descriptor, BPMN conformance, or package/publishing
    conventions, cross-reference the matching repo skill so reviewers run the right gate:

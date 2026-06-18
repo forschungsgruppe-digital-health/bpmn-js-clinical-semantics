@@ -4,7 +4,7 @@ _Captures relevant requirements, driving forces, business goals, quality objecti
 
 This document describes the design decisions, component architecture, data model, and project structure of **bpmn-js-clinical-semantics**. It is intended for contributors, integrators, and anyone interested in understanding how the libraries work under the hood.
 
-For usage instructions, see the [README](../README.md). For contributor workflow, see [CONTRIBUTING.md](../CONTRIBUTING.md).
+For usage instructions, see the [README](../../README.md). For contributor workflow, see [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 ## Motivation and Background
 

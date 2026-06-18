@@ -2,7 +2,7 @@
 
 This is a from-scratch primer for a developer who is **new to BPMN and to [bpmn.io](https://bpmn.io/)** but needs to understand, and then extend, the clinical-semantics extensions that live in this repository. It explains the BPMN 2.0 standard, the standard XML extension mechanism, the bpmn.io toolkit, the five ways you can extend bpmn.io, and finally how the two extensions in this repo map onto those concepts and how they are validated.
 
-For the project itself, start at [README.md](README.md); for design rationale and the data model see [ARCHITECTURE.md](ARCHITECTURE.md); for setup, the quality gate, and release process see [CONTRIBUTING.md](CONTRIBUTING.md); for the lean operational rules (and the hard "clinical data only in `<extensionElements>`" boundary) see [AGENTS.md](AGENTS.md).
+For the project itself, start at [README.md](../README.md); for design rationale and the data model see [ARCHITECTURE.md](ARCHITECTURE.md); for setup, the quality gate, and release process see [CONTRIBUTING.md](../CONTRIBUTING.md); for the lean operational rules (and the hard "clinical data only in `<extensionElements>`" boundary) see [AGENTS.md](../AGENTS.md).
 
 ---
 
@@ -413,19 +413,19 @@ Rulesets: `bpmnlint:recommended` (best-practice + compliance), `bpmnlint:correct
 
 ## 7. This repository as a worked example
 
-This repo is an npm-workspaces monorepo of **two independent bpmn-js extension libraries** (plus an optional Vue 3 wrapper and a vanilla demo). It adds clinical semantics to BPMN 2.0 **purely via standard `<extensionElements>`** under two custom XML namespaces. It is raw ESM (JS + JSDoc, no build step for the libraries), tested with Vitest. For the design rationale and the full data model see [ARCHITECTURE.md](ARCHITECTURE.md); for the layout and commands see [CONTRIBUTING.md](CONTRIBUTING.md).
+This repo is an npm-workspaces monorepo of **two independent bpmn-js extension libraries** (plus an optional Vue 3 wrapper and a vanilla demo). It adds clinical semantics to BPMN 2.0 **purely via standard `<extensionElements>`** under two custom XML namespaces. It is raw ESM (JS + JSDoc, no build step for the libraries), tested with Vitest. For the design rationale and the full data model see [ARCHITECTURE.md](ARCHITECTURE.md); for the layout and commands see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 **Which of the five extension types this repo uses.** Exactly **two**, implemented once per package:
 
 | Extension type | In this repo? | Concrete artifact |
 |---|---|---|
-| **(a) moddle model extension** | **Yes (×2)** | [`packages/terminology/src/moddle/clinical.json`](packages/terminology/src/moddle/clinical.json), [`packages/fhir-mapping/src/moddle/fhir-mapping.json`](packages/fhir-mapping/src/moddle/fhir-mapping.json) |
-| **(c) properties panel provider** | **Yes (×2)** | [`packages/terminology/src/properties-panel/TerminologyPropertiesProvider.js`](packages/terminology/src/properties-panel/TerminologyPropertiesProvider.js) (+ its `index.js` DI module), [`packages/fhir-mapping/src/properties-panel/FhirMappingPropertiesProvider.js`](packages/fhir-mapping/src/properties-panel/FhirMappingPropertiesProvider.js) (+ its `index.js`) |
+| **(a) moddle model extension** | **Yes (×2)** | [`packages/terminology/src/moddle/clinical.json`](../packages/terminology/src/moddle/clinical.json), [`packages/fhir-mapping/src/moddle/fhir-mapping.json`](../packages/fhir-mapping/src/moddle/fhir-mapping.json) |
+| **(c) properties panel provider** | **Yes (×2)** | [`packages/terminology/src/properties-panel/TerminologyPropertiesProvider.js`](../packages/terminology/src/properties-panel/TerminologyPropertiesProvider.js) (+ its `index.js` DI module), [`packages/fhir-mapping/src/properties-panel/FhirMappingPropertiesProvider.js`](../packages/fhir-mapping/src/properties-panel/FhirMappingPropertiesProvider.js) (+ its `index.js`) |
 | **(b) bpmn-js module** (renderer) | No | not present — clinical data never touches rendering; use the canonical upstream [custom-rendering](https://github.com/bpmn-io/bpmn-js-example-custom-rendering) example if you ever need one |
 | **(b) bpmn-js module** (rules) | No | not present — no `RuleProvider`; use the canonical [custom-modeling-rules](https://github.com/bpmn-io/bpmn-js-examples/tree/main/custom-modeling-rules) example |
 | **(d) element templates / (e) bpmnlint plugin** | No | `.bpmnlintrc` consumes only the stock configs `["bpmnlint:recommended", "bpmnlint:correctness"]`; there is no `bpmnlint-plugin-*` package and no element-template files |
 
-This is a deliberate design choice (see [AGENTS.md](AGENTS.md) hard rules): clinical data lives in `<extensionElements>` and never changes BPMN core structure or rendering, which is why only the *data model* (a) and the *editing UI* (c) extension types are needed.
+This is a deliberate design choice (see [AGENTS.md](../AGENTS.md) hard rules): clinical data lives in `<extensionElements>` and never changes BPMN core structure or rendering, which is why only the *data model* (a) and the *editing UI* (c) extension types are needed.
 
 ### (a) The two moddle descriptors — package identity
 
@@ -471,7 +471,7 @@ The full type hierarchies are: **terminology** — `Annotatable` (extends) + `An
 
 ### (c) The two properties-panel providers — the registration pattern
 
-Both providers follow the identical bpmn-js-properties-panel idiom: the constructor takes injected `propertiesPanel` + `translate`, registers at `LOW_PRIORITY = 500`, declares `$inject`, and `getGroups(element)` returns a `(groups) => groups` transformer that, after an `is(element, type)` guard against a `TARGET_TYPES` allow-list, pushes a group. From [`TerminologyPropertiesProvider.js`](packages/terminology/src/properties-panel/TerminologyPropertiesProvider.js):
+Both providers follow the identical bpmn-js-properties-panel idiom: the constructor takes injected `propertiesPanel` + `translate`, registers at `LOW_PRIORITY = 500`, declares `$inject`, and `getGroups(element)` returns a `(groups) => groups` transformer that, after an `is(element, type)` guard against a `TARGET_TYPES` allow-list, pushes a group. From [`TerminologyPropertiesProvider.js`](../packages/terminology/src/properties-panel/TerminologyPropertiesProvider.js):
 
 ```javascript
 export default function TerminologyPropertiesProvider(propertiesPanel, translate) {
@@ -497,7 +497,7 @@ TerminologyPropertiesProvider.prototype.getGroups = function (element) {
 
 (The user-facing label string above — `'Klinische Annotation'` — is reproduced verbatim from the repo source; the panel's UI label strings in this repo are German and are kept here unchanged so the snippet stays faithful to the file.)
 
-Each entry is `{ id, component, isEdited }` where `component` is a Preact component (`htm/preact`). The DI module — the object actually consumed as an `additionalModules` entry — is tiny ([`properties-panel/index.js`](packages/terminology/src/properties-panel/index.js)):
+Each entry is `{ id, component, isEdited }` where `component` is a Preact component (`htm/preact`). The DI module — the object actually consumed as an `additionalModules` entry — is tiny ([`properties-panel/index.js`](../packages/terminology/src/properties-panel/index.js)):
 
 ```javascript
 import TerminologyPropertiesProvider from './TerminologyPropertiesProvider.js';
@@ -507,7 +507,7 @@ export default {
 };
 ```
 
-Entry components read/write the moddle via `useService('modeling')` ([`ClinicalDomainEntry.js`](packages/terminology/src/properties-panel/entries/ClinicalDomainEntry.js)):
+Entry components read/write the moddle via `useService('modeling')` ([`ClinicalDomainEntry.js`](../packages/terminology/src/properties-panel/entries/ClinicalDomainEntry.js)):
 
 ```javascript
 const bo = element.businessObject;
@@ -535,7 +535,7 @@ import {
 } from '@forschungsgruppe-digital-health/fhir-mapping';
 ```
 
-A consumer wires both extensions exactly as the abstract types describe — `moddleExtensions` keyed by prefix registers the XML schema (a), `additionalModules` registers the panel providers (c) (see [README § Quick Start](README.md#quick-start)):
+A consumer wires both extensions exactly as the abstract types describe — `moddleExtensions` keyed by prefix registers the XML schema (a), `additionalModules` registers the panel providers (c) (see [README § Quick Start](../README.md#quick-start)):
 
 ```javascript
 const modeler = new BpmnModeler({
@@ -547,7 +547,7 @@ const modeler = new BpmnModeler({
 
 ### The real annotated `<extensionElements>` (from this repo)
 
-From [`examples/minimal/lung-cancer-staging-annotated.bpmn`](examples/minimal/lung-cancer-staging-annotated.bpmn) — both namespaces are declared on `<bpmn2:definitions>` (`xmlns:term="https://clinical-bpmn.org/terminology/v1"`, `xmlns:fhirmap="https://clinical-bpmn.org/fhir-mapping/v1"`), `term:clinicalDomain` rides as a foreign attribute, and the `<term:annotations>` and `<fhirmap:resourceMappings>` containers sit as independent siblings inside `<bpmn2:extensionElements>`:
+From [`examples/minimal/lung-cancer-staging-annotated.bpmn`](../examples/minimal/lung-cancer-staging-annotated.bpmn) — both namespaces are declared on `<bpmn2:definitions>` (`xmlns:term="https://clinical-bpmn.org/terminology/v1"`, `xmlns:fhirmap="https://clinical-bpmn.org/fhir-mapping/v1"`), `term:clinicalDomain` rides as a foreign attribute, and the `<term:annotations>` and `<fhirmap:resourceMappings>` containers sit as independent siblings inside `<bpmn2:extensionElements>`:
 
 ```xml
 <bpmn2:task id="Task_Staging" name="Perform TNM Staging" term:clinicalDomain="staging">
@@ -583,7 +583,7 @@ The two namespaces are fully independent; a non-clinical BPMN tool ignores both 
 
 ## 8. Validating an extension
 
-This repo ships a **deterministic conformance gate** (the decision lives in the CLI tool, never in any model or agent), wired to npm scripts and run identically in the terminal, git hooks, VS Code tasks, and agent skills. The full table is in [CONTRIBUTING.md § Conformance and Quality Checks](CONTRIBUTING.md#conformance-and-quality-checks) and [AGENTS.md § Quality gate](AGENTS.md). The three layers map onto the concepts in this primer:
+This repo ships a **deterministic conformance gate** (the decision lives in the CLI tool, never in any model or agent), wired to npm scripts and run identically in the terminal, git hooks, VS Code tasks, and agent skills. The full table is in [CONTRIBUTING.md § Conformance and Quality Checks](../CONTRIBUTING.md#conformance-and-quality-checks) and [AGENTS.md § Quality gate](../AGENTS.md). The three layers map onto the concepts in this primer:
 
 ```bash
 npm run lint:bpmn        # bpmnlint (recommended + correctness)        — BLOCKING (structure)
@@ -599,9 +599,9 @@ npm run verify           # = check:packages && check:conformance && npm test  (t
 - **XSD core — standard core (informational), with the lax caveat.** `npm run check:xsd` runs `bash tools/validate-xsd.sh` (xmllint vs the OMG `BPMN20.xsd`). It is **informational by default**: because the standard XSD accepts *anything* inside `<extensionElements>` via `processContents="lax"` (§4), a green XSD does **not** mean your extensions are valid — that verdict comes from the moddle roundtrip. It does confirm the BPMN *core* still matches the standard schema; `bash tools/validate-xsd.sh --strict` enforces the core when you need standard conformance. (This is also why the repo attaches clinical extensions to flow elements/data references and never to `<definitions>` — see the BPMN21-416 caveat in §4.)
 - **package conventions (blocking).** `npm run check:packages` runs `node tools/check-package-conventions.mjs` to enforce npm/bpmn.io publishing rules (name prefix, ESM, license, entry point, peer dependencies, registry config).
 
-To register a new `.bpmn` location for these checks, edit `ROOTS` in `tools/bpmn-files.mjs` (the single file-discovery source). The agent skill **`skills/bpmn-conformance`** (`SKILL.md`) orchestrates exactly these same tools and then explains the results; companion skills `skills/moddle-extension-review` and `skills/bpmn-naming-publishing` review descriptor and packaging changes. Before opening a PR, run `npm run verify` and follow the PR checklist in [CONTRIBUTING.md § Pull Requests](CONTRIBUTING.md#pull-requests).
+To register a new `.bpmn` location for these checks, edit `ROOTS` in `tools/bpmn-files.mjs` (the single file-discovery source). The agent skill **`skills/bpmn-conformance`** (`SKILL.md`) orchestrates exactly these same tools and then explains the results; companion skills `skills/moddle-extension-review` and `skills/bpmn-naming-publishing` review descriptor and packaging changes. Before opening a PR, run `npm run verify` and follow the PR checklist in [CONTRIBUTING.md § Pull Requests](../CONTRIBUTING.md#pull-requests).
 
-> **Hard rule reminder (from [AGENTS.md](AGENTS.md)):** a moddle descriptor change that renames or removes a type or property is a **breaking (MAJOR)** change and needs human sign-off; clinical data goes only under your custom prefix inside `<extensionElements>`, never in the `bpmn:`/`bpmndi:` namespace.
+> **Hard rule reminder (from [AGENTS.md](../AGENTS.md)):** a moddle descriptor change that renames or removes a type or property is a **breaking (MAJOR)** change and needs human sign-off; clinical data goes only under your custom prefix inside `<extensionElements>`, never in the `bpmn:`/`bpmndi:` namespace.
 
 ---
 

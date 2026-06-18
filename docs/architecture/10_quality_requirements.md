@@ -80,7 +80,7 @@ Expressed in the arc42 scenario form (stimulus → response). These are derivabl
 ### Q6 — Automated test correctness
 
 > **Scenario.** A change is pushed / a PR is opened against `main`.
-> **Response.** CI runs `npm test` (Vitest) on a Node **18 and 20** matrix and then builds the demo. The pre-push hook runs the full `npm run verify` (`check:packages` + `check:conformance` + `npm test`) locally. The GitHub Pages deploy runs the test matrix first and only deploys on success. _Note: properties-panel modules and the `demo` package are excluded from unit tests by design (they require live bpmn-js peers) — see [CONTRIBUTING.md](../CONTRIBUTING.md#testing); UI behaviour is exercised through the demo app, not Vitest._
+> **Response.** CI runs `npm test` (Vitest) on a Node **18 and 20** matrix and then builds the demo. The pre-push hook runs the full `npm run verify` (`check:packages` + `check:conformance` + `npm test`) locally. The GitHub Pages deploy runs the test matrix first and only deploys on success. _Note: properties-panel modules and the `demo` package are excluded from unit tests by design (they require live bpmn-js peers) — see [CONTRIBUTING.md](../../CONTRIBUTING.md#testing); UI behaviour is exercised through the demo app, not Vitest._
 
 ### Q7 — Reproducible installs
 
@@ -101,7 +101,7 @@ The repository encodes **pass/fail gates**, not measured quality targets or a pr
 - _Requires human input: usability / accessibility requirements for the properties panel and Vue UI (a11y conformance level, i18n languages beyond the German group labels visible in the demo)._
 - _Requires human input: availability / reliability targets for the external terminology services (Snowstorm, FHIR TS) and the documented behaviour when they are unreachable._
 - _Requires human input: the relative **priority / trade-off ranking** of the quality goals above (e.g. compatibility vs. maintainability vs. feature velocity), including the project's risk appetite. This is a stakeholder decision (see chapter [1](01_introduction_and_goals.md))._
-- _Requires human input: security requirements beyond the supply-chain audit (e.g. threat model, handling of credentials/tokens for terminology servers). Note the project's hard rule that only synthetic clinical data is permitted and the "research prototype — not production-hardened, not independently security-reviewed" status stated in the [README](../README.md)._
+- _Requires human input: security requirements beyond the supply-chain audit (e.g. threat model, handling of credentials/tokens for terminology servers). Note the project's hard rule that only synthetic clinical data is permitted and the "research prototype — not production-hardened, not independently security-reviewed" status stated in the [README](../../README.md)._
 
 ---
 

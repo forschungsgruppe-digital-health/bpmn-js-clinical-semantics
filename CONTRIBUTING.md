@@ -70,7 +70,7 @@ This is a **monorepo** managed with [npm workspaces](https://docs.npmjs.com/cli/
 | `.github/workflows/ci.yml` | CI pipeline (lint, test, build on Node 18 + 20; BPMN conformance + conventions gate) |
 | `.github/workflows/deploy.yml` | GitHub Pages deployment (tests + build + deploy) on push to `main` |
 | `AGENTS.md` | Single-source operational context for AI agents (CLAUDE.md imports it) |
-| `ARCHITECTURE.md` | Design decisions, UML diagrams, data model, project structure |
+| `docs/ARCHITECTURE.md` | Design decisions, UML diagrams, data model, project structure |
 | `tools/` | Deterministic conformance/convention checkers (see [Conformance and Quality Checks](#conformance-and-quality-checks)) |
 | `.bpmnlintrc` | bpmnlint config (`recommended` + `correctness`) |
 | `.githooks/` | Committed pre-commit / pre-push hooks (enabled via `core.hooksPath`) |

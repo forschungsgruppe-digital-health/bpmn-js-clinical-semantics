@@ -8,7 +8,7 @@ description: Derives an arc42 architecture documentation skeleton (official 12-s
 > **No speculation.** Fill in ONLY what is unambiguously derivable from code,
 > package manifests (`package.json`), moddle descriptors
 > (`packages/*/src/moddle/*.json`), the conformance tooling under `tools/`, and
-> the committed docs (`AGENTS.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md`,
+> the committed docs (`AGENTS.md`, `docs/ARCHITECTURE.md`, `CONTRIBUTING.md`,
 > `README.md`). When something needs guessing, insert the placeholder below
 > instead. Do NOT modify source files; writing is limited to the arc42 output
 > file(s). This is a detection/drafting skill — **mandatory human review** before
@@ -17,7 +17,7 @@ description: Derives an arc42 architecture documentation skeleton (official 12-s
 You generate an arc42 architecture documentation skeleton following the OFFICIAL
 arc42 12-section structure.
 
-Note: this repo already ships a hand-written arc42 under `architecture/`
+Note: this repo already ships a hand-written arc42 under `docs/architecture/`
 (one numbered Markdown file per section: `01_introduction_and_goals.md` …
 `12_glossary.md`). When that exists, DO NOT overwrite it. Read it first, then
 either (a) propose a diff that fills `_Not yet documented._` stubs with
@@ -41,8 +41,8 @@ This monorepo. Relevant evidence sources:
 - Moddle descriptors `packages/*/src/moddle/*.json` (namespaces, prefixes, types).
 - Conformance tooling `tools/*.mjs` / `tools/*.sh` and the npm scripts wiring them.
 - Git hooks `.githooks/`, CI under `.github/`, and the agent skills under `skills/`.
-- Prose: `AGENTS.md`, `ARCHITECTURE.md`, `CONTRIBUTING.md`, `README.md`,
-  `EXTENDING-BPMN-IO.md`, `examples/`, `docs/user-stories/`.
+- Prose: `AGENTS.md`, `docs/ARCHITECTURE.md`, `CONTRIBUTING.md`, `README.md`,
+  `docs/EXTENDING-BPMN-IO.md`, `examples/`, `docs/user-stories/`.
 
 ## The 12 official arc42 sections and how to treat each
 
@@ -66,7 +66,7 @@ This monorepo. Relevant evidence sources:
    the BPMN/FHIR data they exchange — detected boundaries only. Business context:
    placeholder.
 4. **Solution Strategy** — PARTIAL/REFERENCE. The "why" lives in prose, not code.
-   Summarize and link `ARCHITECTURE.md` and `architecture/04_solution_strategy.md`
+   Summarize and link `docs/ARCHITECTURE.md` and `docs/architecture/04_solution_strategy.md`
    if present; do not reconstruct rationale that is not written down. This repo has
    NO `docs/adr/` directory — do not invent one or link to it.
 5. **Building Block View** — DERIVABLE. Strongest section. Level 1: the three
@@ -99,7 +99,7 @@ This monorepo. Relevant evidence sources:
    versioning; synthetic-data / PII-sensitivity handling for clinical content.
    Rationale beyond what is written: placeholder.
 9. **Architecture Decisions** — REFERENCE ONLY. There is no `docs/adr/` here.
-   Point to `ARCHITECTURE.md` and `architecture/09_architecture_decisions.md`
+   Point to `docs/ARCHITECTURE.md` and `docs/architecture/09_architecture_decisions.md`
    (which currently defers to the Solution Strategy). Do NOT write new ADRs or
    reconstruct rationale from code.
 10. **Quality Requirements** — ⚠️ HUMAN INPUT. Quality scenarios and the quality
@@ -121,10 +121,10 @@ This monorepo. Relevant evidence sources:
 
 ## Output
 
-Default: refresh the existing `architecture/` set — one numbered file per section
+Default: refresh the existing `docs/architecture/` set — one numbered file per section
 (`NN_title.md`), matching the present naming and `# N. Title` headings — filling
 only `_Not yet documented._` stubs with code-derived drafts. If the user asks for
-a fresh standalone draft, write `architecture/arc42.md` (single file) instead.
+a fresh standalone draft, write `docs/architecture/arc42.md` (single file) instead.
 Ask if unclear.
 
 Use the official section headings and numbering. Every section must be present.

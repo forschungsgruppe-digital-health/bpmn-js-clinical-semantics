@@ -40,7 +40,7 @@ BPMN 2.0 is widely used for modelling clinical pathways, but its elements carry 
 
 **bpmn-js-clinical-semantics** closes this gap by adding two optional annotation layers: terminology annotations (`term:` namespace) for codes from SNOMED CT, LOINC, ICD-10-GM, OPS, IHE XDS, KDL, and other systems; and FHIR resource mappings (`fhirmap:` namespace) for declaring resource types, profiles, interactions, and key elements. Both layers use standard BPMN `extensionElements`, so non-clinical tools simply ignore them.
 
-For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For the full background and design rationale, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
@@ -189,7 +189,7 @@ addAnnotation(businessObject, moddle, {
 });
 ```
 
-For adding custom terminology systems (FHIR-hosted, static, or custom API), see [architecture/08 — Extending with a New Terminology System](architecture/08_crosscutting_concepts.md#extending-with-a-new-terminology-system).
+For adding custom terminology systems (FHIR-hosted, static, or custom API), see [docs/architecture/08 — Extending with a New Terminology System](docs/architecture/08_crosscutting_concepts.md#extending-with-a-new-terminology-system).
 
 ---
 
@@ -249,8 +249,8 @@ npm run dev
 | Document | Audience | Content |
 |---|---|---|
 | [README.md](README.md) | All users | Overview, features, quick start, usage examples |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Contributors, integrators | Design decisions, UML diagrams, data model, project structure, extensibility |
-| [EXTENDING-BPMN-IO.md](EXTENDING-BPMN-IO.md) | New contributors, extension developers | Primer: BPMN & BPMN XML, the standard extension mechanism, the bpmn.io toolkit, the five ways to extend bpmn.io, and how this repo maps onto them — with links to the OMG and bpmn.io sources |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Contributors, integrators | Design decisions, UML diagrams, data model, project structure, extensibility |
+| [docs/EXTENDING-BPMN-IO.md](docs/EXTENDING-BPMN-IO.md) | New contributors, extension developers | Primer: BPMN & BPMN XML, the standard extension mechanism, the bpmn.io toolkit, the five ways to extend bpmn.io, and how this repo maps onto them — with links to the OMG and bpmn.io sources |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributors | Development setup, coding standards, testing, branching, release process |
 | [AGENTS.md](AGENTS.md) | AI coding agents (all tools) | Single-source operational context: the quality gate, conventions, hard rules; CLAUDE.md imports it |
 

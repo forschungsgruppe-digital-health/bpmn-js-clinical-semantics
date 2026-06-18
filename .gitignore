@@ -3,8 +3,13 @@ node_modules/
 
 # Build output
 dist/
-docs/
 *.tsbuildinfo
+
+# docs/ is the tracked documentation home; ignore only local/generated artifacts there
+# (the GitHub Pages site is built in CI, not committed; sample.bpmn is a local scratch fixture)
+/docs/index.html
+/docs/assets/
+/docs/sample.bpmn
 
 # OS files
 .DS_Store
