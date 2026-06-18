@@ -18,16 +18,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci --legacy-peer-deps
 
       - name: Lint (if configured)
         run: npm run lint || true
@@ -43,16 +43,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
           cache: npm
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci --legacy-peer-deps
 
       - name: Ensure xmllint is available (for XSD core validation)
         run: xmllint --version || (sudo apt-get update && sudo apt-get install -y libxml2-utils)
@@ -66,3 +66,8 @@ jobs:
       # Blocking gate: npm/bpmn.io packaging conventions for the workspace packages.
       - name: Package conventions
         run: npm run check:packages
+
+      # Blocking gate: no high/critical CVEs in *production* (shipped) dependencies.
+      # Dev-only advisories are tracked separately and do not block here.
+      - name: Dependency audit (production deps)
+        run: npm audit --omit=dev --audit-level=high
