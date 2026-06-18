@@ -97,7 +97,7 @@ bpmn-js-clinical-semantics/
 |   |   |   +-- moddle/               clinical.json  -- BPMN moddle extension (term: namespace)
 |   |   |   +-- properties-panel/     TerminologyPropertiesProvider, UI entries
 |   |   |   +-- services/             AnnotationHelper (read/write annotations on businessObjects)
-|   |   +-- test/                     Unit tests (139 tests)
+|   |   +-- test/                     Unit tests
 |   |
 |   +-- fhir-mapping/                 @forschungsgruppe-digital-health/fhir-mapping
 |   |   +-- src/
@@ -105,7 +105,7 @@ bpmn-js-clinical-semantics/
 |   |   |   +-- moddle/               fhir-mapping.json  -- BPMN moddle extension (fhirmap: namespace)
 |   |   |   +-- properties-panel/     FhirMappingPropertiesProvider, UI entries
 |   |   |   +-- services/             MappingHelper (read/write/export FHIR mappings)
-|   |   +-- test/                     Unit tests (34 tests)
+|   |   +-- test/                     Unit tests
 |   |
 |   +-- vue/                          @forschungsgruppe-digital-health/vue
 |       +-- src/composables/          useTerminology(), useFhirMapping()
