@@ -12,6 +12,24 @@ tool-specific files only point here — never copy a skill's body.
 | [`moddle-extension-review`](moddle-extension-review/SKILL.md) | changing a moddle type / property / namespace / prefix in `packages/*/src/moddle/*.json` | `npm run check:conformance` |
 | [`bpmn-naming-publishing`](bpmn-naming-publishing/SKILL.md) | editing `packages/*/package.json` or releasing | `npm run check:packages` |
 
+## Analysis skills (vendored from the MiHUB Patient-Portal toolset, adapted)
+
+General code-health skills, **invoked on demand** (not auto-gated on a file pattern) and
+**detection / analysis only** — they report for human review and never edit or delete.
+
+| Skill | Use it to |
+|---|---|
+| [`dead-code-detector`](dead-code-detector/SKILL.md) | find unused exports, dead modules, orphaned moddle types / properties-panel entries |
+| [`feature-inventarist`](feature-inventarist/SKILL.md) | build a Feature Inventory Matrix across the packages (preliminary maturity) |
+| [`docs-auditor`](docs-auditor/SKILL.md) | role-aware docs ↔ code consistency / coverage / link audit + small consolidation plan |
+| [`security-reviewer`](security-reviewer/SKILL.md) | review secrets, PII in fixtures, supply chain, unsafe XML/DOM sinks |
+| [`arc42-generator`](arc42-generator/SKILL.md) | derive / refresh the arc42 skeleton (the `architecture/` chapters) from code |
+| [`test-generator`](test-generator/SKILL.md) | write Vitest characterization tests before a refactor |
+
+Companion slash-commands live in [`.claude/commands/`](../.claude/commands/): `classify-feature`,
+`inventory-update`, `draft-arc42`, `adr-draft`, `upgrade-dep` (Claude Code-specific; the analysis
+skills above are the cross-tool form, auto-discovered by Codex/Copilot via the same symlinks).
+
 ## How each tool consumes these skills
 
 - **Claude Code** — auto-discovers via the `.claude/skills` symlink (→ `../skills`); loads a

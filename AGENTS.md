@@ -68,7 +68,13 @@ gate command before proposing a commit or PR. The decision lives in the tool, ne
 Codex has no per-glob `applyTo` frontmatter, so treat the "Triggers" column as the path mapping
 (Copilot gets real `applyTo` globs in `.github/instructions/`). Codex custom prompts are
 personal-only (`~/.codex/prompts`) and deprecated — there is no repo-committed Codex prompt
-location; the skills above are the shared, repo-committed equivalent. See [`skills/README.md`](skills/README.md).
+location; the skills above are the shared, repo-committed equivalent.
+
+Beyond the three conformance skills, the repo also vendors general **analysis skills** (invoked on
+demand, detection-only): `dead-code-detector`, `feature-inventarist`, `docs-auditor`,
+`security-reviewer`, `arc42-generator`, `test-generator` — plus slash-commands under
+`.claude/commands/` (`classify-feature`, `inventory-update`, `draft-arc42`, `adr-draft`,
+`upgrade-dep`). See [`skills/README.md`](skills/README.md).
 
 ## Conventions (enforced or expected)
 
