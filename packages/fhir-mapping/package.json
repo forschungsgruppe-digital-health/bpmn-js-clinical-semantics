@@ -1,6 +1,6 @@
 {
   "name": "@forschungsgruppe-digital-health/fhir-mapping",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "FHIR resource mapping for BPMN process models with FHIRPath targets",
   "type": "module",
   "scripts": {
@@ -17,7 +17,13 @@
     "bpmn-js-properties-panel": ">=5.0.0",
     "@bpmn-io/properties-panel": ">=3.0.0"
   },
-  "keywords": ["bpmn", "fhir", "mapping", "fhirpath", "clinical"],
+  "keywords": [
+    "bpmn",
+    "fhir",
+    "mapping",
+    "fhirpath",
+    "clinical"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

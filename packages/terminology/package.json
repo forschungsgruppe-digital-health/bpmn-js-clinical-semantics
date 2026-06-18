@@ -1,6 +1,6 @@
 {
   "name": "@forschungsgruppe-digital-health/terminology",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Extensible semantic terminology annotations for BPMN process models",
   "type": "module",
   "scripts": {
@@ -18,7 +18,15 @@
     "bpmn-js-properties-panel": ">=5.0.0",
     "@bpmn-io/properties-panel": ">=3.0.0"
   },
-  "keywords": ["bpmn", "terminology", "snomed", "loinc", "icd-10", "fhir", "clinical"],
+  "keywords": [
+    "bpmn",
+    "terminology",
+    "snomed",
+    "loinc",
+    "icd-10",
+    "fhir",
+    "clinical"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
