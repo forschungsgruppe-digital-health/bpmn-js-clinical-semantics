@@ -34,7 +34,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          for pkg in terminology fhir-mapping vue; do
+          for pkg in terminology fhir-mapping; do
             echo "::group::publish @forschungsgruppe-digital-health/$pkg"
             if npm publish --workspace="packages/$pkg" 2>publish-err.log; then
               echo "published $pkg"

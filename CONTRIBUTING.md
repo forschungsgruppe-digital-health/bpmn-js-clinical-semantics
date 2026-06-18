@@ -59,7 +59,7 @@ This is a **monorepo** managed with [npm workspaces](https://docs.npmjs.com/cli/
 |---|---|---|
 | `packages/terminology` | `@forschungsgruppe-digital-health/terminology` | Terminology annotation engine, providers, adapters, moddle extension, properties panel |
 | `packages/fhir-mapping` | `@forschungsgruppe-digital-health/fhir-mapping` | FHIR resource mapping, moddle extension, properties panel |
-| `packages/vue` | `@forschungsgruppe-digital-health/vue` | Vue 3 composables (optional framework integration) |
+| `packages/demo` | `@forschungsgruppe-digital-health/demo` (private) | Vue 3 composables (optional framework integration), not published |
 | `examples/vanilla` | `clinical-bpmn-demo` (private) | Interactive demo app, not published |
 
 ### Key files
@@ -176,7 +176,7 @@ npx vitest --watch                                 # Watch mode (from a package 
 - **Mock fetch for adapter/provider tests.** Pass a `fetchFn` parameter to providers and adapters to inject mock implementations. See `test/adapters/SnowstormAdapter.test.js` for examples.
 - **Mock moddle for helper tests.** Create a minimal `{ create(type, props) { return { $type: type, ...props }; } }` mock. See `test/services/AnnotationHelper.test.js`.
 - **Properties panel modules are excluded from unit tests** because they depend on bpmn-js peer dependencies that are not fully available in the test environment. UI-level testing should be done via the demo app or integration tests.
-- **The `vue` package has no unit tests** for the same reason — its composables wrap a live bpmn-js modeler instance, so they are exercised through the demo app (`examples/vanilla`) rather than Vitest.
+- **The `demo` package has no unit tests** for the same reason — its composables wrap a live bpmn-js modeler instance, so they are exercised through the demo app (`examples/vanilla`) rather than Vitest.
 
 ### Test coverage targets
 
@@ -298,7 +298,7 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Scopes
 
-Use the package name as scope: `terminology`, `fhir-mapping`, `vue`, `demo`, or omit for cross-cutting changes.
+Use the package name as scope: `terminology`, `fhir-mapping`, `demo`, or omit for cross-cutting changes.
 
 ### Examples
 
@@ -410,28 +410,29 @@ Configuration lives in [`release-please-config.json`](release-please-config.json
    - `docs:`, `refactor:`, `chore:`, `test:`, … → no release on their own.
 2. **release-please opens (and keeps updating) a single release PR** titled `chore: release main`.
    It bumps the publishable package(s) that have releasable commits, updates each `CHANGELOG.md`,
-   updates `vue`'s peer-dependency ranges on the sibling packages (`node-workspace` plugin), and
+   keeps the peer-dependency ranges between the sibling packages in sync (`node-workspace` plugin), and
    updates `.release-please-manifest.json`. Packages released together are kept at the same version
-   (the `linked-versions` plugin) — see the lockstep note below.
+   (the `linked-versions` plugin) — see the lockstep note below. The private `demo` package is not
+   in release-please, so it is never bumped here.
 3. **A maintainer merges the release PR — with a _merge commit_, NOT a squash** (release-please needs
    the merge commit on `main` to tag the release; squashing breaks tag creation). On merge,
    release-please creates a git tag and a GitHub Release **per released package**
-   (`include-component-in-tag: true`), e.g. `vue-v0.1.2`.
+   (`include-component-in-tag: true`), e.g. `fhir-mapping-v0.1.0`.
 4. **The `publish` job runs automatically** (same workflow, gated on `releases_created`) and
-   pushes all three packages to GitHub Packages (`https://npm.pkg.github.com`). No provenance
+   pushes the two publishable packages to GitHub Packages (`https://npm.pkg.github.com`). No provenance
    attestation is produced — npm provenance is a public-npm-registry feature and is not supported
    on GitHub Packages.
 
 ### Lockstep versioning
 
-The three publishable packages are kept in sync **when they are released together**: if several
-have releasable commits in the same window, the **highest** bump wins and those packages move to the
-same version (the `linked-versions` plugin). Practical limit to be aware of: release-please does
-**not** force-release a package that has *no* releasable commits, so a change touching only one
-package (e.g. a `fix:` in `vue`) bumps only that package — the versions reconcile on the next release
-that spans the group. The private packages (the repo root `clinical-bpmn` and the
-`clinical-bpmn-demo` example) are never versioned or published — they are simply absent from
-`release-please-config.json`.
+The two publishable packages (`terminology`, `fhir-mapping`) are kept in sync **when they are released
+together**: if both have releasable commits in the same window, the **highest** bump wins and those
+packages move to the same version (the `linked-versions` plugin). Practical limit to be aware of:
+release-please does **not** force-release a package that has *no* releasable commits, so a change
+touching only one package (e.g. a `fix:` in `terminology`) bumps only that package — the versions
+reconcile on the next release that spans the group. The private packages (the repo root
+`clinical-bpmn`, the `demo` package, and the `clinical-bpmn-demo` example) are never versioned or
+published — they are simply absent from `release-please-config.json`.
 
 ### Publish scope
 
@@ -444,9 +445,9 @@ the registry for this scope as described in
 
 ### Release history
 
-The **first** managed release is **v0.1.1**, driven by a `vue` fix: `vue` → 0.1.1, with
-`terminology` and `fhir-mapping` first-published at `0.1.0` (they had no releasable commits — see the
-lockstep note above). Subsequent releases follow the automated flow above.
+The published packages are `terminology@0.1.0` and `fhir-mapping@0.1.0` (GitHub Release `v0.1.2`).
+The `demo` package is private and has never been published. Subsequent releases follow the automated
+flow above.
 
 ### Ownership, hotfixes & deprecation
 
@@ -460,9 +461,10 @@ lockstep note above). Subsequent releases follow the automated flow above.
   release-please cut the patch when it merges to `main`.
 - **Deprecation.** Mark a deprecated export/type in its JSDoc and the `CHANGELOG`, keep it for at
   least one further MINOR release, and remove it only in a MAJOR bump.
-- **Peer ranges.** The `node-workspace` plugin auto-bumps `vue`'s `peerDependencies` on the sibling
-  packages during a release; keep `updatePeerDependencies: true` in `release-please-config.json` if
-  you edit it.
+- **Peer ranges.** The `node-workspace` plugin auto-bumps the publishable packages' `peerDependencies`
+  on their siblings during a release; keep `updatePeerDependencies: true` in
+  `release-please-config.json` if you edit it. The private `demo` package is outside release-please, so
+  its peer ranges are not managed here.
 
 ---
 
@@ -480,7 +482,7 @@ Follow [Semantic Versioning](https://semver.org/):
 - **MINOR** (0.x.0): New features that are backwards-compatible (new providers, new aspects, new FHIR resource types).
 - **MAJOR** (x.0.0): Breaking changes to public API, moddle schema changes, renamed exports.
 
-All three publishable packages (`terminology`, `fhir-mapping`, `vue`) are versioned together to keep compatibility simple.
+Both publishable packages (`terminology`, `fhir-mapping`) are versioned together to keep compatibility simple. The private `demo` package is not versioned or published.
 
 ### Step-by-step release
 
@@ -490,16 +492,15 @@ All three publishable packages (`terminology`, `fhir-mapping`, `vue`) are versio
    git checkout -b release/0.2.0 main
    ```
 
-2. **Update version numbers** in all three package.json files:
+2. **Update version numbers** in both publishable package.json files:
 
    ```bash
    # From the repo root:
    npm version 0.2.0 --workspace=packages/terminology --no-git-tag-version
    npm version 0.2.0 --workspace=packages/fhir-mapping --no-git-tag-version
-   npm version 0.2.0 --workspace=packages/vue --no-git-tag-version
    ```
 
-3. **Update peer dependency ranges** if the vue package's peer dependencies on terminology or fhir-mapping need adjusting.
+3. **Update peer dependency ranges** if the publishable packages' peer dependencies on each other need adjusting.
 
 4. **Run the full test suite:**
 
@@ -527,12 +528,12 @@ All three publishable packages (`terminology`, `fhir-mapping`, `vue`) are versio
    git push origin v0.2.0
    ```
 
-8. **Publish to GitHub Package Registry:**
+8. **Publish to GitHub Package Registry** (only the two publishable packages; the private `demo`
+   package is never published):
 
    ```bash
    cd packages/terminology && npm publish
    cd ../fhir-mapping && npm publish
-   cd ../vue && npm publish
    ```
 
    If publishing from CI (recommended), use a GitHub Actions workflow:
@@ -544,7 +545,6 @@ All three publishable packages (`terminology`, `fhir-mapping`, `vue`) are versio
      run: |
        npm publish --workspace=packages/terminology
        npm publish --workspace=packages/fhir-mapping
-       npm publish --workspace=packages/vue
    ```
 
 9. **Create a GitHub Release** from the tag, documenting the changes with links to relevant PRs and issues.

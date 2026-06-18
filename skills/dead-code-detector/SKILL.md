@@ -1,6 +1,6 @@
 ---
 name: dead-code-detector
-description: Identify unused exports, dead modules, uncalled functions, and orphaned moddle types / properties-panel entries across the npm-workspaces ESM packages (terminology, fhir-mapping, vue). Use before refactoring or trimming a grown package. Detection only — reports candidates with confidence levels and a suggested action; never deletes or edits anything.
+description: Identify unused exports, dead modules, uncalled functions, and orphaned moddle types / properties-panel entries across the npm-workspaces ESM packages (terminology, fhir-mapping, demo). Use before refactoring or trimming a grown package. Detection only — reports candidates with confidence levels and a suggested action; never deletes or edits anything.
 ---
 
 # dead-code-detector
@@ -58,8 +58,8 @@ Run from the repo root. Prefer the workspace graph over guesses.
 - **Unused dependencies.** Compare each `packages/*/package.json` `dependencies` /
   `peerDependencies` against actual imports. `bpmn-js` / `bpmn-js-properties-panel`
   are **peers** — absence of a direct import does not make them unused.
-- **Cross-package check.** terminology ↔ fhir-mapping ↔ vue: does an export consumed
-  by another package still exist on both ends? Does `vue` (composables) reference
+- **Cross-package check.** terminology ↔ fhir-mapping ↔ demo: does an export consumed
+  by another package still exist on both ends? Does `demo` (the Vue composables) reference
   terminology/fhir-mapping exports that were removed or renamed?
 
 ## Confidence levels

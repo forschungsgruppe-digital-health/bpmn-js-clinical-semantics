@@ -8,7 +8,7 @@ allowed-tools: Read, Edit, Bash, Grep, Glob
 Target: $ARGUMENTS (format: "library@version", e.g. "bpmn-js@18", "vitest@3", "vue@3.5")
 
 This is an ESM npm-workspaces monorepo of bpmn-js extension libraries
-(`packages/terminology`, `packages/fhir-mapping`, `packages/vue`), JS + JSDoc, no
+(`packages/terminology`, `packages/fhir-mapping`, `packages/demo`), JS + JSDoc, no
 TypeScript, Vitest. The libraries ship raw ESM (no build step). The central upgrade
 risk is **overlapping bpmn-js peer-dependency ranges** across packages — see AGENTS.md.
 
@@ -22,11 +22,11 @@ risk is **overlapping bpmn-js peer-dependency ranges** across packages — see A
    - For bpmn-js ecosystem deps (`bpmn-js`, `bpmn-js-properties-panel`,
      `@bpmn-io/properties-panel`, `bpmn-moddle`, `bpmnlint`): these appear as
      **peer ranges** in multiple packages. Confirm the new version stays within a
-     single overlapping range across `terminology`, `fhir-mapping` and `vue`, and
+     single overlapping range across `terminology`, `fhir-mapping` and `demo`, and
      widen the peer ranges deliberately rather than pinning.
    - Installs use `npm install --legacy-peer-deps` (intentional, per AGENTS.md);
      do not "fix" this by tightening peers without sign-off.
-   - For `vue`: only affects `packages/vue` (peer `vue >=3.3.0`).
+   - For `vue`: only affects `packages/demo` (peer `vue >=3.3.0`).
 
 3. **Incremental Upgrade**
    - Update the version in the relevant manifest(s).
@@ -48,7 +48,7 @@ risk is **overlapping bpmn-js peer-dependency ranges** across packages — see A
 5. **Commit**
    - One logical commit per step.
    - Conventional Commit message: `chore(deps): upgrade $ARGUMENTS`
-     (scope = affected package: `terminology` / `fhir-mapping` / `vue`, or omit for root).
+     (scope = affected package: `terminology` / `fhir-mapping` / `demo`, or omit for root).
    - PR description lists all breaking changes and any widened peer ranges.
 
 STOP and ask for human review if:

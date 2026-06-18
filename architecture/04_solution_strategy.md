@@ -4,7 +4,7 @@ _Summarizes fundamental design decisions and strategies that form the cornerston
 
 ## Design Decisions
 
-**Monorepo with npm workspaces.** The three packages share a development lifecycle and are versioned together, but they are published independently. A consumer that only needs terminology annotations does not pull in the FHIR mapping code, and vice versa. The Vue package is optional for projects that use a different frontend framework.
+**Monorepo with npm workspaces.** The two publishable packages (`terminology`, `fhir-mapping`) share a development lifecycle and are versioned together, but are published independently to GitHub Packages. A consumer that only needs terminology annotations does not pull in the FHIR mapping code, and vice versa. The private `demo` package (a Vue 3 wrapper) is optional and is not published.
 
 **Separate XML namespaces.** Terminology annotations use the `term:` prefix (URI `https://clinical-bpmn.org/terminology/v1`) and FHIR mappings use the `fhirmap:` prefix (URI `https://clinical-bpmn.org/fhir-mapping/v1`). This keeps the two concerns decoupled in the BPMN XML and allows each layer to evolve independently.
 

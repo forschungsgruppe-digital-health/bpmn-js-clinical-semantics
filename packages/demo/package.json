@@ -1,7 +1,8 @@
 {
-  "name": "@forschungsgruppe-digital-health/vue",
+  "name": "@forschungsgruppe-digital-health/demo",
   "version": "0.1.2",
-  "description": "Vue 3 wrapper and composables for clinical BPMN extensions",
+  "private": true,
+  "description": "Vue 3 integration demo for the clinical BPMN extensions (private; not published).",
   "type": "module",
   "main": "src/index.js",
   "exports": {
@@ -27,10 +28,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics.git",
-    "directory": "packages/vue"
+    "directory": "packages/demo"
   },
-  "homepage": "https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics#readme",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  }
+  "homepage": "https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics#readme"
 }

@@ -1,5 +1,4 @@
 {
   "packages/terminology": "0.1.0",
-  "packages/fhir-mapping": "0.1.0",
-  "packages/vue": "0.1.2"
+  "packages/fhir-mapping": "0.1.0"
 }

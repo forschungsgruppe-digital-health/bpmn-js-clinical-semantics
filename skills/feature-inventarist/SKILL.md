@@ -1,6 +1,6 @@
 ---
 name: feature-inventarist
-description: Scans the bpmn-js-clinical-semantics monorepo to identify features (package exports, moddle types, properties-panel providers/entries, terminology providers/adapters, Vue composables, CLI conformance tools) and produces an initial Feature Inventory Matrix as Markdown for human review. Use when you need a first-pass inventory of what capabilities exist across packages/terminology, packages/fhir-mapping and packages/vue and their preliminary maturity. Suggests maturity ratings as PRELIMINARY; never decides recommendations or deletes anything.
+description: Scans the bpmn-js-clinical-semantics monorepo to identify features (package exports, moddle types, properties-panel providers/entries, terminology providers/adapters, Vue composables, CLI conformance tools) and produces an initial Feature Inventory Matrix as Markdown for human review. Use when you need a first-pass inventory of what capabilities exist across packages/terminology, packages/fhir-mapping and packages/demo and their preliminary maturity. Suggests maturity ratings as PRELIMINARY; never decides recommendations or deletes anything.
 ---
 
 # feature-inventarist
@@ -16,7 +16,7 @@ extension libraries** that add clinical semantics to BPMN 2.0 via standard
 tested with **Vitest**, published to **GitHub Packages**
 (`@forschungsgruppe-digital-health/*`). The three workspaces are
 `packages/terminology` (`term:`), `packages/fhir-mapping` (`fhirmap:`) and
-`packages/vue` (Vue 3 wrapper). See `AGENTS.md` for the full picture.
+`packages/demo` (Vue 3 wrapper). See `AGENTS.md` for the full picture.
 
 Your job is to discover and catalogue what each package actually offers — its
 public API and the clinical extension surface — not to judge it.
@@ -40,8 +40,8 @@ Inventory across these dimensions (per package where applicable):
    generic FHIR terminology).
 5. **Services / core helpers** — `src/core/*` (types, registries, FHIR-version
    config) and `src/services/*` (e.g. `AnnotationHelper`, `MappingHelper`).
-6. **Vue surface** — composables under `packages/vue/src/composables/*`
-   (`useTerminology`, `useFhirMapping`) and what `packages/vue` re-exports.
+6. **Vue surface** — composables under `packages/demo/src/composables/*`
+   (`useTerminology`, `useFhirMapping`) and what `packages/demo` re-exports.
 7. **Conformance tooling** — the deterministic CLI gate under `tools/` wired to
    npm scripts (`npm run check:conformance` = `lint:bpmn` + `check:roundtrip` +
    `check:xsd`; `check:packages`; `verify`). Note which tool each feature is
@@ -59,7 +59,7 @@ For every feature you can identify:
    the moddle type(s) it reads/writes (by `prefix:name`), the properties-panel
    entry that surfaces it, and any example/doc usage (`examples/**`, `docs/**`,
    `docs/user-stories/*.md`).
-3. Identify cross-package references — e.g. a `packages/vue` composable wrapping
+3. Identify cross-package references — e.g. a `packages/demo` composable wrapping
    a `terminology`/`fhir-mapping` export, or a properties-panel entry bound to a
    specific moddle type.
 4. Record test coverage: which `packages/*/test/**/*.test.js` exercise it

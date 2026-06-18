@@ -27,7 +27,7 @@
   "workspaces": [
     "packages/terminology",
     "packages/fhir-mapping",
-    "packages/vue",
+    "packages/demo",
     "examples/*"
   ],
   "devDependencies": {

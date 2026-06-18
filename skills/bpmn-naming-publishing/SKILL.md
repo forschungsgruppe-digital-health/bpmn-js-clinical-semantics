@@ -36,9 +36,9 @@ npm run check:packages        # node tools/check-package-conventions.mjs
 
 - Prefer an `exports` map mirroring the siblings: `"."`, `"./moddle"`,
   `"./properties-panel"`.
-- The three publishable packages (`terminology`, `fhir-mapping`, `vue`) are
-  versioned together — keep their versions in lockstep (see CONTRIBUTING.md →
-  Release Process).
+- The two publishable packages (`terminology`, `fhir-mapping`) are versioned
+  together — keep their versions in lockstep (see CONTRIBUTING.md → Releasing).
+  The `demo` package is private and not published.
 - Declared bpmn-js peer ranges must agree across packages.
 
 Present a concrete `package.json` diff, then re-run `npm run check:packages` to

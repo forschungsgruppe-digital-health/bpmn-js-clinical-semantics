@@ -23,7 +23,7 @@ template that the repo does not have.
    - **Title:** `## ADR-NNNN — <decision> [PROPOSED]`
    - **Context:** why this decision is needed now (what in the codebase or constraints
      forces it). Reference concrete repo facts where relevant: npm-workspaces ESM monorepo
-     (`packages/terminology`, `packages/fhir-mapping`, `packages/vue`), plain JS + JSDoc
+     (`packages/terminology`, `packages/fhir-mapping`, `packages/demo`), plain JS + JSDoc
      (no TypeScript), Vitest, moddle descriptors (`packages/*/src/moddle/*.json`) +
      properties-panel providers, GitHub Packages publishing under
      `@forschungsgruppe-digital-health`, the deterministic conformance gate

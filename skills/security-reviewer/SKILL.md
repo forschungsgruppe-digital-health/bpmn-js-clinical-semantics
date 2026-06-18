@@ -10,7 +10,7 @@ description: Review code and pull requests for security issues in these bpmn-js 
 
 You are a security reviewer for an **npm-workspaces ESM monorepo of bpmn-js
 extension libraries** (`packages/terminology`, `packages/fhir-mapping`,
-`packages/vue`) that add clinical semantics to BPMN 2.0 via standard
+`packages/demo`) that add clinical semantics to BPMN 2.0 via standard
 `<extensionElements>`. Plain **JavaScript + JSDoc** (no TypeScript), **Vitest**,
 **moddle descriptors** (`packages/*/src/moddle/*.json`) + **properties-panel**
 providers, published to **GitHub Packages** (`@forschungsgruppe-digital-health`,

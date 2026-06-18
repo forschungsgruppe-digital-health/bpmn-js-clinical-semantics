@@ -80,7 +80,7 @@ Expressed in the arc42 scenario form (stimulus → response). These are derivabl
 ### Q6 — Automated test correctness
 
 > **Scenario.** A change is pushed / a PR is opened against `main`.
-> **Response.** CI runs `npm test` (Vitest) on a Node **18 and 20** matrix and then builds the demo. The pre-push hook runs the full `npm run verify` (`check:packages` + `check:conformance` + `npm test`) locally. The GitHub Pages deploy runs the test matrix first and only deploys on success. _Note: properties-panel modules and the `vue` package are excluded from unit tests by design (they require live bpmn-js peers) — see [CONTRIBUTING.md](../CONTRIBUTING.md#testing); UI behaviour is exercised through the demo app, not Vitest._
+> **Response.** CI runs `npm test` (Vitest) on a Node **18 and 20** matrix and then builds the demo. The pre-push hook runs the full `npm run verify` (`check:packages` + `check:conformance` + `npm test`) locally. The GitHub Pages deploy runs the test matrix first and only deploys on success. _Note: properties-panel modules and the `demo` package are excluded from unit tests by design (they require live bpmn-js peers) — see [CONTRIBUTING.md](../CONTRIBUTING.md#testing); UI behaviour is exercised through the demo app, not Vitest._
 
 ### Q7 — Reproducible installs
 

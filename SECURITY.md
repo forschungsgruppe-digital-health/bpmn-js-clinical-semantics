@@ -6,9 +6,10 @@
 
 ## Supported versions
 
-This project is pre-1.0 (`0.x`). Only the latest released `0.x` version of each package
-(`@forschungsgruppe-digital-health/terminology`, `/fhir-mapping`, `/vue`) receives security fixes;
-there is no long-term-support branch yet.
+This project is pre-1.0 (`0.x`). Only the latest released `0.x` version of each published package
+(`@forschungsgruppe-digital-health/terminology`, `/fhir-mapping`) receives security fixes;
+there is no long-term-support branch yet. The `@forschungsgruppe-digital-health/demo` package is
+private/unpublished and is out of scope for releases and advisories.
 
 ## Reporting a vulnerability
 
@@ -25,9 +26,9 @@ vulnerability.
 
 ## Scope
 
-**In scope:** the published libraries (`packages/terminology`, `packages/fhir-mapping`,
-`packages/vue`), the moddle parse/serialize path, and the build/release/CI configuration
-(`.github/workflows/`, `release-please`).
+**In scope:** the two publishable libraries (`packages/terminology`, `packages/fhir-mapping`), the
+private `packages/demo` package, the moddle parse/serialize path, and the build/release/CI
+configuration (`.github/workflows/`, `release-please`).
 
 **Out of scope:** the demo app under `examples/`, documentation-only issues, and anything that would
 require committing real patient data (prohibited — see below). General code-quality and lint findings

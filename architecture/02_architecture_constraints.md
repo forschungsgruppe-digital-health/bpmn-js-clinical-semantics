@@ -29,12 +29,12 @@ _Documents organizational, technical, and regulatory constraints that limit arch
 ### Peer-dependency ranges (host compatibility contract)
 
 ```text
-bpmn-js                      >= 15.0.0   (terminology, fhir-mapping, vue)
-bpmn-js-properties-panel     >= 5.0.0    (terminology, fhir-mapping, vue)
-@bpmn-io/properties-panel    >= 3.0.0    (terminology, fhir-mapping, vue)
-vue                          >= 3.3.0    (vue package only)
-@forschungsgruppe-digital-health/terminology   >= 0.1.0  (vue, optional peer)
-@forschungsgruppe-digital-health/fhir-mapping  >= 0.1.0  (vue, optional peer)
+bpmn-js                      >= 15.0.0   (terminology, fhir-mapping, demo)
+bpmn-js-properties-panel     >= 5.0.0    (terminology, fhir-mapping, demo)
+@bpmn-io/properties-panel    >= 3.0.0    (terminology, fhir-mapping, demo)
+vue                          >= 3.3.0    (demo package only)
+@forschungsgruppe-digital-health/terminology   >= 0.1.0  (demo, optional peer)
+@forschungsgruppe-digital-health/fhir-mapping  >= 0.1.0  (demo, optional peer)
 ```
 
 Source: `packages/*/package.json` `peerDependencies` / `peerDependenciesMeta`. These open-ended `>=` ranges are the cause of the mandatory `--legacy-peer-deps` install flag.
@@ -45,7 +45,7 @@ Source: `packages/*/package.json` `peerDependencies` / `peerDependenciesMeta`. T
 |---|---|---|
 | Registry | Published to **GitHub Packages** (`https://npm.pkg.github.com`) | `publishConfig.registry` in each package; `release-please.yml` publish job |
 | Package scope | **`@forschungsgruppe-digital-health/*`** (scope must equal the owning org for GitHub Packages) | package names; `release-please.yml` comment on `scope` |
-| Versioning | **Linked versions** across `terminology` / `fhir-mapping` / `vue`, automated by **release-please** (Conventional-Commits → SemVer) | `release-please-config.json` (`linked-versions`, `node-workspace`) |
+| Versioning | **Linked versions** across `terminology` / `fhir-mapping` (the private `demo` package is excluded from release-please), automated by **release-please** (Conventional-Commits → SemVer) | `release-please-config.json` (`linked-versions`, `node-workspace`) |
 | Demo distribution | Demo app deployed to **GitHub Pages** on push to `main` | `deploy.yml` (builds `examples/vanilla`, uploads `docs/`) |
 | License | **Apache-2.0** | `license` field in root + all packages; `LICENSE` |
 
@@ -54,7 +54,7 @@ Source: `packages/*/package.json` `peerDependencies` / `peerDependenciesMeta`. T
 | Constraint | Detail | Source / evidence |
 |---|---|---|
 | Ownership / context | Research prototype of the **MiHUB project, TU Dresden / Forschungsgruppe Digital Health (FGDH)** | `README.md` status banner |
-| Maturity | **Pre-1.0**; all three packages at `0.1.0`; no release cut yet | package `version` fields; `CONTRIBUTING.md`; `README.md` |
+| Maturity | **Pre-1.0**; two publishable packages (`terminology`, `fhir-mapping`) at `0.1.0` plus the private `demo` package; first release cut (`v0.1.2`) | package `version` fields; `CONTRIBUTING.md`; `README.md` |
 | Production use | **Not for production** — under active development, not production-hardened nor independently security-reviewed | `README.md` status banner |
 | Repository topology | Single public monorepo on GitHub (`forschungsgruppe-digital-health/bpmn-js-clinical-semantics`); `main` is the protected stable branch | root `package.json` `repository`; `CONTRIBUTING.md` |
 | Funding / programme frame | _Requires human input: formal MiHUB deliverable scope, funding body and reporting obligations are not derivable from this repository._ |
@@ -64,7 +64,7 @@ Source: `packages/*/package.json` `peerDependencies` / `peerDependenciesMeta`. T
 
 | Constraint | Rule | Source / evidence |
 |---|---|---|
-| Commits | **Conventional Commits**; scope = package name (`terminology`, `fhir-mapping`, `vue`, `demo`) — also drives release-please versioning | `AGENTS.md`; `CONTRIBUTING.md` |
+| Commits | **Conventional Commits**; scope = package name (`terminology`, `fhir-mapping`, `demo`) — also drives release-please versioning | `AGENTS.md`; `CONTRIBUTING.md` |
 | Module format | **ESM only** (`"type": "module"`); JS + JSDoc, no TypeScript | `AGENTS.md`; package manifests |
 | Package naming | `@forschungsgruppe-digital-health/*` (or `bpmn-js-*` / `bpmnlint-plugin-*`) | `AGENTS.md`; enforced by `tools/check-package-conventions.mjs` |
 | Conformance gate | Every check is a deterministic CLI in `tools/`; the **decision lives in the tool, never the model**. Same scripts run in terminal, git hooks, VS Code, and CI | `AGENTS.md`; root scripts; `ci.yml` |

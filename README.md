@@ -73,7 +73,7 @@ For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE
 - [ ] FHIR R5 SubscriptionTopic support
 - [ ] Automated conformance checking against FHIR profiles
 
-### Vue Integration (`@forschungsgruppe-digital-health/vue`)
+### Vue Integration (`packages/demo` — private demo, not published)
 
 - [x] `useTerminology()` and `useFhirMapping()` composables for Vue 3
 - [ ] Additional framework integrations (React, Angular)
@@ -98,9 +98,8 @@ For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE
 |---|---|---|
 | [`@forschungsgruppe-digital-health/terminology`](packages/terminology/) | Terminology annotation engine, providers, moddle extension, properties panel | `npm i @forschungsgruppe-digital-health/terminology` |
 | [`@forschungsgruppe-digital-health/fhir-mapping`](packages/fhir-mapping/) | FHIR resource mapping, moddle extension, properties panel | `npm i @forschungsgruppe-digital-health/fhir-mapping` |
-| [`@forschungsgruppe-digital-health/vue`](packages/vue/) | Vue 3 composables (`useTerminology`, `useFhirMapping`) | `npm i @forschungsgruppe-digital-health/vue` |
 
-Either package can be installed independently. The Vue package is optional and only needed for Vue 3 projects.
+Either package can be installed independently. A Vue 3 integration is provided in the **private, unpublished** [`packages/demo`](packages/demo/) package (`@forschungsgruppe-digital-health/demo`) — an example, not installed from the registry.
 
 Packages are published to the [GitHub Package Registry](https://docs.github.com/en/packages). See [CONTRIBUTING.md](CONTRIBUTING.md#configuring-npm-for-the-github-registry) for registry configuration.
 

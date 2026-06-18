@@ -107,7 +107,7 @@ bpmn-js-clinical-semantics/
 |   |   |   +-- services/             MappingHelper (read/write/export FHIR mappings)
 |   |   +-- test/                     Unit tests
 |   |
-|   +-- vue/                          @forschungsgruppe-digital-health/vue
+|   +-- demo/                         @forschungsgruppe-digital-health/demo (private, not published)
 |       +-- src/composables/          useTerminology(), useFhirMapping()
 |
 +-- examples/
@@ -129,7 +129,7 @@ bpmn-js-clinical-semantics/
 +-- README.md                         Project overview and quick start
 ```
 
-**Why three packages?** The terminology engine and the FHIR mapping layer solve different problems and have different dependency footprints. A project that only needs terminology search (e.g. a coding assistant widget) should not be forced to pull in FHIR mapping types. Conversely, a project that only needs to declare resource-level FHIR mappings does not need the Snowstorm adapter or FHIR terminology client. The Vue package is framework-specific and only relevant to Vue 3 consumers. The monorepo structure keeps development convenient while allowing independent consumption.
+**Why two publishable packages plus the private `demo` package?** The terminology engine and the FHIR mapping layer solve different problems and have different dependency footprints. A project that only needs terminology search (e.g. a coding assistant widget) should not be forced to pull in FHIR mapping types. Conversely, a project that only needs to declare resource-level FHIR mappings does not need the Snowstorm adapter or FHIR terminology client. These two (`terminology`, `fhir-mapping`) are the publishable packages. The `demo` package is framework-specific and only relevant to Vue 3 consumers; it is private (`@forschungsgruppe-digital-health/demo`, not published). The monorepo structure keeps development convenient while allowing independent consumption.
 
 ## Package Details
 
@@ -167,7 +167,7 @@ FHIR resource-level mapping. Each BPMN element can declare:
 - **`keyElements`** -- FHIRPath elements with semantic roles (`trigger`, `filter`, `classifier`, `identifier`, `payload`), fixed values, and terminology bindings
 - **`searchParams`** -- FHIR SearchParameters for `search`-type interactions
 
-### `@forschungsgruppe-digital-health/vue`
+### `@forschungsgruppe-digital-health/demo`
 
 Thin Vue 3 wrapper providing `useTerminology()` and `useFhirMapping()` composables for building custom sidebars or search UIs. Both composables react to the bpmn-js selection and expose reactive state.
 

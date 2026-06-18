@@ -30,7 +30,7 @@ graph TB
             FTYPES["Types\nFHIR_RESOURCE_TYPES\nSEMANTIC_ROLES"]
         end
 
-        subgraph "Package: @forschungsgruppe-digital-health/vue"
+        subgraph "Package: @forschungsgruppe-digital-health/demo"
             direction TB
             UT[useTerminology]
             UFM[useFhirMapping]

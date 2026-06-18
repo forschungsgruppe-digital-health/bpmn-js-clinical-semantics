@@ -47,7 +47,7 @@ Evaluate each role against each concern. Every finding is tagged with its
   `release-please-config.json` ↔ CI)? Are the conformance layers described the same
   way everywhere (bpmnlint / moddle roundtrip / XSD core / package conventions)?
   *release/publishing:* who owns releases; is the linked-version lockstep across
-  `terminology`/`fhir-mapping`/`vue` stated once and consistently? *usage:* can a new
+  `terminology`/`fhir-mapping` (and the private `demo`) stated once and consistently? *usage:* can a new
   maintainer find "how we work" on one path without contradictions?
 - **Library consumer (downstream developer)** — *development:* can I install, import
   the ESM entry points, wire the moddle descriptor and properties-panel provider, and

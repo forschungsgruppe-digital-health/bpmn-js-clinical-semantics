@@ -62,7 +62,7 @@ This monorepo. Relevant evidence sources:
    plug into a bpmn-js host application (the `peerDependencies` are the contract),
    emit/consume BPMN XML with `term:` and `fhirmap:` extension namespaces, and the
    `fhir-mapping` package references FHIR resource types (`@types/fhir`). Produce a
-   mermaid context diagram showing the host bpmn-js app, the three packages, and
+   mermaid context diagram showing the host bpmn-js app, the workspace packages, and
    the BPMN/FHIR data they exchange — detected boundaries only. Business context:
    placeholder.
 4. **Solution Strategy** — PARTIAL/REFERENCE. The "why" lives in prose, not code.
@@ -71,7 +71,7 @@ This monorepo. Relevant evidence sources:
    NO `docs/adr/` directory — do not invent one or link to it.
 5. **Building Block View** — DERIVABLE. Strongest section. Level 1: the three
    workspace packages — `packages/terminology` (prefix `term:`),
-   `packages/fhir-mapping` (prefix `fhirmap:`), `packages/vue` (host wrapper) —
+   `packages/fhir-mapping` (prefix `fhirmap:`), `packages/demo` (host wrapper) —
    plus the `tools/` conformance gate and `examples/`. Level 2/3: each package's
    `src/index.js` exports, its moddle descriptor
    (`packages/*/src/moddle/*.json`), and (where present) properties-panel

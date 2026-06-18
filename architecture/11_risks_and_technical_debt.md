@@ -76,21 +76,21 @@ a descriptor change is semantically breaking.
 > _Requires human input: likelihood/impact rating and whether to add an automated
 > moddle-schema diff/compatibility gate alongside the existing conformance gate._
 
-## 11.4 Test-coverage debt — the `vue` package has no unit tests
+## 11.4 Test-coverage debt — the `demo` package has no unit tests
 
-`packages/vue` (`@forschungsgruppe-digital-health/vue`) ships the `useTerminology()`
+`packages/demo` (`@forschungsgruppe-digital-health/demo`) ships the `useTerminology()`
 and `useFhirMapping()` composables but contains **no test files and no `test`
 script**, so `npm test` (which runs `--workspaces --if-present`) skips it entirely.
 
-- **Evidence:** `packages/vue` contains only `src/index.js` and
+- **Evidence:** `packages/demo` contains only `src/index.js` and
   `src/composables/{useTerminology,useFhirMapping}.js`; no `test/` directory, no
-  `*.test.*` / `*.spec.*` files, and `packages/vue/package.json` has no `test` script
+  `*.test.*` / `*.spec.*` files, and `packages/demo/package.json` has no `test` script
   (whereas `terminology` and `fhir-mapping` carry Vitest suites — 139 and 34 tests
   per chapter 5).
 - **Consequence:** the framework-specific wrapper — the layer most exposed to bpmn-js
   selection/reactivity changes — is unverified by the regression suite.
 
-> _Requires human input: likelihood/impact rating and a coverage target for the `vue`
+> _Requires human input: likelihood/impact rating and a coverage target for the `demo`
 > package._
 
 ## 11.5 Dependency / supply-chain risk
@@ -116,7 +116,7 @@ script**, so `npm test` (which runs `--workspaces --if-present`) skips it entire
 
 | ID | Item | Evidence |
 |---|---|---|
-| MAT-1 | **Pre-1.0, no release cut yet.** All three published packages are at version `0.1.0` and there are **no git tags**, so no release-please release has been produced. Per SemVer, the public API is unstable and may change without a major bump. | `.release-please-manifest.json` (`terminology`/`fhir-mapping`/`vue` = `0.1.0`); `git tag` returns nothing; release-please configured via `.github/workflows/release-please.yml` + `release-please-config.json`. |
+| MAT-1 | **Pre-1.0.** The two publishable packages (`terminology`, `fhir-mapping`) are published at version `0.1.0` (GitHub Release `v0.1.2` exists); the `demo` package is private (`"private": true`) and excluded from release-please/publishing. Per SemVer, the public API is unstable and may change without a major bump. | `.release-please-manifest.json` (`terminology`/`fhir-mapping` = `0.1.0`); GitHub Release `v0.1.2`; `packages/demo/package.json` (`"private": true`); release-please configured via `.github/workflows/release-please.yml` + `release-please-config.json`. |
 | MAT-2 | **Several arc42 chapters are code-derived drafts, and others are not yet documented.** Chapters 1, 3, 4, 5, 8 are filled; the remaining chapters (incl. this one) are code-derived drafts that require human verification and the marked human-input fields completed. | The `architecture/01..12` set; per-chapter content/placeholders. |
 
 > _Requires human input: target version/stability milestone for the first ≥ 1.0
@@ -130,9 +130,9 @@ script**, so `npm test` (which runs `--workspaces --if-present`) skips it entire
 | TD-2 | Conformance | `term:target` undefined in `clinical.json` → lossy roundtrip / README drift — issue #19 | _Requires human input_ |
 | TD-3 | Build | Vite `emptyOutDir` on `docs/` can delete tracked docs locally | _Requires human input_ |
 | TD-4 | Process | Breaking moddle-schema changes gated by human review only (no auto-detection) | _Requires human input_ |
-| TD-5 | Tests | `vue` package has no unit tests | _Requires human input_ |
+| TD-5 | Tests | `demo` package has no unit tests | _Requires human input_ |
 | DEP-1 | Dependencies | 1 low, dev-only advisory after `npm audit fix` (esbuild); prod deps clean | _Requires human input_ |
-| MAT-1 | Lifecycle | Pre-1.0; no release cut / git tag yet | _Requires human input_ |
+| MAT-1 | Lifecycle | Pre-1.0; `terminology`/`fhir-mapping` published at `0.1.0` (release `v0.1.2`), `demo` private/unpublished | _Requires human input_ |
 | MAT-2 | Docs | Several arc42 chapters are code-derived drafts | _Requires human input_ |
 
 ---

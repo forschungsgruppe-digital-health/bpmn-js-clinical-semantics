@@ -19,11 +19,11 @@ The optional terminology adapters (`SnowstormAdapter`, `FhirTerminologyAdapter`,
 |---|---|---|---|
 | Terminology engine | `@forschungsgruppe-digital-health/terminology` | published | `https://npm.pkg.github.com` |
 | FHIR mapping layer | `@forschungsgruppe-digital-health/fhir-mapping` | published | `https://npm.pkg.github.com` |
-| Vue 3 wrapper | `@forschungsgruppe-digital-health/vue` | published | `https://npm.pkg.github.com` |
+| Vue 3 wrapper `@forschungsgruppe-digital-health/demo` | `@forschungsgruppe-digital-health/demo` | `private: true` | not published |
 | Root workspace `clinical-bpmn` | — | `private: true` | not published |
 | Demo `clinical-bpmn-demo` (`examples/vanilla`) | — | `private: true` | deployed as static site (not npm) |
 
-All three published packages ship **raw ESM source** (`"type": "module"`, `main: src/index.js`) — there is no transpile/bundle step before publish. Each declares `publishConfig.registry = https://npm.pkg.github.com`, so they are published to **GitHub Packages** under the `@forschungsgruppe-digital-health` scope (scope == owning GitHub org, as required by GitHub Packages). bpmn-js, the properties panel, and (for the Vue package) Vue 3 are `peerDependencies` supplied by the consumer, not bundled.
+The two published packages ship **raw ESM source** (`"type": "module"`, `main: src/index.js`) — there is no transpile/bundle step before publish. Each declares `publishConfig.registry = https://npm.pkg.github.com`, so they are published to **GitHub Packages** under the `@forschungsgruppe-digital-health` scope (scope == owning GitHub org, as required by GitHub Packages). The `demo` package (the Vue 3 wrapper) is `private: true` and is **not** published. bpmn-js, the properties panel, and (for the `demo` package) Vue 3 are `peerDependencies` supplied by the consumer, not bundled.
 
 ## Topology
 
@@ -31,7 +31,7 @@ All three published packages ship **raw ESM source** (`"type": "module"`, `main:
 graph TD
     subgraph "GitHub (build & distribution plane)"
         REPO["Repository<br/>(main branch)"]
-        GHP["GitHub Packages<br/>npm.pkg.github.com<br/>3 published packages"]
+        GHP["GitHub Packages<br/>npm.pkg.github.com<br/>2 published packages"]
         PAGES["GitHub Pages<br/>static site (docs/)"]
         REPO -- "release-please.yml<br/>(on release)" --> GHP
         REPO -- "deploy.yml<br/>(push to main)" --> PAGES
@@ -86,22 +86,23 @@ push to main ──▶ release-please-action maintains a release PR
                           │  setup-node (registry-url + scope) writes .npmrc
                           ▼
    npm publish --workspace=packages/terminology   ┐
-   npm publish --workspace=packages/fhir-mapping  ├──▶ GitHub Packages
-   npm publish --workspace=packages/vue           ┘    (npm.pkg.github.com)
+   npm publish --workspace=packages/fhir-mapping  ┴──▶ GitHub Packages
+                                                        (npm.pkg.github.com)
+   (packages/demo is private: true — not published)
 ```
 
 Configuration facts derived from `release-please-config.json`:
 
-- Three release-tracked components (`terminology`, `fhir-mapping`, `vue`), all `release-type: node`, currently at `0.1.0` per the manifest.
-- **`linked-versions`** plugin groups all three under `clinical-bpmn`, so they share a single version line.
-- **`node-workspace`** plugin (`updatePeerDependencies: true`) keeps the internal `peerDependencies` ranges (e.g. the Vue package's optional peers on `terminology`/`fhir-mapping`) in sync on bump.
+- Two release-tracked components (`terminology`, `fhir-mapping`), both `release-type: node`, currently at `0.1.0` per the manifest. The `demo` package (the renamed Vue 3 wrapper) is `private: true` and is neither release-tracked nor published.
+- **`linked-versions`** plugin groups both under `clinical-bpmn`, so they share a single version line.
+- **`node-workspace`** plugin (`updatePeerDependencies: true`) keeps the internal `peerDependencies` ranges (e.g. the `demo` package's optional peers on `terminology`/`fhir-mapping`) in sync on bump.
 - `separate-pull-requests: false` and `include-component-in-tag: false` → one consolidated release PR/tag rather than per-package.
 
 Publish job specifics (`release-please.yml`):
 
 - Runs only when `releases_created == 'true'`; uses `permissions: packages: write`.
 - Auth via the workflow's built-in `secrets.GITHUB_TOKEN` exposed as `NODE_AUTH_TOKEN`; `actions/setup-node` writes `@forschungsgruppe-digital-health:registry=https://npm.pkg.github.com` into `.npmrc`. No long-lived publish token is stored in the repo.
-- **Raw-src publish** (no build step before `npm publish`); each workspace is published explicitly and in order, so the two `private: true` workspaces are never published.
+- **Raw-src publish** (no build step before `npm publish`); each publishable workspace is published explicitly and in order, so the `private: true` workspaces (root, `packages/demo`, `examples/vanilla`) are never published.
 
 ## Continuous Integration (build/test plane)
 
@@ -118,7 +119,7 @@ Action versions are pinned by commit SHA. `--legacy-peer-deps` is used throughou
 |---|---|---|
 | GitHub Actions (`ubuntu-latest`, Node 18/20) | CI, conformance, demo build, release/publish | this project (CI) |
 | GitHub Pages (org static hosting) | the built demo (`docs/`) | this project |
-| GitHub Packages (`npm.pkg.github.com`) | the three published npm packages | this project (publish), integrators (consume) |
+| GitHub Packages (`npm.pkg.github.com`) | the two published npm packages (`terminology`, `fhir-mapping`) | this project (publish), integrators (consume) |
 | Consumer host app (browser or Node) | the libraries, in-process as a bpmn-js peer | integrator |
 | External SNOMED CT (Snowstorm) / FHIR terminology servers | optional outbound lookups from the adapters | consumer / third party (not this repo) |
 

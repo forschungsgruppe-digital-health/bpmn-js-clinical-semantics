@@ -14,7 +14,7 @@ allowed-tools: Task, Read, Grep, Glob, Write, Bash
 
 Scope: the npm-workspaces ESM monorepo of bpmn-js extension libraries —
 `packages/terminology` (`term:`), `packages/fhir-mapping` (`fhirmap:`) and
-`packages/vue`, plus the conformance tooling under `tools/`. Plain JS + JSDoc
+`packages/demo`, plus the conformance tooling under `tools/`. Plain JS + JSDoc
 (no TypeScript), Vitest. See `AGENTS.md`.
 
 ## Steps

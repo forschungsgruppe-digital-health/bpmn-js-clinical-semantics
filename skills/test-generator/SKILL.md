@@ -1,6 +1,6 @@
 ---
 name: test-generator
-description: Write Vitest characterization tests that pin the CURRENT behavior of a bpmn-js extension module (providers, registries, moddle/properties-panel glue, mapping helpers) before refactoring it. Use before any non-trivial refactor in packages/terminology, packages/fhir-mapping, or packages/vue. Detection/analysis only — captures behavior as tests; never "fixes" observed bugs and never edits the code under test.
+description: Write Vitest characterization tests that pin the CURRENT behavior of a bpmn-js extension module (providers, registries, moddle/properties-panel glue, mapping helpers) before refactoring it. Use before any non-trivial refactor in packages/terminology, packages/fhir-mapping, or packages/demo. Detection/analysis only — captures behavior as tests; never "fixes" observed bugs and never edits the code under test.
 ---
 
 # Characterization tests before a refactor

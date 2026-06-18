@@ -20,7 +20,7 @@ straight into a full inventory.
 
 This is an npm-workspaces **ESM** monorepo of **bpmn-js extension libraries**
 (`packages/terminology` → `term:`, `packages/fhir-mapping` → `fhirmap:`,
-`packages/vue` → Vue 3 wrapper). Plain **JavaScript + JSDoc, no TypeScript**;
+`packages/demo` → Vue 3 wrapper). Plain **JavaScript + JSDoc, no TypeScript**;
 tested with **Vitest**; clinical data lives only in BPMN `<extensionElements>`
 under the custom prefix. See `AGENTS.md`.
 
@@ -49,7 +49,7 @@ under the custom prefix. See `AGENTS.md`.
 
 3. **Identify dependencies:**
    - Other features/exports called by this one (intra- and cross-package, e.g. a
-     `packages/vue` composable wrapping a `terminology`/`fhir-mapping` export).
+     `packages/demo` composable wrapping a `terminology`/`fhir-mapping` export).
    - External surfaces: terminology adapters (Snowstorm / generic FHIR terminology
      servers), the moddle namespace/prefix it binds to, peer dependencies
      (`bpmn-js`, `@bpmn-io/properties-panel`, Vue).

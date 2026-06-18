@@ -8,10 +8,6 @@
     "packages/fhir-mapping": {
       "component": "fhir-mapping",
       "release-type": "node"
-    },
-    "packages/vue": {
-      "component": "vue",
-      "release-type": "node"
     }
   },
   "plugins": [
@@ -23,7 +19,7 @@
     {
       "type": "linked-versions",
       "groupName": "clinical-bpmn",
-      "components": ["terminology", "fhir-mapping", "vue"]
+      "components": ["terminology", "fhir-mapping"]
     }
   ],
   "include-component-in-tag": true,

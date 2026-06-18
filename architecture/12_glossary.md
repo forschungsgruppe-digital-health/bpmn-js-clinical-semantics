@@ -73,18 +73,18 @@ Namespace `fhirmap:` → URI `https://clinical-bpmn.org/fhir-mapping/v1` (descri
 
 | Term | Definition in this repo |
 |---|---|
-| **Monorepo / npm workspaces** | Single repository with three publishable packages (`terminology`, `fhir-mapping`, `vue`) plus the demo, managed as npm workspaces. Install requires `--legacy-peer-deps`. |
+| **Monorepo / npm workspaces** | Single repository with two publishable packages (`terminology`, `fhir-mapping`) plus the private `demo` package, managed as npm workspaces. Install requires `--legacy-peer-deps`. |
 | **Raw ESM, no build step** | Packages ship `src/` directly (`"type": "module"`, `"main": "src/index.js"`); only the demo is built. JS + JSDoc, no TypeScript. |
 | **Conformance gate** | The deterministic CLI checks under `tools/` whose verdict lives in the tool, never the model: `lint:bpmn` (bpmnlint, blocking), `check:roundtrip` (moddle lossless+stable, blocking on instability), `check:xsd` (OMG `BPMN20.xsd` via `xmllint`, informational by default), `check:packages` (publishing conventions, blocking). Aggregated as `check:conformance` and `verify`. |
 | **Moddle roundtrip** | The `tools/moddle-roundtrip.mjs` check: parse → serialize (A) → re-parse → re-serialize (B), assert `A === B` (idempotent) and that no registered `term:`/`fhirmap:` element was dropped. |
 | **Git hooks** | `pre-commit`/`pre-push` wired via `tools/setup-hooks.mjs` (npm `prepare` → `core.hooksPath`), running the same conformance scripts as terminal and CI. |
 | **release-please** | Google's release automation. Reads Conventional Commits, maintains a release PR, then tags + creates GitHub Releases and triggers the gated publish job. |
-| **Lockstep / linked versioning** | All three packages share one version (currently `0.1.0`), kept in sync by release-please's `linked-versions` + `node-workspace` plugins (`updatePeerDependencies: true`). |
-| **Conventional Commits** | Commit-message convention (`feat`/`fix`/…); scope = package name (`terminology`, `fhir-mapping`, `vue`, `demo`); drives the release-please version bumps. |
+| **Lockstep / linked versioning** | The two publishable packages share one version (currently `0.1.0`), kept in sync by release-please's `linked-versions` + `node-workspace` plugins (`updatePeerDependencies: true`); the private `demo` package is excluded from release-please. |
+| **Conventional Commits** | Commit-message convention (`feat`/`fix`/…); scope = package name (`terminology`, `fhir-mapping`, `demo`); drives the release-please version bumps. |
 | **GitHub Packages** | The npm registry (`https://npm.pkg.github.com`) the packages publish to; the `@forschungsgruppe-digital-health` scope must equal the owning org. |
 | **GitHub Pages** | Where the interactive demo (`examples/vanilla`, built to `docs/`) is deployed on push to `main` via `deploy.yml`. |
 | **Vitest** | The test runner (`vitest run`) used per package. |
-| **Vue composables** | `useTerminology()` / `useFhirMapping()` from the `vue` package — reactive wrappers over the registry/mapping helper that follow the bpmn-js selection (Vue 3 only, optional). |
+| **Vue composables** | `useTerminology()` / `useFhirMapping()` from the `demo` package — reactive wrappers over the registry/mapping helper that follow the bpmn-js selection (Vue 3 only, optional). |
 
 ---
 
