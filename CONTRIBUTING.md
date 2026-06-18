@@ -11,6 +11,7 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - [Development Workflow](#development-workflow)
 - [Coding Standards](#coding-standards)
 - [Testing](#testing)
+- [Conformance and Quality Checks](#conformance-and-quality-checks)
 - [Branching Strategy](#branching-strategy)
 - [Commit Conventions](#commit-conventions)
 - [Pull Requests](#pull-requests)
@@ -65,9 +66,14 @@ This is a **monorepo** managed with [npm workspaces](https://docs.npmjs.com/cli/
 | File | Purpose |
 |---|---|
 | `package.json` | Root workspace config, shared scripts, shared dev dependencies |
-| `.github/workflows/ci.yml` | CI pipeline (lint, test, build on Node 18 + 20) |
+| `.github/workflows/ci.yml` | CI pipeline (lint, test, build on Node 18 + 20; BPMN conformance + conventions gate) |
 | `.github/workflows/deploy.yml` | GitHub Pages deployment (tests + build + deploy) on push to `main` |
+| `AGENTS.md` | Single-source operational context for AI agents (CLAUDE.md imports it) |
 | `ARCHITECTURE.md` | Design decisions, UML diagrams, data model, project structure |
+| `tools/` | Deterministic conformance/convention checkers (see [Conformance and Quality Checks](#conformance-and-quality-checks)) |
+| `.bpmnlintrc` | bpmnlint config (`recommended` + `correctness`) |
+| `.githooks/` | Committed pre-commit / pre-push hooks (enabled via `core.hooksPath`) |
+| `skills/` | Vendor-neutral agent skills that orchestrate the conformance tools |
 | `packages/*/src/moddle/*.json` | BPMN moddle extension descriptors (XML schema) |
 | `packages/*/test/` | Unit test directories |
 
@@ -176,6 +182,71 @@ Aim for coverage of all public API functions, all provider types (static, FHIR, 
 
 ---
 
+## Conformance and Quality Checks
+
+Beyond unit tests, the repo ships a **deterministic conformance gate** for the
+BPMN artifacts and the package metadata. The decision is made by CLI tools (not by
+any AI/agent), and the **same npm scripts** run in CI, in the local git hooks and
+in the VS Code tasks — so a green local run means a green CI run.
+
+### Commands
+
+```bash
+npm run check:conformance   # bpmnlint + moddle roundtrip + XSD core (the gate)
+npm run check:packages      # npm/bpmn.io packaging conventions
+npm run verify              # check:packages + check:conformance + npm test (full)
+
+# individual steps
+npm run lint:bpmn                         # structural BPMN 2.0 (bpmnlint)
+npm run check:roundtrip                   # term:/fhirmap: data is lossless & stable
+node tools/moddle-roundtrip.mjs --strict  # treat roundtrip warnings as failures
+npm run check:xsd                         # BPMN-core XSD validation (informational)
+bash tools/validate-xsd.sh --strict       # fail on a schema-invalid core
+```
+
+Append file paths to scope a check, e.g. `node tools/moddle-roundtrip.mjs docs/sample.bpmn`.
+
+### The three layers
+
+| Layer | Tool | What it proves | Blocking |
+|---|---|---|---|
+| Structure | `bpmnlint` (`recommended` + `correctness`) | valid BPMN structure: connectedness, start/end events, no implicit splits, no dangling refs | yes |
+| Extension data | `tools/moddle-roundtrip.mjs` | `term:`/`fhirmap:` content survives parse→serialize, output is stable | yes on instability; warnings non-fatal (use `--strict`) |
+| Standard core | `tools/validate-xsd.sh` (xmllint vs OMG BPMN20.xsd) | the BPMN core matches the standard schema | no — informational |
+
+**Why XSD is informational:** the standard `BPMN20.xsd` accepts anything inside
+`<extensionElements>` via `processContents="lax"`, so it cannot validate the
+clinical extensions — a green XSD does **not** mean the extensions are valid. That
+verdict comes from the moddle roundtrip. Run `bash tools/validate-xsd.sh --strict`
+to enforce the BPMN core when you need standard conformance.
+
+### Local git hooks
+
+`npm install` runs the `prepare` script, which points git at `.githooks/`
+(`core.hooksPath`). After that:
+
+- **pre-commit** runs `check:conformance` / `check:packages` when the matching
+  files are staged.
+- **pre-push** runs the full `npm run verify`.
+
+Re-enable manually with `npm run hooks:install`. Bypass once with
+`git commit --no-verify` / `git push --no-verify`. Hooks skip gracefully if
+`node` is not on PATH.
+
+### VS Code
+
+`.vscode/tasks.json` exposes every check under **Terminal → Run Task…**, and with
+the recommended `redhat.vscode-xml` extension `.bpmn` files are validated live
+against the BPMN core XSD in the editor.
+
+### Agent skills
+
+`skills/bpmn-conformance`, `skills/moddle-extension-review` and
+`skills/bpmn-naming-publishing` orchestrate these same tools (vendor-neutral
+`SKILL.md`; Claude Code discovers them via `.claude/skills`).
+
+---
+
 ## Branching Strategy
 
 | Branch | Purpose |
@@ -237,10 +308,11 @@ chore: update vitest to 3.2.x
 
 ### Before opening a PR
 
-1. Run `npm test` and ensure all 173+ tests pass.
+1. Run `npm run verify` (packages + conformance + tests) and ensure it passes.
 2. Run `npm run build` and ensure the demo builds without errors.
-3. If you added a new public API, update the `test/index.test.js` for the affected package.
-4. If you added a new provider or adapter, include tests with mocked fetch.
+3. If you touched any `.bpmn` file or a moddle descriptor, confirm `npm run check:conformance` is green.
+4. If you added a new public API, update the `test/index.test.js` for the affected package.
+5. If you added a new provider or adapter, include tests with mocked fetch.
 
 ### PR template
 
