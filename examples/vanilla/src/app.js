@@ -22,6 +22,10 @@ import 'bpmn-js/dist/assets/bpmn-js.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
 
+// ─── Example diagrams (single source: examples/minimal, bundled via Vite ?raw) ─
+import annotatedBpmn from '../../minimal/lung-cancer-staging-annotated.bpmn?raw';
+import plainBpmn from '../../minimal/lung-cancer-staging.bpmn?raw';
+
 // ─── Create modeler with BOTH extensions ─────────────────────
 
 const modeler = new BpmnModeler({
@@ -41,12 +45,18 @@ const modeler = new BpmnModeler({
   }
 });
 
-// ─── Load sample diagram ─────────────────────────────────────
+// ─── Example diagrams (the minimal example is the default) ───
 
-async function loadDiagram() {
+const SAMPLES = {
+  annotated: { label: 'Lung cancer — annotated (term: + fhirmap:)', xml: annotatedBpmn },
+  plain: { label: 'Lung cancer — plain BPMN (no extensions)', xml: plainBpmn },
+  demo: { label: 'Demo sample', url: './sample.bpmn' }
+};
+
+async function loadSample(key) {
   try {
-    const response = await fetch('./sample.bpmn');
-    const xml = await response.text();
+    const sample = SAMPLES[key] || SAMPLES.annotated;
+    const xml = sample.xml ?? (await (await fetch(sample.url)).text());
     await modeler.importXML(xml);
     modeler.get('canvas').zoom('fit-viewport');
   } catch (err) {
@@ -54,7 +64,19 @@ async function loadDiagram() {
   }
 }
 
-loadDiagram();
+const sampleSelect = document.getElementById('sample-select');
+if (sampleSelect) {
+  for (const [key, sample] of Object.entries(SAMPLES)) {
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = sample.label;
+    sampleSelect.appendChild(option);
+  }
+  sampleSelect.value = 'annotated';
+  sampleSelect.addEventListener('change', () => loadSample(sampleSelect.value));
+}
+
+loadSample('annotated');
 
 // ─── XML Download ────────────────────────────────────────────
 
