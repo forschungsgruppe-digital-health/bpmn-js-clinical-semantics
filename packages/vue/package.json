@@ -1,6 +1,6 @@
 {
   "name": "@forschungsgruppe-digital-health/vue",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Vue 3 wrapper and composables for clinical BPMN extensions",
   "type": "module",
   "main": "src/index.js",
@@ -16,8 +16,12 @@
     "@forschungsgruppe-digital-health/fhir-mapping": ">=0.1.0"
   },
   "peerDependenciesMeta": {
-    "@forschungsgruppe-digital-health/terminology": { "optional": true },
-    "@forschungsgruppe-digital-health/fhir-mapping": { "optional": true }
+    "@forschungsgruppe-digital-health/terminology": {
+      "optional": true
+    },
+    "@forschungsgruppe-digital-health/fhir-mapping": {
+      "optional": true
+    }
   },
   "license": "Apache-2.0",
   "repository": {
