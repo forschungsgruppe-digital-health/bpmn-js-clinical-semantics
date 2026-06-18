@@ -12,7 +12,11 @@ Thumbs.db
 
 # IDE / Editor
 .idea/
-.vscode/
+.vscode/*
+# …but keep the shared, committed editor config (tasks/recommended extensions/settings)
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
 *.swp
 *.swo
 *~

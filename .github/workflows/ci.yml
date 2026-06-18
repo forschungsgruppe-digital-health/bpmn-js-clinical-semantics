@@ -37,3 +37,32 @@ jobs:
 
       - name: Build demo app
         run: npm run build
+
+  conformance:
+    name: BPMN conformance & conventions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Ensure xmllint is available (for XSD core validation)
+        run: xmllint --version || (sudo apt-get update && sudo apt-get install -y libxml2-utils)
+
+      # Blocking gate: structural BPMN lint + lossless/stable moddle roundtrip +
+      # informational XSD core validation. (XSD is informational by design — the
+      # standard BPMN20.xsd cannot validate extension content; see the tools.)
+      - name: Conformance (bpmnlint + roundtrip + XSD)
+        run: npm run check:conformance
+
+      # Blocking gate: npm/bpmn.io packaging conventions for the workspace packages.
+      - name: Package conventions
+        run: npm run check:packages

@@ -14,7 +14,15 @@
     "dev": "npm run --workspace=examples/vanilla dev",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:bpmn": "node tools/lint-bpmn.mjs",
+    "check:roundtrip": "node tools/moddle-roundtrip.mjs",
+    "check:xsd": "bash tools/validate-xsd.sh",
+    "check:packages": "node tools/check-package-conventions.mjs",
+    "check:conformance": "npm run lint:bpmn && npm run check:roundtrip && npm run check:xsd",
+    "verify": "npm run check:packages && npm run check:conformance && npm test",
+    "hooks:install": "node tools/setup-hooks.mjs",
+    "prepare": "node tools/setup-hooks.mjs"
   },
   "workspaces": [
     "packages/terminology",
@@ -25,6 +33,8 @@
   "devDependencies": {
     "@types/fhir": "^0.0.41",
     "@xmldom/xmldom": "^0.9.10",
+    "bpmn-moddle": "^10.0.0",
+    "bpmnlint": "^11.12.1",
     "vitest": "^3.1.1"
   },
   "license": "Apache-2.0",
