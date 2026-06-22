@@ -81,7 +81,6 @@ graph TB
             SNOMED[SnomedCtProvider]
             FHIRP[FhirProvider]
             STATIC[StaticProvider]
-            PACKAGE[PackageProvider]
             PRESETS["Presets\nIHE XDS classCode\nIHE XDS typeCode\nKDL"]
             TMODDLE["moddle: clinical.json\n(term: namespace)"]
             TPANEL["TerminologyProperties\nProvider"]
@@ -122,7 +121,6 @@ graph TB
     FHIRP --> |uses| FTA
     SA --> |REST| SNOW
     FTA --> |FHIR API| FHIRS
-    PACKAGE --> |extends| STATIC
     TPANEL --> |reads/writes| TMODDLE
     TPANEL --> |searches via| TR
     FPANEL --> |reads/writes| FMODDLE
@@ -191,11 +189,6 @@ classDiagram
         +getAll() Concept[]
     }
 
-    class PackageProvider {
-        -packageName?: string
-        -codeSystem: CodeSystem
-    }
-
     class SnowstormAdapter {
         -baseUrl: string
         -branch: string
@@ -225,7 +218,6 @@ classDiagram
     TerminologyProvider <|-- SnomedCtProvider
     TerminologyProvider <|-- FhirProvider
     TerminologyProvider <|-- StaticProvider
-    StaticProvider <|-- PackageProvider
     SnomedCtProvider --> SnowstormAdapter : uses
     FhirProvider --> FhirTerminologyAdapter : uses
     TerminologyProvider ..> Concept : returns
@@ -455,7 +447,7 @@ registry.register(new StaticProvider(
 ));
 ```
 
-### Option C: Local FHIR package resource (PackageProvider first, server second)
+### Option C: Local FHIR package resource (package first, server second)
 
 ```js
 import {
@@ -476,7 +468,7 @@ registry.register(createPackageFallbackProvider({
 }));
 ```
 
-This pattern keeps the runtime deterministic for well-known package content while preserving a live server path for deployments that need broader coverage, newer server-side expansions, or operational fallback. `PackageProvider` is the first-class wrapper for a package-shipped CodeSystem JSON resource; `createPackageCollectionProvider()` stays available when a demo or application wants a single combined provider entry for multiple package resources. In the demo, each imported `hl7.terminology.r4` CodeSystem JSON is now registered as its own `PackageProvider`; the package-backed path still uses a vendored snapshot of selected `hl7.terminology.r4@7.0.1` resources because the upstream npm package currently references `hl7.fhir.r4.core@4.0.1`, which is not directly installable in this workspace.
+This pattern keeps the runtime deterministic for well-known package content while preserving a live server path for deployments that need broader coverage, newer server-side expansions, or operational fallback. In the demo, the package-backed path is implemented with a vendored snapshot of selected `hl7.terminology.r4@7.0.1` `CodeSystem` JSON files because the upstream npm package currently references `hl7.fhir.r4.core@4.0.1`, which is not directly installable in this workspace.
 
 ### Option D: Custom API (new adapter + provider)
 

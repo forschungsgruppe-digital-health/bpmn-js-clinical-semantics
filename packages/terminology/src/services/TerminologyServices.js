@@ -1,7 +1,6 @@
 import { TerminologyRegistry } from '../core/TerminologyRegistry.js';
 import { FhirProvider } from '../providers/FhirProvider.js';
 import { FallbackProvider } from '../providers/FallbackProvider.js';
-import { PackageProvider } from '../providers/PackageProvider.js';
 import { StaticProvider } from '../providers/StaticProvider.js';
 import { createStaticProviderFromCodeSystem } from './CodeSystemProviderFactory.js';
 import { createFhirTerminologyProviderLoader } from './TerminologyProviderLoader.js';
@@ -22,24 +21,23 @@ function isProviderInstance(value) {
 }
 
 /**
- * Create a first-class terminology provider from an installed/package-backed
- * FHIR CodeSystem JSON resource.
+ * Create a static terminology provider from an installed/package-backed FHIR
+ * CodeSystem JSON resource.
  *
  * @param {{
  *   id: string,
  *   displayName?: string,
  *   systemUri?: string,
- *   version?: string,
  *   codeSystem: import('@types/fhir').fhir4.CodeSystem
  * }} config
- * @returns {import('../providers/PackageProvider').PackageProvider}
+ * @returns {import('../providers/StaticProvider').StaticProvider}
  */
-export function createPackageProvider(config) {
-  return new PackageProvider(config);
-}
-
 export function createPackageTerminologyProvider(config) {
-  return createPackageProvider(config);
+  return createStaticProviderFromCodeSystem(config.codeSystem, {
+    id: config.id,
+    displayName: config.displayName,
+    systemUri: config.systemUri
+  });
 }
 
 /**
@@ -56,10 +54,6 @@ export function createPackageTerminologyProvider(config) {
  * @returns {StaticProvider}
  */
 export function createPackageCollectionProvider(config) {
-  if (!Array.isArray(config.codeSystems) || config.codeSystems.length === 0) {
-    throw new Error('createPackageCollectionProvider requires at least one CodeSystem resource.');
-  }
-
   const concepts = (config.codeSystems || []).flatMap((codeSystem, index) =>
     createStaticProviderFromCodeSystem(codeSystem, {
       id: `${config.id}-${index}`,
@@ -128,13 +122,6 @@ function normalizePackageProvider(providerOrConfig) {
   }
 
   if (Array.isArray(providerOrConfig.codeSystems)) {
-    if (providerOrConfig.codeSystems.length === 1) {
-      return createPackageProvider({
-        ...providerOrConfig,
-        codeSystem: providerOrConfig.codeSystems[0]
-      });
-    }
-
     return createPackageCollectionProvider(providerOrConfig);
   }
 
@@ -158,8 +145,7 @@ function normalizePackageProvider(providerOrConfig) {
  *     id: string,
  *     displayName?: string,
  *     systemUri?: string,
- *     codeSystem?: import('@types/fhir').fhir4.CodeSystem,
- *     codeSystems?: import('@types/fhir').fhir4.CodeSystem[],
+ *     codeSystem: import('@types/fhir').fhir4.CodeSystem,
  *     fallbackProvider?: import('../core/TerminologyProvider').TerminologyProvider,
  *     fallbackFhirConfig?: ConstructorParameters<typeof FhirProvider>[0]
  *   }>,

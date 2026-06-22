@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   createPackageCollectionProvider,
   createPackageFallbackProvider,
-  createPackageProvider,
   createPackageTerminologyProvider,
   createTerminologyModule,
   createTerminologyServices
@@ -20,21 +19,6 @@ const actCodeCodeSystem = {
 
 describe('TerminologyServices', () => {
   it('should create a package-backed static provider', async () => {
-    const provider = createPackageProvider({
-      id: 'hl7-v3-actcode',
-      displayName: 'HL7 v3 ActCode',
-      systemUri: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
-      codeSystem: actCodeCodeSystem
-    });
-
-    expect(provider.id).toBe('hl7-v3-actcode');
-    await expect(provider.lookup('AA')).resolves.toMatchObject({
-      code: 'AA',
-      system: 'http://terminology.hl7.org/CodeSystem/v3-ActCode'
-    });
-  });
-
-  it('should keep the legacy package terminology factory working', async () => {
     const provider = createPackageTerminologyProvider({
       id: 'hl7-v3-actcode',
       displayName: 'HL7 v3 ActCode',
@@ -96,14 +80,6 @@ describe('TerminologyServices', () => {
       code: 'MR',
       system: 'http://terminology.hl7.org/CodeSystem/v2-0203'
     });
-  });
-
-  it('should reject empty package collections', () => {
-    expect(() => createPackageCollectionProvider({
-      id: 'hl7-package',
-      displayName: 'HL7 Terminology (Package)',
-      codeSystems: []
-    })).toThrow('at least one CodeSystem');
   });
 
   it('should create registry and loader services from configuration', () => {
