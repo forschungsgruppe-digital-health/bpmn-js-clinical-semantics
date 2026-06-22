@@ -57,9 +57,9 @@ describe('FhirProvider', () => {
       const provider = createProvider({ fetchFn });
 
       const result = await provider.search('Lunge', { limit: 5 });
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0].code).toBe('C34.1');
-      expect(result.items[0].system).toBe('http://fhir.de/CodeSystem/bfarm/icd-10-gm');
+      expect(result.concepts).toHaveLength(1);
+      expect(result.concepts[0].code).toBe('C34.1');
+      expect(result.concepts[0].system).toBe('http://fhir.de/CodeSystem/bfarm/icd-10-gm');
     });
 
     it('should respect maxResults config', async () => {

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { SnowstormAdapter } from '../../src/adapters/SnowstormAdapter.js';
 
 function createMockFetch(responseBody, ok = true) {
@@ -27,7 +27,7 @@ describe('SnowstormAdapter', () => {
       expect(calledUrl.searchParams.get('language')).toBe('de');
     });
 
-    it('should map Snowstorm response to Concept objects', async () => {
+    it('should map Snowstorm response to Concept objects with a canonical FHIR version URI', async () => {
       const mockResponse = {
         items: [
           {
@@ -35,6 +35,7 @@ describe('SnowstormAdapter', () => {
             pt: { term: 'Pneumonia' },
             fsn: { term: 'Pneumonia (disorder)' },
             releasedEffectiveTime: 20240901,
+            moduleId: '900000000000207008',
             active: true,
             definitionStatus: 'PRIMITIVE'
           }
@@ -49,7 +50,8 @@ describe('SnowstormAdapter', () => {
         code: '233604007',
         display: 'Pneumonia',
         system: 'http://snomed.info/sct',
-        version: '20240901',
+        // 🟢 Erwartet jetzt die offizielle FHIR-konforme URI im version-Feld
+        version: 'http://snomed.info/sct/900000000000207008/version/20240901',
         active: true,
         properties: {
           fsn: 'Pneumonia (disorder)',
@@ -95,12 +97,13 @@ describe('SnowstormAdapter', () => {
   });
 
   describe('lookup()', () => {
-    it('should return mapped concept for valid code', async () => {
+    it('should build canonical URI even if moduleId is returned as a number', async () => {
       const mockResponse = {
         conceptId: '169069000',
         pt: { term: 'CT of chest' },
         fsn: { term: 'CT of chest (procedure)' },
         releasedEffectiveTime: 20240901,
+        moduleId: 11000274103, // Als Nummer geliefert
         active: true,
         definitionStatus: 'FULLY_DEFINED'
       };
@@ -110,6 +113,22 @@ describe('SnowstormAdapter', () => {
       expect(concept.code).toBe('169069000');
       expect(concept.display).toBe('CT of chest');
       expect(concept.system).toBe('http://snomed.info/sct');
+      // 🟢 Prüft, ob auch Zahlen-ModuleIDs sauber in die URI fließen
+      expect(concept.version).toBe('http://snomed.info/sct/11000274103/version/20240901');
+    });
+
+    it('should fallback to raw effectiveTime string if moduleId is missing', async () => {
+      const mockResponse = {
+        conceptId: '169069000',
+        pt: { term: 'CT of chest' },
+        fsn: { term: 'CT of chest (procedure)' },
+        releasedEffectiveTime: 20240901, // Keine moduleId vorhanden
+        active: true
+      };
+      const adapter = new SnowstormAdapter({ baseUrl: BASE_URL, fetchFn: createMockFetch(mockResponse) });
+
+      const concept = await adapter.lookup('169069000');
+      // 🟢 Abwärtskompatibilität: Wenn das Modul fehlt, nutzen wir die nackte Zeit als String
       expect(concept.version).toBe('20240901');
     });
 

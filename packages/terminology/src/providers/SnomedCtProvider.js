@@ -50,12 +50,17 @@ export class SnomedCtProvider extends TerminologyProvider {
     if (options.semanticTag) {
       additionalParams.semanticTag = options.semanticTag;
     }
-    return this._adapter.search({
+    const result = await this._adapter.search({
       term,
       limit: options.limit ?? this._maxResults,
       offset: options.offset ?? 0,
       additionalParams
     });
+
+    return {
+      concepts: result.items || [],
+      total: result.total ?? 0
+    };
   }
 
   async lookup(code) {

@@ -63,17 +63,20 @@ export class FhirProvider extends TerminologyProvider {
       offset: options.offset ?? 0
     });
     
+    const concepts = result.items || [];
+
     // Ensure the returned concepts use the correct CodeSystem URI (not the ValueSet URI)
-    if (result && result.items) {
-      result.items.forEach(c => {
-        c.system = this._systemUri;
-        if (!c.version && this._version) {
-          c.version = this._version;
-        }
-      });
-    }
+    concepts.forEach(c => {
+      c.system = this._systemUri;
+      if (!c.version && this._version) {
+        c.version = this._version;
+      }
+    });
     
-    return result;
+    return {
+      concepts,
+      total: result.total ?? 0
+    };
   }
 
   async lookup(code) {

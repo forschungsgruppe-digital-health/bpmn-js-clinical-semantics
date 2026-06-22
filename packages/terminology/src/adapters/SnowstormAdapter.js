@@ -119,17 +119,24 @@ export class SnowstormAdapter {
     return 'en';
   }
 
-  /** @private */
+/** @private */
   _mapConcept(item) {
     const fsnTerm = item.fsn?.term || '';
     const semanticTag = fsnTerm.match(/\(([^)]+)\)$/)?.[1] || undefined;
-    const version = item.releasedEffectiveTime ?? item.effectiveTime ?? item.version;
+    
+    const effectiveTime = item.releasedEffectiveTime ?? item.effectiveTime ?? item.version;
+    const moduleId = item.moduleId;
+
+    // Wenn beides da ist: Baue die offizielle FHIR Canonical URI. Ansonsten Fallback auf effectiveTime.
+    const versionUri = (moduleId && effectiveTime)
+      ? `http://snomed.info/sct/${moduleId}/version/${effectiveTime}`
+      : (effectiveTime !== undefined && effectiveTime !== null ? String(effectiveTime) : undefined);
 
     return {
       code: item.conceptId,
       display: item.pt?.term || fsnTerm,
       system: 'http://snomed.info/sct',
-      version: version === undefined || version === null ? undefined : String(version),
+      version: versionUri, 
       active: item.active,
       properties: {
         fsn: fsnTerm,
@@ -138,7 +145,6 @@ export class SnowstormAdapter {
       }
     };
   }
-
 
   /** @private */
   async _request(url) {
