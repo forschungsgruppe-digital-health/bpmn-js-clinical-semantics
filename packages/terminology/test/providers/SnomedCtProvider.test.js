@@ -39,13 +39,13 @@ describe('SnomedCtProvider', () => {
   describe('search()', () => {
     it('should delegate to SnowstormAdapter and pass through moduleId and version', async () => {
       const fetchFn = createMockFetch({
-        items: [{ 
-          conceptId: '233604007', 
-          pt: { term: 'Pneumonia' }, 
-          fsn: { term: 'Pneumonia (disorder)' }, 
-          releasedEffectiveTime: 20240901, 
-          moduleId: '900000000000207008', // Neu: ModuleID im Mock-Response
-          active: true 
+        items: [{
+          conceptId: '233604007',
+          pt: { term: 'Pneumonia' },
+          fsn: { term: 'Pneumonia (disorder)' },
+          releasedEffectiveTime: 20240901,
+          moduleId: '900000000000207008',
+          active: true
         }],
         total: 1
       });
@@ -83,7 +83,6 @@ describe('SnomedCtProvider', () => {
     });
   });
 
-  // Neu eingefügt: Test für die lookup()-Methode des Providers
   describe('lookup()', () => {
     it('should fetch and map a single concept via code', async () => {
       const fetchFn = createMockFetch({

@@ -66,14 +66,6 @@ describe('@bpmn-js-clinical-semantics/terminology – core exports', () => {
     expect(mod.FallbackProvider).toBeDefined();
   });
 
-  it('should export preset factory functions', async () => {
-    const mod = await import('../src/providers/presets/index.js');
-    expect(mod.createIheXdsClassCodeProvider).toBeDefined();
-    expect(mod.createIheXdsTypeCodeProvider).toBeDefined();
-    expect(mod.createKdlProvider).toBeDefined();
-    expect(mod.loadKdlFromFhir).toBeDefined();
-    expect(mod.loadCodeSystemFromFhir).toBeDefined();
-  });
 
   it('should export AnnotationHelper functions', async () => {
     const mod = await import('../src/services/AnnotationHelper.js');

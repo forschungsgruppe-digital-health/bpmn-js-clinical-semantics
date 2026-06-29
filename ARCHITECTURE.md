@@ -12,6 +12,7 @@ For usage instructions, see the [README](README.md). For contributor workflow, s
 - [Design Decisions](#design-decisions)
 - [Package Overview](#package-overview)
 - [Terminology Provider Architecture](#terminology-provider-architecture)
+- [Convenience Factories and Configuration](#convenience-factories-and-configuration)
 - [Annotation and Mapping Data Model](#annotation-and-mapping-data-model)
 - [Project Structure](#project-structure)
 - [Package Details](#package-details)
@@ -81,7 +82,6 @@ graph TB
             SNOMED[SnomedCtProvider]
             FHIRP[FhirProvider]
             STATIC[StaticProvider]
-            PRESETS["Presets\nIHE XDS classCode\nIHE XDS typeCode\nKDL"]
             TMODDLE["moddle: clinical.json\n(term: namespace)"]
             TPANEL["TerminologyProperties\nProvider"]
             THELPER[AnnotationHelper]
@@ -116,7 +116,6 @@ graph TB
     SNOMED --> |implements| TP_IFACE
     FHIRP --> |implements| TP_IFACE
     STATIC --> |implements| TP_IFACE
-    PRESETS --> |creates| STATIC
     SNOMED --> |uses| SA
     FHIRP --> |uses| FTA
     SA --> |REST| SNOW
@@ -225,6 +224,20 @@ classDiagram
 
 ---
 
+## Convenience Factories and Configuration
+
+While the core architecture relies on generic interfaces like `TerminologyProvider` and pure implementations (`StaticProvider`, `FhirProvider`), integrating external dependencies—such as npm packages containing raw FHIR JSON files (e.g., `hl7.terminology.r4`)—requires preprocessing. A `StaticProvider` expects a flat, one-dimensional array of concepts, but FHIR `CodeSystem` resources often contain deeply nested hierarchies.
+
+To prevent consumer applications from having to write custom JSON parsing logic, the terminology package provides a **Convenience Factory Layer** (primarily in `TerminologyServices.js` and `CodeSystemProviderFactory.js`). 
+
+This layer bridges the gap between pure architecture and Developer Experience (DX):
+1. **Flattening FHIR JSONs:** Helper functions like `createPackageCollectionProvider` and `createStaticProviderFromCodeSystem` recursively traverse nested FHIR JSON trees, extract the relevant data (`code`, `display`, `system`, `active`), and "flatten" them into simple arrays.
+2. **Declarative Configuration:** The `createTerminologyServices` factory function accepts a declarative configuration object containing arrays like `fhirProviders` or `packageProviders`. Under the hood, the factory automatically executes the flattening process, instantiates the correct core architectural components (like `StaticProvider` or `FallbackProvider`), and registers them with the `TerminologyRegistry`.
+
+This separation of concerns ensures that the core architecture remains "dumb" and completely decoupled from FHIR-specific JSON parsing, while allowing developers to plug-and-play imported JSONs without writing mapping boilerplate.
+
+---
+
 ## Annotation and Mapping Data Model
 
 The following diagram shows both extension element hierarchies side by side. Both attach to BPMN elements via `extensionElements` and are fully independent of each other.
@@ -317,7 +330,7 @@ bpmn-js-clinical-semantics/
 |   |   |   +-- core/                 TerminologyProvider (interface), TerminologyRegistry, types
 |   |   |   +-- adapters/             SnowstormAdapter, FhirTerminologyAdapter
 |   |   |   +-- providers/            SnomedCtProvider, FhirProvider, StaticProvider
-|   |   |   |   +-- presets/          Factory functions for IHE XDS classCode/typeCode, KDL
+
 |   |   |   +-- moddle/               clinical.json  -- BPMN moddle extension (term: namespace)
 |   |   |   +-- properties-panel/     TerminologyPropertiesProvider, UI entries
 |   |   |   +-- services/             AnnotationHelper (read/write annotations on businessObjects)
@@ -375,9 +388,9 @@ Extensible terminology annotation engine. Each BPMN element can carry multiple a
 | SNOMED CT | `SnomedCtProvider` | Yes (Snowstorm) | via API |
 | LOINC, ICD-10-GM, OPS, ATC, ICD-O-3 | `FhirProvider` | Yes (any FHIR TS) | via API |
 | HL7 v2/v3 from local FHIR package + server fallback | `FallbackProvider` + `createStaticProviderFromCodeSystem()` + `FhirProvider` | Optional fallback server | via package JSON, then API fallback |
-| IHE XDS classCode | `createIheXdsClassCodeProvider()` | No | 16 built-in |
-| IHE XDS typeCode | `createIheXdsTypeCodeProvider()` | No | 22 built-in |
-| KDL (DVMD) | `createKdlProvider()` | No | 18 built-in (full set loadable from FHIR) |
+| IHE XDS classCode | `de.ihe-d.terminology` (FHIR JSON) | No | loaded from npm package |
+| IHE XDS typeCode | `de.ihe-d.terminology` (FHIR JSON) | No | loaded from npm package |
+| KDL (DVMD) | `dvmd.kdl.r4` (FHIR JSON) | No | loaded from npm package |
 
 Adding a new terminology system requires zero changes to existing code. Implement `TerminologyProvider` and call `registry.register()`. For FHIR-hosted code systems, reuse `FhirProvider`. For small static code systems, use `StaticProvider`. For local FHIR package content, reuse `createStaticProviderFromCodeSystem()`. For dual-track resolution, wrap providers with `FallbackProvider`.
 

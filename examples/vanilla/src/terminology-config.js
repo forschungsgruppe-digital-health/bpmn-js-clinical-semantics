@@ -1,12 +1,13 @@
 import {
-  createIheXdsClassCodeProvider,
-  createIheXdsTypeCodeProvider,
   SnomedCtProvider,
-  createKdlProvider,
   createPackageCollectionProvider,
   createTerminologyModule,
   createTerminologyServices
 } from '@bpmn-js-clinical-semantics/terminology';
+
+import iheXdsClassCodeSystem from '../../../node_modules/de.ihe-d.terminology/CodeSystem-IHEXDSclassCode.json';
+import iheXdsTypeCodeSystem from '../../../node_modules/de.ihe-d.terminology/CodeSystem-IHEXDStypeCode.json';
+import kdlCodeSystem from '../../../node_modules/dvmd.kdl.r4/codesystem-kdl.xml.json';
 
 const HL7_PACKAGE_CODE_SYSTEMS = Object.values(import.meta.glob(
   '../../../node_modules/hl7.terminology.r4/CodeSystem-*.json',
@@ -19,12 +20,6 @@ const HL7_PACKAGE_CODE_SYSTEMS = Object.values(import.meta.glob(
 const DEFAULT_FHIR_BASE_URL = import.meta.env.VITE_FHIR_BASE_URL || 'https://r4.ontoserver.csiro.au/fhir';
 // const DEFAULT_FHIR_BASE_URL = import.meta.env.VITE_FHIR_BASE_URL || 'https://implementation-demo.snomedtools.org/snowstorm-lite/fhir';
 const DEFAULT_SNOWSTORM_BASE_URL = import.meta.env.VITE_SNOWSTORM_BASE_URL || 'https://snowstorm-training.snomedtools.org/snowstorm/snomed-ct';
-
-const STATIC_PROVIDER_FACTORIES = [
-  createIheXdsClassCodeProvider,
-  createIheXdsTypeCodeProvider,
-  createKdlProvider
-];
 
 const FHIR_PROVIDER_CONFIGS = [
 /* {
@@ -78,7 +73,6 @@ const FHIR_PROVIDER_CONFIGS = [
 
 export async function createDemoTerminologyServices() {
   const services = createTerminologyServices({
-    staticProviderFactories: STATIC_PROVIDER_FACTORIES,
     providers: [
       new SnomedCtProvider({
         baseUrl: DEFAULT_SNOWSTORM_BASE_URL,
@@ -89,6 +83,21 @@ export async function createDemoTerminologyServices() {
         id: 'hl7-terminology-r4-package',
         displayName: 'HL7 Terminology R4 Package',
         codeSystems: HL7_PACKAGE_CODE_SYSTEMS
+      }),
+      createPackageCollectionProvider({
+        id: 'ihe-xds-class',
+        displayName: 'IHE XDS classCode',
+        codeSystems: [iheXdsClassCodeSystem]
+      }),
+      createPackageCollectionProvider({
+        id: 'ihe-xds-type',
+        displayName: 'IHE XDS typeCode',
+        codeSystems: [iheXdsTypeCodeSystem]
+      }),
+      createPackageCollectionProvider({
+        id: 'kdl',
+        displayName: 'KDL (Klinische Dokumentenklassen-Liste)',
+        codeSystems: [kdlCodeSystem]
       })
     ],
     fhirProviders: FHIR_PROVIDER_CONFIGS,

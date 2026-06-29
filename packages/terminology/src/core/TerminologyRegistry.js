@@ -97,6 +97,7 @@ export class TerminologyRegistry {
 
   /**
    * Search across ALL registered providers simultaneously.
+   * @deprecated
    * @param {string} term
    * @param {import('./types').SearchOptions} [options]
    * @returns {Promise<Map<string, import('./types').SearchResult>>}

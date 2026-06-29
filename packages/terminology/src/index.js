@@ -21,14 +21,6 @@ export { FhirProvider } from './providers/FhirProvider.js';
 export { StaticProvider } from './providers/StaticProvider.js';
 export { FallbackProvider } from './providers/FallbackProvider.js';
 
-// ─── Presets (ready-to-use static providers) ─────────────────
-export {
-  createIheXdsClassCodeProvider,
-  createIheXdsTypeCodeProvider,
-  createKdlProvider,
-  loadKdlFromFhir
-} from './providers/presets/index.js';
-
 // ─── moddle descriptor ───────────────────────────────────────
 export { default as TerminologyModdleDescriptor } from './moddle/clinical.json';
 
