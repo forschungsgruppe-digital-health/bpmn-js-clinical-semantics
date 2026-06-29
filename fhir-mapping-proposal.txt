@@ -1,0 +1,116 @@
+Vorschlag fuer die Weiterentwicklung des klinischen BPMN -> FHIR-Mappings
+
+Ausgangslage
+
+Die aktuelle Struktur ist fachlich schon nah am Ziel, loest das eigentliche Problem aber noch nicht sauber. Der klinische Kontext liegt im terminology-Paket als Annotation vor, waehrend das fhir-mapping-Paket parallel dazu technische Mapping-Informationen verwaltet. Dadurch ist die Loesung doppelt modelliert: Die Semantik wird einmal als klinische Annotation gepflegt und ein weiteres Mal ueber separate FHIR-Mapping-Angaben vorbereitet. Trotzdem entsteht daraus noch keine verlaessliche Uebertragung in konkrete FHIR-Ressourcen.
+
+Das eigentliche Ziel der Bibliothek ist jedoch klar: Copy & Paste sowie manuelle Doppelpflege bei der Ueberfuehrung eines BPMN-Modells in FHIR sollen vermieden werden. BPMN-Modelle sollen den klinischen Kontext einmal zentral enthalten, und diese Informationen sollen anschliessend strukturiert in FHIR uebernommen werden koennen.
+
+Probleme im aktuellen Ansatz
+
+1. Der Modus descriptive/prescriptive bringt aktuell keinen entscheidenden Mehrwert und kann entfernt werden.
+2. Das Mapping ist konzeptionell doppelt verteilt: einmal in terminology, einmal in fhir-mapping.
+3. Frei eingetragene FHIRPath-Ziele auf Annotationsebene sind zu technisch, fehleranfaellig und keine gute Single Source of Truth.
+4. Es fehlt ein Resolver bzw. Transformationsmechanismus, der klinische Annotationen und FHIR-Kontext zusammenfuehrt.
+5. Der Aspect alleine reicht nicht als Schluessel fuer ein robustes Mapping, weil dafuer weiterer Kontext benoetigt wird.
+
+Empfohlene Zielarchitektur
+
+1. terminology wird zur einzigen Quelle fuer klinische Semantik.
+2. fhir-mapping beschreibt nur noch den FHIR-Rahmen eines BPMN-Elements.
+3. Ein neuer regelbasierter Resolver ueberfuehrt Semantik + FHIR-Kontext in konkrete FHIR-Felder.
+
+Rolle des terminology-Pakets
+
+Das terminology-Paket sollte nur fachliche Annotationen halten:
+
+- aspect
+- codings[] mit system, code, display
+- optional text
+
+Entfallen sollten:
+
+- descriptive/prescriptive
+- direkte target-/FHIRPath-Angaben an der Annotation
+
+Damit bleibt terminology der zentrale Dreh- und Angelpunkt fuer klinische Bedeutung.
+
+Rolle des fhir-mapping-Pakets
+
+Das fhir-mapping-Paket sollte nur den FHIR-Kontext des BPMN-Elements beschreiben, zum Beispiel:
+
+- resourceType
+- optional profile
+- direction
+- interaction
+- optional technische Overrides in klar begrenztem Umfang
+
+Wichtig ist: Das Paket sollte nicht erneut dieselbe Fachsemantik modellieren, die bereits in terminology enthalten ist.
+
+Mapping nicht nur ueber aspect
+
+Der aspect ist wichtig, aber er reicht nicht allein aus. Fuer belastbares Mapping sollte der Resolver mindestens folgende Informationen beruecksichtigen:
+
+- resourceType
+- optional profile
+- aspect
+- code system
+- code
+- optional BPMN-Kontext, z. B. DataObject, Input/Output, MessageFlow
+
+Der wirksame Mapping-Schluessel ist also eher eine Kombination aus:
+
+(resourceType/profile, aspect, system, code, BPMN-Kontext)
+
+Neues Herzstueck: regelbasierter Resolver
+
+Es braucht eine eigene Komponente, die aus BPMN-Element, Terminology-Annotationen und FHIR-Mapping-Kontext konkrete FHIR-Zuweisungen erzeugt.
+
+Beispielhafte Regelidee:
+
+when resourceType = DocumentReference
+and aspect = documentType
+then map coding -> DocumentReference.type
+
+Weitere moegliche Regeln:
+
+- DocumentReference + documentClass -> DocumentReference.category
+- DiagnosticReport + clinicalContent -> DiagnosticReport.code
+- Composition + documentType -> Composition.type
+
+Beispiel
+
+Ein BPMN-DataObject enthaelt:
+
+- resourceType = DocumentReference
+- Annotation mit aspect = documentType
+- Coding mit system = http://loinc.org
+- Coding mit code = 18748-4
+
+Der Resolver erzeugt daraus:
+
+- DocumentReference.type = CodeableConcept(loinc#18748-4)
+
+Vorteile des Vorschlags
+
+1. Die klinische Semantik wird nur einmal gepflegt.
+2. Copy & Paste zwischen Annotation und Mapping entfaellt.
+3. Das Mapping wird deterministisch, nachvollziehbar und testbar.
+4. Neue Zielressourcen und Profile koennen ueber Regeln ergaenzt werden.
+5. terminology wird wirklich zum zentralen semantischen Einstiegspunkt.
+
+Empfohlene Umsetzungsschritte
+
+1. descriptive/prescriptive aus dem Terminology-Modell entfernen.
+2. annotation.target bzw. direkte FHIRPath-Ziele an Annotationen entfernen.
+3. fhir-mapping auf resourceType/profile/direction/interaction fokussieren.
+4. Ein Rule-Format fuer die Ueberfuehrung definieren.
+5. Einen ersten Resolver fuer wenige Kernfaelle implementieren.
+6. Mit klaren Beispielen und Tests starten, z. B.:
+   - documentType -> DocumentReference.type
+   - documentClass -> DocumentReference.category
+   - clinicalContent -> DiagnosticReport.code
+
+Kurzfazit
+
+Der richtige naechste Schritt ist nicht, das aktuelle doppelte Mapping weiter auszubauen, sondern die Verantwortlichkeiten klar zu trennen: terminology beschreibt die klinische Bedeutung, fhir-mapping beschreibt den FHIR-Kontext, und ein Resolver fuehrt beides zusammen. Erst damit wird die Bibliothek ihrem eigentlichen Ziel gerecht, den klinischen Kontext aus dem BPMN-Modell strukturiert und ohne Doppelpflege nach FHIR zu uebertragen.
