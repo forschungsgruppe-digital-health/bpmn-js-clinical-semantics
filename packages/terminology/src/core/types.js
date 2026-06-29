@@ -116,6 +116,13 @@ export const MODES = {
   PRESCRIPTIVE: 'prescriptive'
 };
 
+export const TRANSFORMS = {
+  COPY: 'copy',
+  FIXED: 'fixed',
+  TRANSLATE: 'translate',
+  REFERENCE: 'reference'
+};
+
 export const CLINICAL_DOMAINS = [
   { id: 'diagnostics', label: 'Diagnostik' },
   { id: 'staging', label: 'Staging' },

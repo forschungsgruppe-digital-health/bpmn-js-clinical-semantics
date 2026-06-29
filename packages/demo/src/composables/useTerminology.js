@@ -1,4 +1,4 @@
-import { ref, inject, onMounted } from 'vue';
+import { ref, inject, onMounted, onBeforeUnmount } from 'vue';
 
 /**
  * Vue composable for accessing the terminology registry.
@@ -16,10 +16,30 @@ export function useTerminology() {
   const isSearching = ref(false);
   const error = ref(null);
 
+  function refreshAvailableSystems() {
+    availableSystems.value = registry
+      ? registry.listProviders().filter(provider => provider.capabilities?.search !== false)
+      : [];
+  }
+
   onMounted(() => {
-    if (registry) {
-      availableSystems.value = registry.listProviders();
+    refreshAvailableSystems();
+
+    if (!registry || typeof registry.on !== 'function' || typeof registry.off !== 'function') {
+      return;
     }
+
+    registry.on('provider:registered', refreshAvailableSystems);
+    registry.on('provider:unregistered', refreshAvailableSystems);
+  });
+
+  onBeforeUnmount(() => {
+    if (!registry || typeof registry.off !== 'function') {
+      return;
+    }
+
+    registry.off('provider:registered', refreshAvailableSystems);
+    registry.off('provider:unregistered', refreshAvailableSystems);
   });
 
   async function search(term, systemId, options) {

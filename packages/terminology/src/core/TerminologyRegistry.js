@@ -54,6 +54,23 @@ export class TerminologyRegistry {
   }
 
   /**
+   * Find a provider instance by its CodeSystem URI.
+   * @param {string} systemUri
+   * @returns {import('./TerminologyProvider').TerminologyProvider | null}
+   */
+  findProviderBySystem(systemUri) {
+    if (!systemUri) return null;
+
+    for (const provider of this._providers.values()) {
+      if (provider.systemUri === systemUri) {
+        return provider;
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * List all registered providers with metadata.
    * @returns {Array<{ id: string, displayName: string, systemUri: string, capabilities: object }>}
    */
@@ -62,6 +79,7 @@ export class TerminologyRegistry {
       id: p.id,
       displayName: p.displayName,
       systemUri: p.systemUri,
+      version: p.version,
       capabilities: p.capabilities
     }));
   }
@@ -79,6 +97,7 @@ export class TerminologyRegistry {
 
   /**
    * Search across ALL registered providers simultaneously.
+   * @deprecated
    * @param {string} term
    * @param {import('./types').SearchOptions} [options]
    * @returns {Promise<Map<string, import('./types').SearchResult>>}

@@ -17,8 +17,8 @@
  * @typedef {Object} KeyElementParams
  * @property {string} path - FHIRPath expression (e.g. 'DiagnosticReport.status')
  * @property {string} [semanticRole] - trigger | filter | classifier | identifier | payload
- * @property {string} [fixedValue] - FHIR-structural constant (mutually exclusive with terminologyBinding)
- * @property {string} [terminologyBinding] - Code system URI; resolved from term:coding at runtime
+ * @property {string} [fixedValue] - Fixed value for this element (mutually exclusive with terminologyBinding)
+ * @property {string} [terminologyBinding] - Terminology binding reference to `term:annotation@id`
  * @property {string} [terminologyAspect] - term:annotation aspect to disambiguate (e.g. 'documentType')
  */
 
@@ -81,6 +81,22 @@ export function getResourceMappingsContainer(bo) {
 export function getResourceMappings(bo) {
   const container = getResourceMappingsContainer(bo);
   return container?.mappings || [];
+}
+
+export function getBindableTerminologyAnnotations(bo) {
+  if (!bo.extensionElements?.values) {
+    return [];
+  }
+
+  const container = bo.extensionElements.values.find((value) => value.$type === 'term:Annotations');
+
+  return (container?.values || [])
+    .filter((annotation) => annotation.id)
+    .map((annotation) => ({
+      id: annotation.id,
+      text: annotation.text,
+      codings: annotation.codings || []
+    }));
 }
 
 function ensureExtensionElements(bo, moddle) {

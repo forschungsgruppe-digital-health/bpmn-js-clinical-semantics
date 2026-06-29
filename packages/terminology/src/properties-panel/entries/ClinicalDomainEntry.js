@@ -2,13 +2,14 @@ import { html } from 'htm/preact';
 import { useService } from 'bpmn-js-properties-panel';
 
 const CLINICAL_DOMAINS = [
-  { value: '', label: '– nicht gesetzt –' },
-  { value: 'diagnostics', label: 'Diagnostik' },
+  { value: '', label: '– not set –' },
+  { value: 'diagnostics', label: 'Diagnostics' },
+  { value: 'documentation', label: 'Documentation' },
   { value: 'staging', label: 'Staging' },
-  { value: 'therapy', label: 'Therapie' },
-  { value: 'follow-up', label: 'Nachsorge' },
-  { value: 'palliation', label: 'Palliativversorgung' },
-  { value: 'prevention', label: 'Prävention' },
+  { value: 'therapy', label: 'Therapy' },
+  { value: 'follow-up', label: 'Follow-up' },
+  { value: 'palliation', label: 'Palliative care' },
+  { value: 'prevention', label: 'Prevention' },
   { value: 'rehabilitation', label: 'Rehabilitation' }
 ];
 
@@ -29,7 +30,7 @@ export function ClinicalDomainEntry(props) {
   return html`
     <div class="bio-properties-panel-entry">
       <label class="bio-properties-panel-label" for="clinical-domain">
-        ${translate('Klinische Domäne')}
+        ${translate('Clinical domain')}
       </label>
       <select
         id="clinical-domain"

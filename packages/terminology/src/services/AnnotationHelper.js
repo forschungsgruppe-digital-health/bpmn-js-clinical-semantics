@@ -3,6 +3,9 @@
  * on BPMN element businessObjects.
  */
 
+const DEFAULT_ANN_PREFIX = 'term-ann';
+const ANN_ID_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$/;
+
 export function getExtensionElement(bo, type) {
   if (!bo.extensionElements) return undefined;
   return bo.extensionElements.values?.find(e => e.$type === type);
@@ -15,6 +18,48 @@ export function getAnnotationsContainer(bo) {
 export function getAnnotations(bo) {
   const container = getAnnotationsContainer(bo);
   return container?.values || [];
+}
+
+export function getUsedIds(bo) {
+  return getAnnotations(bo)
+    .map(annotation => annotation.id)
+    .filter(Boolean);
+}
+
+export function getCodingKey(coding) {
+  const system = (coding?.system || '').trim();
+  const code = (coding?.code || '').trim();
+
+  if (!system || !code) {
+    return '';
+  }
+
+  return `${system}|${code}`;
+}
+
+export function getUsedCodingKeys(bo) {
+  return getAnnotations(bo).flatMap(annotation =>
+    (annotation.codings || []).map(getCodingKey).filter(Boolean)
+  );
+}
+
+export function isValidId(id) {
+  return ANN_ID_PATTERN.test((id || '').trim());
+}
+
+export function createId(existingIds = []) {
+  const normalizedBase = DEFAULT_ANN_PREFIX;
+  const idsInUse = new Set(existingIds.filter(Boolean));
+
+  let sequence = 1;
+  let candidate = `${normalizedBase}-${sequence}`;
+
+  while (idsInUse.has(candidate)) {
+    sequence += 1;
+    candidate = `${normalizedBase}-${sequence}`;
+  }
+
+  return candidate;
 }
 
 export function ensureExtensionElements(bo, moddle) {
@@ -35,11 +80,12 @@ export function ensureAnnotationsContainer(bo, moddle) {
   return container;
 }
 
-export function addAnnotation(bo, moddle, { aspect, mode, text, codings }) {
+export function addAnnotation(bo, moddle, { id, aspect, mode, text, codings, target, existingIds }) {
   const container = ensureAnnotationsContainer(bo, moddle);
   const props = {
-    aspect: aspect || 'clinicalContent',
-    mode: mode || 'descriptive'
+    id: (id || '').trim() || createId(
+      existingIds || getUsedIds(bo)
+    )
   };
   if (text) props.text = text;
 
@@ -67,6 +113,25 @@ export function addAnnotation(bo, moddle, { aspect, mode, text, codings }) {
 export function removeAnnotation(bo, index) {
   const container = getAnnotationsContainer(bo);
   if (container?.values && index >= 0 && index < container.values.length) {
-    container.values.splice(index, 1);
+    const [removedAnnotation] = container.values.splice(index, 1);
+    clearTerminologyBindings(bo, removedAnnotation?.id);
   }
+}
+
+function clearTerminologyBindings(bo, id) {
+  if (!id || !bo.extensionElements?.values) {
+    return;
+  }
+
+  bo.extensionElements.values
+    .filter((value) => value.$type === 'fhirmap:ResourceMappings')
+    .forEach((container) => {
+      (container.mappings || []).forEach((mapping) => {
+        (mapping.keyElements || []).forEach((keyElement) => {
+          if (keyElement.terminologyBinding === id) {
+            keyElement.terminologyBinding = undefined;
+          }
+        });
+      });
+    });
 }

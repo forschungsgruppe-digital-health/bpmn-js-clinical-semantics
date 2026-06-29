@@ -3,15 +3,8 @@
 [![CI](https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics/actions/workflows/ci.yml/badge.svg)](https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A518-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-![Status](https://img.shields.io/badge/status-under%20development-orange.svg)
 
 **Semantic clinical annotations and FHIR resource mapping for BPMN process models.**
-
-> ⚠️ **Status: under active development — not for production use.**
-> This is a **research prototype** developed in the MiHUB project (TU Dresden / Forschungsgruppe
-> Digital Health). The public API, the moddle schema, and the published packages may change without
-> notice, and the libraries have not been production-hardened or independently security-reviewed.
-> **Do not use it to process real patient data — only synthetic test data.**
 
 Two independent [bpmn-js](https://github.com/bpmn-io/bpmn-js) extension libraries that add clinical context to BPMN diagrams without modifying the BPMN standard. Each library provides a moddle extension (for XML serialization) and a properties panel provider (for interactive editing). Both annotation layers are stored as standard BPMN 2.0 `extensionElements`, preserving full backwards compatibility with every BPMN engine and viewer.
 
@@ -40,18 +33,18 @@ BPMN 2.0 is widely used for modelling clinical pathways, but its elements carry 
 
 **bpmn-js-clinical-semantics** closes this gap by adding two optional annotation layers: terminology annotations (`term:` namespace) for codes from SNOMED CT, LOINC, ICD-10-GM, OPS, IHE XDS, KDL, and other systems; and FHIR resource mappings (`fhirmap:` namespace) for declaring resource types, profiles, interactions, and key elements. Both layers use standard BPMN `extensionElements`, so non-clinical tools simply ignore them.
 
-For the full background and design rationale, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
 ## Features
 
-### Terminology Annotations (`@forschungsgruppe-digital-health/terminology`)
+### Terminology Annotations (`@bpmn-js-clinical-semantics/terminology`)
 
 - [x] Multi-code annotation of any BPMN element (Tasks, DataObjects, Events, Gateways, MessageFlows)
-- [x] Pluggable provider architecture with built-in support for SNOMED CT (via Snowstorm), any FHIR-hosted code system (LOINC, ICD-10-GM, OPS, ATC, ICD-O-3), IHE XDS classCode/typeCode, and KDL
-- [x] Aspect-based annotation model (clinicalContent, documentClass, documentType, note, confidentiality, status, format, participant)
-- [x] Descriptive and prescriptive modes with optional FHIRPath mapping targets
+- [x] Pluggable provider architecture with built-in support for SNOMED CT (via Snowstorm), any FHIR-hosted code system (LOINC, ICD-10-GM, OPS, ATC, ICD-O-3), package-backed HL7 terminology resources, IHE XDS classCode/typeCode, and KDL
+- [x] Annotation model with stable `id` bindings and optional coded entries
+- [x] Optional FHIRPath mapping targets
 - [x] Extensibility without code changes -- new terminology systems via `TerminologyProvider` interface
 - [x] Offline-capable static providers for small code systems (IHE XDS, KDL)
 - [x] Interactive properties panel integration for the bpmn-js modeler
@@ -61,7 +54,7 @@ For the full background and design rationale, see [docs/ARCHITECTURE.md](docs/AR
 - [ ] Import terminology bindings from existing FHIR profiles
 - [ ] Bulk export of annotations as FHIR CodeSystem/ValueSet resources
 
-### FHIR Resource Mapping (`@forschungsgruppe-digital-health/fhir-mapping`)
+### FHIR Resource Mapping (`@bpmn-js-clinical-semantics/fhir-mapping`)
 
 - [x] Resource-level FHIR mapping (resourceType, profile URL, interaction, direction)
 - [x] Key element binding with FHIRPath expressions, semantic roles, fixed values, and terminology bindings
@@ -73,22 +66,19 @@ For the full background and design rationale, see [docs/ARCHITECTURE.md](docs/AR
 - [ ] FHIR R5 SubscriptionTopic support
 - [ ] Automated conformance checking against FHIR profiles
 
-### Vue Integration (`packages/demo` — private demo, not published)
+### Vue Integration (`@bpmn-js-clinical-semantics/vue`)
 
 - [x] `useTerminology()` and `useFhirMapping()` composables for Vue 3
 - [ ] Additional framework integrations (React, Angular)
 
 ### Tooling and Quality
 
-- [x] Unit-test suite covering core modules, adapters, providers, helpers, and public API
+- [x] 173 unit tests covering core modules, adapters, providers, helpers, and public API
 - [x] CI pipeline on Node 18 and 20
 - [x] GitHub Pages deployment of interactive demo
 - [ ] TypeScript type definitions (.d.ts)
 - [ ] End-to-end tests with bpmn-js integration
-- [x] Automated release pipeline with changelog generation (release-please)
-
-> MVP scope and acceptance criteria for the terminology and FHIR-mapping features live in the
-> user stories under [`docs/user-stories/`](docs/user-stories/).
+- [ ] Automated release pipeline with changelog generation
 
 ---
 
@@ -96,10 +86,11 @@ For the full background and design rationale, see [docs/ARCHITECTURE.md](docs/AR
 
 | Package | Description | Install |
 |---|---|---|
-| [`@forschungsgruppe-digital-health/terminology`](packages/terminology/) | Terminology annotation engine, providers, moddle extension, properties panel | `npm i @forschungsgruppe-digital-health/terminology` |
-| [`@forschungsgruppe-digital-health/fhir-mapping`](packages/fhir-mapping/) | FHIR resource mapping, moddle extension, properties panel | `npm i @forschungsgruppe-digital-health/fhir-mapping` |
+| [`@bpmn-js-clinical-semantics/terminology`](packages/terminology/) | Terminology annotation engine, providers, moddle extension, properties panel | `npm i @bpmn-js-clinical-semantics/terminology` |
+| [`@bpmn-js-clinical-semantics/fhir-mapping`](packages/fhir-mapping/) | FHIR resource mapping, moddle extension, properties panel | `npm i @bpmn-js-clinical-semantics/fhir-mapping` |
+| [`@bpmn-js-clinical-semantics/vue`](packages/vue/) | Vue 3 composables (`useTerminology`, `useFhirMapping`) | `npm i @bpmn-js-clinical-semantics/vue` |
 
-Either package can be installed independently. A Vue 3 integration is provided in the **private, unpublished** [`packages/demo`](packages/demo/) package (`@forschungsgruppe-digital-health/demo`) — an example, not installed from the registry.
+Either package can be installed independently. The Vue package is optional and only needed for Vue 3 projects.
 
 Packages are published to the [GitHub Package Registry](https://docs.github.com/en/packages). See [CONTRIBUTING.md](CONTRIBUTING.md#configuring-npm-for-the-github-registry) for registry configuration.
 
@@ -115,14 +106,8 @@ Packages are published to the [GitHub Package Registry](https://docs.github.com/
 ### Install
 
 ```bash
-npm install @forschungsgruppe-digital-health/terminology @forschungsgruppe-digital-health/fhir-mapping
+npm install @bpmn-js-clinical-semantics/terminology @bpmn-js-clinical-semantics/fhir-mapping
 ```
-
-> ⚠️ These packages are published to **GitHub Packages**, not the public npm registry — configure the
-> `@forschungsgruppe-digital-health` scope first (see
-> [CONTRIBUTING.md](CONTRIBUTING.md#configuring-npm-for-the-github-registry)). They are pre-1.0 and no
-> release has been cut yet (see the status banner above), so a bare `npm install` will not resolve them
-> until the first release is published.
 
 ### Integrate into your bpmn-js modeler
 
@@ -136,12 +121,12 @@ import {
 import {
   TerminologyModdleDescriptor,
   TerminologyPropertiesPanelModule
-} from '@forschungsgruppe-digital-health/terminology';
+} from '@bpmn-js-clinical-semantics/terminology';
 
 import {
   FhirMappingModdleDescriptor,
   FhirMappingPropertiesPanelModule
-} from '@forschungsgruppe-digital-health/fhir-mapping';
+} from '@bpmn-js-clinical-semantics/fhir-mapping';
 
 const modeler = new BpmnModeler({
   container: '#canvas',
@@ -165,31 +150,93 @@ const modeler = new BpmnModeler({
 
 ```js
 import {
-  TerminologyRegistry,
   SnomedCtProvider,
   createKdlProvider,
-  addAnnotation,
-  ASPECTS
-} from '@forschungsgruppe-digital-health/terminology';
+  createPackageFallbackProvider,
+  createTerminologyModule,
+  createTerminologyServices,
+  addAnnotation
+} from '@bpmn-js-clinical-semantics/terminology';
+import actCodeCodeSystem from 'hl7.terminology.r4/CodeSystem-v3-ActCode.json';
 
-// Set up providers
-const registry = new TerminologyRegistry();
-registry.register(new SnomedCtProvider({ baseUrl: 'https://snowstorm.example.com' }));
-registry.register(createKdlProvider());
+const terminologyServices = createTerminologyServices({
+  providers: [
+    new SnomedCtProvider({ baseUrl: 'https://snowstorm.example.com' }),
+    createKdlProvider(),
+    createPackageFallbackProvider({
+      id: 'hl7-v3-actcode',
+      displayName: 'HL7 v3 ActCode',
+      systemUri: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
+      codeSystem: actCodeCodeSystem,
+      fallbackFhirConfig: {
+        systemUri: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
+        valueSetUri: 'http://terminology.hl7.org/ValueSet/v3-ActCode',
+        baseUrl: 'https://fhir.example.com'
+      }
+    })
+  ],
+  loaderConfig: {
+    fhirBaseUrl: 'https://fhir.example.com'
+  }
+});
+
+await terminologyServices.terminologyProviderLoader.ensureProvider('http://terminology.hl7.org/CodeSystem/v3-ActCode');
 
 // Search across all providers
-const results = await registry.searchAll('pneumonia');
+const results = await terminologyServices.terminologyRegistry.searchAll('pneumonia');
+
+// Optional: expose the services as a bpmn-js DI module
+const TerminologyServicesModule = createTerminologyModule(terminologyServices);
 
 // Add an annotation to a BPMN element's businessObject
 addAnnotation(businessObject, moddle, {
-  aspect: ASPECTS.CLINICAL_CONTENT,
-  mode: 'descriptive',
+  id: 'term-ann-1',
   text: 'CT-Thorax mit Kontrastmittel',
   codings: [{ system: 'http://snomed.info/sct', code: '169069000', display: 'CT of chest' }]
 });
 ```
 
-For adding custom terminology systems (FHIR-hosted, static, or custom API), see [docs/arc42/08 — Extending with a New Terminology System](docs/arc42/08_crosscutting_concepts.md#extending-with-a-new-terminology-system).
+`createPackageTerminologyProvider()` and `createPackageFallbackProvider()` are the public extension points for package-backed terminology. Install any package that ships FHIR `CodeSystem` JSON resources, import the JSON you need, and register it through your own app-level config file. In this repository, that consumer-owned bootstrap lives in `examples/vanilla/src/terminology-config.js`, while the demo's concrete package dependencies are declared in `examples/vanilla/package.json`. For your own app, create an equivalent config file next to your modeler setup and pass the resulting services/module into `bpmn-js`.
+
+### Adding another terminology package in the demo
+
+The demo already uses this pattern with `hl7.terminology.r4`. The package is installed in `examples/vanilla/package.json`, its `CodeSystem-*.json` resources are loaded with `import.meta.glob(...)`, and then everything is exposed as one searchable provider via `createPackageCollectionProvider(...)`.
+
+1. Install the package into the demo workspace:
+
+```bash
+npm install <your-terminology-package> --workspace=examples/vanilla
+```
+
+After a successful install, the package will also appear in the root `package-lock.json`.
+
+2. Load the package's `CodeSystem` files in `examples/vanilla/src/terminology-config.js`:
+
+```js
+const MY_PACKAGE_CODE_SYSTEMS = Object.values(import.meta.glob(
+  '../../../node_modules/<your-terminology-package>/CodeSystem-*.json',
+  {
+    eager: true,
+    import: 'default'
+  }
+));
+```
+
+3. Register the package contents as a provider:
+
+```js
+createPackageCollectionProvider({
+  id: 'my-package',
+  displayName: 'My Terminology Package',
+  codeSystems: MY_PACKAGE_CODE_SYSTEMS
+})
+```
+
+4. Add that provider to the `providers` array passed to `createTerminologyServices(...)`.
+
+This is consumer-side wiring, not library internals: the library provides the helper functions, while the demo shows how an application uses them. A `.npmrc` is not required when the dependency is installed from a direct URL or from the default npm registry; it is only needed when the package must be fetched from a custom registry such as GitHub Packages.
+
+For adding custom terminology systems (FHIR-hosted, static, package-backed, or custom API), see [ARCHITECTURE.md -- Extending with a New Terminology System](ARCHITECTURE.md#extending-with-a-new-terminology-system). The demo keeps its concrete server URLs and package imports in a dedicated bootstrap/config layer; the properties panel only talks to `terminologyRegistry` and an optional `terminologyProviderLoader`. For FHIR terminology servers that need explicit canonical ValueSet URLs or version hints, `FhirProvider` also supports `valueSetUri` and `expandParameters`.
 
 ---
 
@@ -204,7 +251,7 @@ Annotations and mappings are persisted as standard BPMN 2.0 extension elements:
                   term:clinicalDomain="diagnostics">
   <bpmn2:extensionElements>
     <term:annotations>
-      <term:annotation aspect="clinicalContent" mode="descriptive"
+      <term:annotation id="term-ann-1"
                        text="CT-Befund Thorax mit KM">
         <term:coding system="http://snomed.info/sct"
                      code="169069000" display="CT of chest (procedure)"/>
@@ -232,7 +279,6 @@ The interactive demo is automatically deployed to GitHub Pages on every push to 
 **Live Demo:** [forschungsgruppe-digital-health.github.io/bpmn-js-clinical-semantics](https://forschungsgruppe-digital-health.github.io/bpmn-js-clinical-semantics/)
 
 The demo shows the full bpmn-js modeler with both annotation panels active, loaded with a sample lung cancer diagnostic pathway. Click any BPMN element to inspect and edit its annotations, view the resulting XML, and download the annotated BPMN file.
-
 To run the demo locally:
 
 ```bash
@@ -249,25 +295,20 @@ npm run dev
 | Document | Audience | Content |
 |---|---|---|
 | [README.md](README.md) | All users | Overview, features, quick start, usage examples |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Contributors, integrators | Design decisions, UML diagrams, data model, project structure, extensibility |
-| [docs/EXTENDING.md](docs/EXTENDING.md) | New contributors, extension developers | Primer: BPMN & BPMN XML, the standard extension mechanism, the bpmn.io toolkit, the five ways to extend bpmn.io, and how this repo maps onto them — with links to the OMG and bpmn.io sources |
-| [docs/concepts/synthea-gmf-module-mapping.md](docs/concepts/synthea-gmf-module-mapping.md) | Contributors, researchers | Concept/proposal: a bpmn.io properties-panel extension that maps BPMN patient pathways onto the Synthea Generic Module Framework to generate Synthea modules (not yet implemented) |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Contributors, integrators | Design decisions, UML diagrams, data model, project structure, extensibility |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributors | Development setup, coding standards, testing, branching, release process |
-| [AGENTS.md](AGENTS.md) | AI coding agents (all tools) | Single-source operational context: the quality gate, conventions, hard rules; CLAUDE.md imports it |
-| [CHANGELOG.md](CHANGELOG.md) | All users, maintainers | Repository-level changelog (Keep a Changelog); per-package version history is generated by release-please |
-| [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | All participants | Community standards (Contributor Covenant 2.1) and how to report concerns |
 
 ---
 
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contributor guide covering development setup, coding standards, testing, branching strategy, and the release and publishing process. By participating you agree to our [Code of Conduct](CODE_OF_CONDUCT.md) (Contributor Covenant 2.1); notable changes are recorded in the [CHANGELOG](CHANGELOG.md).
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contributor guide covering development setup, coding standards, testing, branching strategy, and the release and publishing process.
 
 ```bash
 git clone https://github.com/forschungsgruppe-digital-health/bpmn-js-clinical-semantics.git
 cd bpmn-js-clinical-semantics
 npm install --legacy-peer-deps
-npm test        # run the test suite
+npm test        # 173 tests
 npm run dev     # interactive demo at http://localhost:5173
 ```
 

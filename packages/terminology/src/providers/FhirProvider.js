@@ -12,9 +12,12 @@ export class FhirProvider extends TerminologyProvider {
    * @param {string} config.id - Provider ID (e.g. 'loinc', 'icd-10-gm')
    * @param {string} config.displayName
    * @param {string} config.systemUri
+   * @param {string} [config.valueSetUri] - Override URI for $expand (useful for HL7 ValueSets)
    * @param {string} config.baseUrl - FHIR server base URL
    * @param {number} [config.maxResults=15]
    * @param {string} [config.language]
+   * @param {Record<string, string>} [config.expandParameters]
+   * @param {Record<string, string>} [config.lookupParameters]
    * @param {import('../core/types').ConnectionConfig['auth']} [config.auth]
    * @param {typeof fetch} [config.fetchFn]
    */
@@ -23,11 +26,22 @@ export class FhirProvider extends TerminologyProvider {
     this._id = config.id;
     this._displayName = config.displayName;
     this._systemUri = config.systemUri;
+    this._version = config.version
+      || config.lookupParameters?.version
+      || config.expandParameters?.valueSetVersion
+      || config.expandParameters?.version
+      || (typeof config.expandParameters?.['system-version'] === 'string'
+        ? config.expandParameters['system-version'].split('|')[1]
+        : undefined);
     this._maxResults = config.maxResults || 15;
-    this._language = config.language;
+    
+    // Use valueSetUri for the adapter if provided, otherwise fallback to systemUri
     this._adapter = new FhirTerminologyAdapter({
       baseUrl: config.baseUrl,
       systemUri: config.systemUri,
+      valueSetUri: config.valueSetUri,
+      expandParameters: config.expandParameters,
+      lookupParameters: config.lookupParameters,
       auth: config.auth,
       fetchFn: config.fetchFn,
       headers: config.headers
@@ -37,20 +51,41 @@ export class FhirProvider extends TerminologyProvider {
   get id() { return this._id; }
   get displayName() { return this._displayName; }
   get systemUri() { return this._systemUri; }
+  get version() { return this._version; }
   get capabilities() {
     return { search: true, lookup: true, hierarchy: false, validate: true };
   }
 
   async search(term, options = {}) {
-    return this._adapter.search({
+    const result = await this._adapter.search({
       term,
       limit: options.limit ?? this._maxResults,
-      offset: options.offset ?? 0,
-      language: options.language ?? this._language
+      offset: options.offset ?? 0
     });
+    
+    const concepts = result.items || [];
+
+    // Ensure the returned concepts use the correct CodeSystem URI (not the ValueSet URI)
+    concepts.forEach(c => {
+      c.system = this._systemUri;
+      if (!c.version && this._version) {
+        c.version = this._version;
+      }
+    });
+    
+    return {
+      concepts,
+      total: result.total ?? 0
+    };
   }
 
   async lookup(code) {
-    return this._adapter.lookup(code);
+    const concept = await this._adapter.lookup(code);
+
+    if (concept && !concept.version && this._version) {
+      concept.version = this._version;
+    }
+
+    return concept;
   }
 }

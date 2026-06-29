@@ -37,20 +37,31 @@ describe('SnomedCtProvider', () => {
   });
 
   describe('search()', () => {
-    it('should delegate to SnowstormAdapter with correct params', async () => {
+    it('should delegate to SnowstormAdapter and pass through moduleId and version', async () => {
       const fetchFn = createMockFetch({
-        items: [{ conceptId: '233604007', pt: { term: 'Pneumonia' }, fsn: { term: 'Pneumonia (disorder)' }, active: true }],
+        items: [{
+          conceptId: '233604007',
+          pt: { term: 'Pneumonia' },
+          fsn: { term: 'Pneumonia (disorder)' },
+          releasedEffectiveTime: 20240901,
+          moduleId: '900000000000207008',
+          active: true
+        }],
         total: 1
       });
       const provider = createProvider({ fetchFn });
 
-      const result = await provider.search('pneumonia', { limit: 5, language: 'de' });
-      expect(result.items).toHaveLength(1);
+      const result = await provider.search('pneumonia', { limit: 5 });
+      expect(result.concepts).toHaveLength(1);
+      expect(result.concepts[0].version).toBe('http://snomed.info/sct/900000000000207008/version/20240901');
+      expect(result.concepts[0].moduleId).toBeUndefined(); // Map doesn't include moduleId directly
 
       const calledUrl = new URL(fetchFn.mock.calls[0][0]);
+      const calledHeaders = fetchFn.mock.calls[0][1].headers;
       expect(calledUrl.searchParams.get('term')).toBe('pneumonia');
       expect(calledUrl.searchParams.get('limit')).toBe('5');
-      expect(calledUrl.searchParams.get('language')).toBe('de');
+      expect(calledUrl.searchParams.get('language')).toBeNull();
+      expect(calledHeaders['Accept-Language']).toBe('de');
     });
 
     it('should pass ECL constraint from default config', async () => {
@@ -69,6 +80,26 @@ describe('SnomedCtProvider', () => {
       await provider.search('test', { ecl: '<404684003' });
       const calledUrl = new URL(fetchFn.mock.calls[0][0]);
       expect(calledUrl.searchParams.get('ecl')).toBe('<404684003');
+    });
+  });
+
+  describe('lookup()', () => {
+    it('should fetch and map a single concept via code', async () => {
+      const fetchFn = createMockFetch({
+        conceptId: '169069000',
+        pt: { term: 'CT of chest' },
+        fsn: { term: 'CT of chest (procedure)' },
+        releasedEffectiveTime: 20240901,
+        moduleId: '900000000000207008',
+        active: true
+      });
+      const provider = createProvider({ fetchFn });
+
+      const concept = await provider.lookup('169069000');
+      expect(concept).not.toBeNull();
+      expect(concept.code).toBe('169069000');
+      expect(concept.version).toBe('http://snomed.info/sct/900000000000207008/version/20240901');
+      expect(concept.moduleId).toBeUndefined(); // Map doesn't include moduleId directly
     });
   });
 

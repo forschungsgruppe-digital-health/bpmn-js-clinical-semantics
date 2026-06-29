@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   getResourceMappings,
+  getBindableTerminologyAnnotations,
   addResourceMapping,
   removeResourceMapping,
   exportMappingsAsJson
@@ -56,6 +57,30 @@ describe('MappingHelper', () => {
     });
   });
 
+  describe('getBindableTerminologyAnnotations()', () => {
+    it('should return terminology annotations with IDs from the same business object', () => {
+      const bo = createBusinessObject({
+        values: [
+          {
+            $type: 'term:Annotations',
+            values: [
+              { $type: 'term:Annotation', id: 'term-ann-1', text: 'Discharge summary' },
+              { $type: 'term:Annotation' }
+            ]
+          }
+        ]
+      });
+
+      expect(getBindableTerminologyAnnotations(bo)).toEqual([
+        {
+          id: 'term-ann-1',
+          text: 'Discharge summary',
+          codings: []
+        }
+      ]);
+    });
+  });
+
   // ─── addResourceMapping ───────────────────────────────────
 
   describe('addResourceMapping()', () => {
@@ -99,7 +124,7 @@ describe('MappingHelper', () => {
         resourceType: 'DiagnosticReport',
         keyElements: [
           { path: 'DiagnosticReport.status', semanticRole: 'trigger', fixedValue: 'final' },
-          { path: 'DiagnosticReport.code', semanticRole: 'classifier', terminologyBinding: 'http://loinc.org' }
+          { path: 'DiagnosticReport.code', semanticRole: 'classifier', terminologyBinding: 'term-ann-1' }
         ]
       });
 
@@ -108,7 +133,7 @@ describe('MappingHelper', () => {
       expect(mapping.keyElements[0].path).toBe('DiagnosticReport.status');
       expect(mapping.keyElements[0].semanticRole).toBe('trigger');
       expect(mapping.keyElements[0].fixedValue).toBe('final');
-      expect(mapping.keyElements[1].terminologyBinding).toBe('http://loinc.org');
+      expect(mapping.keyElements[1].terminologyBinding).toBe('term-ann-1');
     });
 
     it('should add searchParams', () => {

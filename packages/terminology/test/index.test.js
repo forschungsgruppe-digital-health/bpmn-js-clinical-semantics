@@ -34,6 +34,7 @@ describe('@forschungsgruppe-digital-health/terminology – core exports', () => 
     const mod = await import('../src/core/types.js');
     expect(mod.ASPECTS).toBeDefined();
     expect(mod.MODES).toBeDefined();
+    expect(mod.TRANSFORMS).toBeDefined();
     expect(mod.CLINICAL_DOMAINS).toBeDefined();
   });
 
@@ -62,22 +63,58 @@ describe('@forschungsgruppe-digital-health/terminology – core exports', () => 
     expect(mod.StaticProvider).toBeDefined();
   });
 
-  it('should export preset factory functions', async () => {
-    const mod = await import('../src/providers/presets/index.js');
-    expect(mod.createIheXdsClassCodeProvider).toBeDefined();
-    expect(mod.createIheXdsTypeCodeProvider).toBeDefined();
-    expect(mod.createKdlProvider).toBeDefined();
-    expect(mod.loadKdlFromFhir).toBeDefined();
+  it('should export FallbackProvider', async () => {
+    const mod = await import('../src/providers/FallbackProvider.js');
+    expect(mod.FallbackProvider).toBeDefined();
   });
+
 
   it('should export AnnotationHelper functions', async () => {
     const mod = await import('../src/services/AnnotationHelper.js');
     expect(mod.getAnnotations).toBeDefined();
     expect(mod.addAnnotation).toBeDefined();
+    expect(mod.createId).toBeDefined();
+    expect(mod.getUsedIds).toBeDefined();
+    expect(mod.getCodingKey).toBeDefined();
+    expect(mod.getUsedCodingKeys).toBeDefined();
+    expect(mod.isValidId).toBeDefined();
     expect(mod.removeAnnotation).toBeDefined();
     expect(mod.getAnnotationsContainer).toBeDefined();
     expect(mod.ensureAnnotationsContainer).toBeDefined();
     expect(mod.ensureExtensionElements).toBeDefined();
+  });
+
+  it('should export TerminologyProviderLoader helpers', async () => {
+    const mod = await import('../src/services/TerminologyProviderLoader.js');
+    expect(mod.createFhirTerminologyProviderLoader).toBeDefined();
+  });
+
+  it('should export CodeSystemProviderFactory helpers', async () => {
+    const mod = await import('../src/services/CodeSystemProviderFactory.js');
+    expect(mod.createStaticProviderFromCodeSystem).toBeDefined();
+  });
+
+  it('should export TerminologyServices helpers', async () => {
+    const mod = await import('../src/services/TerminologyServices.js');
+    expect(mod.createPackageTerminologyProvider).toBeDefined();
+    expect(mod.createPackageCollectionProvider).toBeDefined();
+    expect(mod.createPackageFallbackProvider).toBeDefined();
+    expect(mod.createTerminologyServices).toBeDefined();
+    expect(mod.createTerminologyModule).toBeDefined();
+  });
+
+  it('should export configurable properties panel helpers', async () => {
+    const mod = await import('../src/properties-panel/config.js');
+    expect(mod.DEFAULT_TERMINOLOGY_PROPERTIES_CONFIG).toBeDefined();
+    expect(mod.resolveTerminologyPropertiesConfig).toBeDefined();
+
+    const panelConfig = mod.resolveTerminologyPropertiesConfig({
+      showMappingTarget: false
+    });
+
+    expect(panelConfig.showClinicalDomain).toBe(true);
+    expect(panelConfig.showAnnotations).toBe(true);
+    expect(panelConfig.showMappingTarget).toBe(false);
   });
 
   it('should export moddle descriptor as JSON', async () => {

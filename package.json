@@ -31,10 +31,12 @@
     "examples/*"
   ],
   "devDependencies": {
+    "@testing-library/preact": "^3.2.4",
     "@types/fhir": "^0.0.41",
     "@xmldom/xmldom": "^0.9.10",
     "bpmn-moddle": "^10.0.0",
     "bpmnlint": "^11.12.1",
+    "jsdom": "^29.1.1",
     "vitest": "^3.1.1"
   },
   "license": "Apache-2.0",

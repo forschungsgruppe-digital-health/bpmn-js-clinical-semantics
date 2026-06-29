@@ -55,15 +55,15 @@
       <bpmn2:extensionElements>
 
         <term:annotations>
-          <term:annotation aspect="documentType" mode="prescriptive"
+          <term:annotation id="term-ann-1" mode="prescriptive"
                            text="MRI scan report of the thorax as input document for TNM staging">
             <term:coding system="http://loinc.org" code="18748-4"
                          display="Diagnostic imaging study"/>
-            <term:coding system="http://ihe-d.de/CodeSystems/IHEXDStypeCode" code="ERGE"
+            <term:coding system="http://ihe-d.de/CodeSystems/IHEXDStypeCode" version="2020-02-07T07:55:58" code="ERGE"
                          display="Diagnostic imaging results"/>
           </term:annotation>
-          <term:annotation aspect="documentClass" mode="prescriptive">
-            <term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" code="BEF"
+          <term:annotation id="term-ann-2" mode="prescriptive">
+            <term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" version="2021-06-25T13:44:47" code="BEF"
                          display="Clinical reports"/>
           </term:annotation>
         </term:annotations>
@@ -75,12 +75,10 @@
                                    direction="input">
             <fhirmap:keyElement path="DocumentReference.type"
                                semanticRole="classifier"
-                               terminologyBinding="http://loinc.org"
-                               terminologyAspect="documentType"/>
+                               terminologyBinding="term-ann-1"/>
             <fhirmap:keyElement path="DocumentReference.category"
                                semanticRole="classifier"
-                               terminologyBinding="http://ihe-d.de/CodeSystems/IHEXDSclassCode"
-                               terminologyAspect="documentClass"/>
+                               terminologyBinding="term-ann-2"/>
             <fhirmap:keyElement path="DocumentReference.status"
                                semanticRole="trigger"
                                fixedValue="current"/>
@@ -99,7 +97,7 @@
 
         <!-- Terminology annotations -->
         <term:annotations>
-          <term:annotation aspect="clinicalContent" mode="descriptive"
+          <term:annotation id="term-ann-3" mode="descriptive"
                            text="Clinical TNM staging to determine tumor stage">
             <term:coding system="http://snomed.info/sct" code="254292007"
                          display="Tumor staging (tumor staging)"/>
@@ -118,12 +116,10 @@
                                    direction="output">
             <fhirmap:keyElement path="Observation.code"
                                semanticRole="classifier"
-                               terminologyBinding="http://loinc.org"
-                               terminologyAspect="clinicalContent"/>
+                               terminologyBinding="term-ann-3"/>
             <fhirmap:keyElement path="Observation.valueCodeableConcept"
                                semanticRole="payload"
-                               terminologyBinding="http://snomed.info/sct"
-                               terminologyAspect="clinicalContent"/>
+                               terminologyBinding="term-ann-3"/>
             <fhirmap:keyElement path="Observation.status"
                                semanticRole="trigger"
                                fixedValue="final"/>
@@ -135,8 +131,7 @@
                                    direction="output">
             <fhirmap:keyElement path="ServiceRequest.code"
                                semanticRole="classifier"
-                               terminologyBinding="http://snomed.info/sct"
-                               terminologyAspect="clinicalContent"/>
+                               terminologyBinding="term-ann-3"/>
             <fhirmap:keyElement path="ServiceRequest.intent"
                                semanticRole="classifier"
                                fixedValue="order"/>
@@ -157,7 +152,7 @@
       <bpmn2:extensionElements>
 
         <term:annotations>
-          <term:annotation aspect="clinicalContent" mode="descriptive"
+          <term:annotation id="term-ann-4" mode="descriptive"
                            text="Treatment decision based on TNM stage: Stage I-II (operable) vs. Stage III-IV (inoperable)"/>
         </term:annotations>
 
@@ -172,11 +167,11 @@
       <bpmn2:extensionElements>
 
         <term:annotations>
-          <term:annotation aspect="clinicalContent" mode="prescriptive"
+          <term:annotation id="term-ann-5" mode="prescriptive"
                            text="Lobectomy or pneumonectomy for operable lung cancer Stage I-II">
             <term:coding system="http://snomed.info/sct" code="359615001"
                          display="Partial lobectomy of lung (procedure)"/>
-            <term:coding system="http://fhir.de/CodeSystem/bfarm/ops" code="5-324"
+            <term:coding system="http://fhir.de/CodeSystem/bfarm/ops" version="2021" code="5-324"
                          display="Simple lobectomy and bilobectomy of the lung"/>
           </term:annotation>
         </term:annotations>
@@ -188,11 +183,10 @@
                                    direction="output">
             <fhirmap:keyElement path="Procedure.code"
                                semanticRole="classifier"
-                               terminologyBinding="http://snomed.info/sct"
-                               terminologyAspect="clinicalContent"/>
+                               terminologyBinding="term-ann-5"/>
             <fhirmap:keyElement path="Procedure.bodySite"
                                semanticRole="payload"
-                               terminologyBinding="http://snomed.info/sct"/>
+                               terminologyBinding="term-ann-5"/>
             <fhirmap:keyElement path="Procedure.status"
                                semanticRole="trigger"
                                fixedValue="completed"/>
@@ -209,11 +203,11 @@
       <bpmn2:extensionElements>
 
         <term:annotations>
-          <term:annotation aspect="clinicalContent" mode="prescriptive"
+          <term:annotation id="term-ann-6" mode="prescriptive"
                            text="Cisplatin-based doublet chemotherapy for inoperable lung cancer Stage III-IV">
             <term:coding system="http://snomed.info/sct" code="367336001"
                          display="Chemotherapy (procedure)"/>
-            <term:coding system="http://www.whocc.no/atc" code="L01XA01"
+            <term:coding system="http://www.whocc.no/atc" version="2025.0.0" code="L01XA01"
                          display="Cisplatin"/>
           </term:annotation>
         </term:annotations>
@@ -225,8 +219,7 @@
                                    direction="output">
             <fhirmap:keyElement path="MedicationRequest.medicationCodeableConcept"
                                semanticRole="payload"
-                               terminologyBinding="http://www.whocc.no/atc"
-                               terminologyAspect="clinicalContent"/>
+                               terminologyBinding="term-ann-6"/>
             <fhirmap:keyElement path="MedicationRequest.intent"
                                semanticRole="classifier"
                                fixedValue="order"/>
@@ -253,15 +246,15 @@
       <bpmn2:extensionElements>
 
         <term:annotations>
-          <term:annotation aspect="documentType" mode="prescriptive"
+          <term:annotation id="term-ann-7" mode="prescriptive"
                            text="Medical discharge report upon completion of follow-up">
             <term:coding system="http://loinc.org" code="18842-5"
                          display="Discharge summary"/>
-            <term:coding system="http://dvmd.de/fhir/CodeSystem/kdl" code="AD010101"
+            <term:coding system="http://dvmd.de/fhir/CodeSystem/kdl" version="2024" code="AD010101"
                          display="Medical discharge report"/>
           </term:annotation>
-          <term:annotation aspect="documentClass" mode="prescriptive">
-            <term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" code="BRI"
+          <term:annotation id="term-ann-8" mode="prescriptive">
+            <term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" version="2021-06-25T13:44:47" code="BRI"
                          display="Physician letters"/>
           </term:annotation>
         </term:annotations>
@@ -273,12 +266,10 @@
                                    direction="output">
             <fhirmap:keyElement path="DocumentReference.type"
                                semanticRole="classifier"
-                               terminologyBinding="http://loinc.org"
-                               terminologyAspect="documentType"/>
+                               terminologyBinding="term-ann-7"/>
             <fhirmap:keyElement path="DocumentReference.category"
                                semanticRole="classifier"
-                               terminologyBinding="http://ihe-d.de/CodeSystems/IHEXDSclassCode"
-                               terminologyAspect="documentClass"/>
+                               terminologyBinding="term-ann-8"/>
             <fhirmap:keyElement path="DocumentReference.status"
                                semanticRole="trigger"
                                fixedValue="current"/>
@@ -296,7 +287,7 @@
       <bpmn2:extensionElements>
 
         <term:annotations>
-          <term:annotation aspect="clinicalContent" mode="descriptive"
+          <term:annotation id="term-ann-9" mode="descriptive"
                            text="Structured follow-up assessment with imaging surveillance and lab monitoring">
             <term:coding system="http://snomed.info/sct" code="390906007"
                          display="Follow-up encounter (procedure)"/>
@@ -318,8 +309,7 @@
                                fixedValue="plan"/>
             <fhirmap:keyElement path="CarePlan.category"
                                semanticRole="classifier"
-                               terminologyBinding="http://snomed.info/sct"
-                               terminologyAspect="clinicalContent"/>
+                               terminologyBinding="term-ann-9"/>
             <fhirmap:keyElement path="CarePlan.title"
                                semanticRole="payload"
                                fixedValue="Follow-up Lung Cancer"/>
