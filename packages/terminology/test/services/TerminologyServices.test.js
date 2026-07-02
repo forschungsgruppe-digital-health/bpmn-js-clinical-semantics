@@ -6,6 +6,10 @@ import {
   createTerminologyModule,
   createTerminologyServices
 } from '../../src/services/TerminologyServices.js';
+import {
+  createDefaultPackageProviders,
+  createDefaultTerminologyServices
+} from '../../src/config/terminology-config.js';
 
 const actCodeCodeSystem = {
   resourceType: 'CodeSystem',
@@ -114,5 +118,52 @@ describe('TerminologyServices', () => {
     expect(createTerminologyModule(services)).toEqual({
       terminologyRegistry: ['value', services.terminologyRegistry]
     });
+  });
+
+  it('should create default services with built-in providers', () => {
+    const services = createDefaultTerminologyServices({
+      enablePackageDefaults: false,
+      loaderConfig: false
+    });
+
+    const providerIds = services.terminologyRegistry.listProviders().map(provider => provider.id);
+
+    expect(providerIds).toEqual(expect.arrayContaining([
+      'snomed-ct',
+      'loinc',
+      'icd-10-gm',
+      'ops',
+      'atc'
+    ]));
+  });
+
+  it('should allow disabling defaults by provider id', () => {
+    const services = createDefaultTerminologyServices({
+      enablePackageDefaults: false,
+      loaderConfig: false,
+      disabledProviderIds: ['atc', 'snomed-ct']
+    });
+
+    const providerIds = services.terminologyRegistry.listProviders().map(provider => provider.id);
+
+    expect(providerIds).not.toContain('atc');
+    expect(providerIds).not.toContain('snomed-ct');
+    expect(providerIds).toContain('loinc');
+  });
+
+  it('should apply package provider overrides by id', () => {
+    const providers = createDefaultPackageProviders({
+      packageProviderOptions: {
+        kdl: {
+          displayName: 'KDL Custom'
+        }
+      }
+    });
+
+    const providerIds = providers.map(provider => provider.id);
+    const kdlProvider = providers.find(provider => provider.id === 'kdl');
+
+    expect(providerIds).toContain('kdl');
+    expect(kdlProvider.displayName).toBe('KDL Custom');
   });
 });

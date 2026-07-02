@@ -196,25 +196,65 @@ addAnnotation(businessObject, moddle, {
 });
 ```
 
-`createPackageTerminologyProvider()` and `createPackageFallbackProvider()` are the public extension points for package-backed terminology. Install any package that ships FHIR `CodeSystem` JSON resources, import the JSON you need, and register it through your own app-level config file. In this repository, that consumer-owned bootstrap lives in `examples/vanilla/src/terminology-config.js`, while the demo's concrete package dependencies are declared in `examples/vanilla/package.json`. For your own app, create an equivalent config file next to your modeler setup and pass the resulting services/module into `bpmn-js`.
+`createDefaultTerminologyServices()` exposes the standard configuration used by the demo (SNOMED + FHIR server providers + package-backed providers). You can override only the parts you need (for example base URLs, disabled provider IDs, or provider overrides) and keep the rest unchanged. For full custom wiring, `createPackageTerminologyProvider()` and `createPackageFallbackProvider()` remain available as low-level extension points.
+
+### Default config options (`createDefaultTerminologyServices(config)`)
+
+| Option | Type | Purpose |
+|---|---|---|
+| `serverConfig` | `{ fhirBaseUrl?: string, snowstormBaseUrl?: string }` | Override default server base URLs. |
+| `enableSnomed` | `boolean` | Enable/disable default SNOMED provider (`true` by default). |
+| `enableFhirDefaults` | `boolean` | Enable/disable built-in FHIR providers (`true` by default). |
+| `enablePackageDefaults` | `boolean` | Enable/disable built-in package providers (`true` by default). |
+| `disabledProviderIds` | `string[]` | Disable providers by ID (applies to defaults and custom providers). |
+| `snomedConfig` | `object` | Override SNOMED provider config (`branch`, `languageStrategy`, `baseUrl`, ...). |
+| `fhirProviderOverrides` | `Array<{ id: string, ... }>` | Override built-in FHIR providers by ID. |
+| `additionalFhirProviders` | `Array<FhirProviderConfig>` | Add extra FHIR providers. |
+| `packageProviderOptions` | `Record<string, object>` | Override built-in package providers by ID. |
+| `hl7CodeSystems` | `CodeSystem[]` | Inject explicit HL7 package CodeSystems instead of auto-loaded defaults. |
+| `additionalPackageProviders` | `TerminologyProvider[]` | Add extra package-backed providers. |
+| `providers` / `fhirProviders` / `packageProviders` | arrays | Append additional provider instances/configs directly. |
+| `loaderConfig` | `false \| object` | Override loader setup or disable loader with `false`. |
+
+Default provider IDs:
+- SNOMED: `snomed-ct`
+- FHIR defaults: `loinc`, `icd-10-gm`, `ops`, `atc`
+- Package defaults: `hl7-terminology-r4-package`, `ihe-xds-class`, `ihe-xds-type`, `kdl`
+
+Example:
+
+```js
+import { createDefaultTerminologyServices } from '@bpmn-js-clinical-semantics/terminology';
+
+const terminologyServices = createDefaultTerminologyServices({
+  serverConfig: {
+    fhirBaseUrl: 'https://r4.ontoserver.csiro.au/fhir',
+    snowstormBaseUrl: 'https://snowstorm-training.snomedtools.org/snowstorm/snomed-ct'
+  },
+  disabledProviderIds: ['atc'],
+  fhirProviderOverrides: [
+    { id: 'icd-10-gm', expandParameters: { valueSetVersion: '2024' } }
+  ]
+});
+```
 
 ### Adding another terminology package in the demo
 
-The demo already uses this pattern with `hl7.terminology.r4`. The package is installed in `examples/vanilla/package.json`, its `CodeSystem-*.json` resources are loaded with `import.meta.glob(...)`, and then everything is exposed as one searchable provider via `createPackageCollectionProvider(...)`.
+The demo uses the default terminology setup from `@bpmn-js-clinical-semantics/terminology`. Additional package providers can still be added with `createPackageCollectionProvider(...)` if your app needs custom sources beyond the default set.
 
-1. Install the package into the demo workspace:
+1. Install the package in your app:
 
 ```bash
-npm install <your-terminology-package> --workspace=examples/vanilla
+npm install <your-terminology-package>
 ```
 
 After a successful install, the package will also appear in the root `package-lock.json`.
 
-2. Load the package's `CodeSystem` files in `examples/vanilla/src/terminology-config.js`:
+2. Load the package `CodeSystem` resources in your terminology bootstrap:
 
 ```js
 const MY_PACKAGE_CODE_SYSTEMS = Object.values(import.meta.glob(
-  '../../../node_modules/<your-terminology-package>/CodeSystem-*.json',
+  '/node_modules/<your-terminology-package>/CodeSystem-*.json',
   {
     eager: true,
     import: 'default'
@@ -222,7 +262,7 @@ const MY_PACKAGE_CODE_SYSTEMS = Object.values(import.meta.glob(
 ));
 ```
 
-3. Register the package contents as a provider:
+3. Register the package contents as an additional provider:
 
 ```js
 createPackageCollectionProvider({
@@ -232,9 +272,9 @@ createPackageCollectionProvider({
 })
 ```
 
-4. Add that provider to the `providers` array passed to `createTerminologyServices(...)`.
+4. Add that provider to the `providers` array passed to `createDefaultTerminologyServices(...)` or `createTerminologyServices(...)`.
 
-This is consumer-side wiring, not library internals: the library provides the helper functions, while the demo shows how an application uses them. A `.npmrc` is not required when the dependency is installed from a direct URL or from the default npm registry; it is only needed when the package must be fetched from a custom registry such as GitHub Packages.
+This is optional consumer-side extension wiring. A `.npmrc` is not required when the dependency is installed from a direct URL or from the default npm registry; it is only needed when the package must be fetched from a custom registry such as GitHub Packages.
 
 For adding custom terminology systems (FHIR-hosted, static, package-backed, or custom API), see [ARCHITECTURE.md -- Extending with a New Terminology System](ARCHITECTURE.md#extending-with-a-new-terminology-system). The demo keeps its concrete server URLs and package imports in a dedicated bootstrap/config layer; the properties panel only talks to `terminologyRegistry` and an optional `terminologyProviderLoader`. For FHIR terminology servers that need explicit canonical ValueSet URLs or version hints, `FhirProvider` also supports `valueSetUri` and `expandParameters`.
 

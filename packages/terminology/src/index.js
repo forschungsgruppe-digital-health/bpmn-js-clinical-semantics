@@ -20,6 +20,15 @@ export { SnomedCtProvider } from './providers/SnomedCtProvider.js';
 export { FhirProvider } from './providers/FhirProvider.js';
 export { StaticProvider } from './providers/StaticProvider.js';
 export { FallbackProvider } from './providers/FallbackProvider.js';
+export {
+  DEFAULT_PACKAGE_PROVIDER_IDS,
+  loadHl7TerminologyR4CodeSystems,
+  createPackagePresetProvider,
+  createHl7TerminologyR4PackageProvider,
+  createIheXdsClassCodeProvider,
+  createIheXdsTypeCodeProvider,
+  createKdlProvider
+} from './providers/presets/index.js';
 
 // ─── moddle descriptor ───────────────────────────────────────
 export { default as TerminologyModdleDescriptor } from './moddle/clinical.json';
@@ -54,3 +63,11 @@ export {
   createTerminologyServices,
   createTerminologyModule
 } from './services/TerminologyServices.js';
+export {
+  createDefaultServerConfig,
+  createDefaultFhirProviderConfigs,
+  createDefaultPackageProviders,
+  createDefaultTerminologyConfig,
+  createDefaultTerminologyServices,
+  createDefaultTerminologyModule
+} from './config/terminology-config.js';
