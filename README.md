@@ -213,6 +213,7 @@ addAnnotation(businessObject, moddle, {
 | `packageProviderOptions` | `Record<string, object>` | Override built-in package providers by ID. |
 | `hl7CodeSystems` | `CodeSystem[]` | Inject explicit HL7 package CodeSystems instead of auto-loaded defaults. |
 | `additionalPackageProviders` | `TerminologyProvider[]` | Add extra package-backed providers. |
+| `packageDiscovery` | `{ enabled?: boolean, packageNames?: string[], modules?: Record<string, CodeSystem>, packages?: Record<string, CodeSystem[]>, include?: string[], exclude?: string[], mode?: 'auto'\|'whitelist' }` | Auto-register package providers. Recommended with Vite: pass the generated `virtual:fdh-terminology-packages` map to `packages`. |
 | `providers` / `fhirProviders` / `packageProviders` | arrays | Append additional provider instances/configs directly. |
 | `loaderConfig` | `false \| object` | Override loader setup or disable loader with `false`. |
 
@@ -240,7 +241,11 @@ const terminologyServices = createDefaultTerminologyServices({
 
 ### Adding another terminology package in the demo
 
-The demo uses the default terminology setup from `@bpmn-js-clinical-semantics/terminology`. Additional package providers can still be added with `createPackageCollectionProvider(...)` if your app needs custom sources beyond the default set.
+The demo already uses built-in package presets (including `hl7-terminology-r4-package`,
+`ihe-xds-class`, `ihe-xds-type`, and `kdl`) through `createDefaultTerminologyServices(...)`,
+so no extra wiring is required for those defaults.
+
+For additional package discovery, use the terminology Vite plugin:
 
 1. Install the package in your app:
 
@@ -248,21 +253,67 @@ The demo uses the default terminology setup from `@bpmn-js-clinical-semantics/te
 npm install <your-terminology-package>
 ```
 
-After a successful install, the package will also appear in the root `package-lock.json`.
-
-2. Load the package `CodeSystem` resources in your terminology bootstrap:
+2. Register the terminology plugin in `vite.config.js`:
 
 ```js
-const MY_PACKAGE_CODE_SYSTEMS = Object.values(import.meta.glob(
-  '/node_modules/<your-terminology-package>/CodeSystem-*.json',
-  {
-    eager: true,
-    import: 'default'
-  }
-));
+import { defineConfig } from 'vite';
+import { terminologyVitePlugin } from '@forschungsgruppe-digital-health/terminology/vite';
+
+export default defineConfig({
+  plugins: [terminologyVitePlugin()]
+});
 ```
 
-3. Register the package contents as an additional provider:
+3. Pass the generated virtual module to `createDefaultTerminologyServices(...)`:
+
+```js
+import { createDefaultTerminologyServices } from '@forschungsgruppe-digital-health/terminology';
+import discoveredPackages from 'virtual:fdh-terminology-packages';
+
+createDefaultTerminologyServices({
+  packageDiscovery: {
+    enabled: true,
+    packages: discoveredPackages
+  }
+});
+```
+
+4. Restart the dev server after dependency changes.
+
+The plugin discovers CodeSystem resources from direct dependencies and (by default) from
+dependencies of `@forschungsgruppe-digital-health/terminology`, then exports them as a
+package-keyed map for `packageDiscovery.packages`.
+
+If you need explicit control, pass plugin options such as:
+
+```js
+terminologyVitePlugin({
+  packages: ['hl7.terminology.r4'],            // explicit allow-list (overrides auto discovery)
+  includeTransitiveFrom: ['@forschungsgruppe-digital-health/terminology'],
+  exclude: ['hl7.fhir.r4.core', 'hl7.fhir.uv.extensions.r4']
+});
+```
+
+Manual wiring still works (for non-Vite setups or explicit subset imports):
+
+```js
+import myCodeSystem from 'my-terminology-package/CodeSystem-my-system.json';
+
+createDefaultTerminologyServices({
+  packageDiscovery: {
+    enabled: true,
+    packages: {
+      'my-terminology-package': [myCodeSystem]
+    }
+  }
+});
+```
+
+The built-in HL7 preset (`hl7-terminology-r4-package`) is always wired through
+`createDefaultTerminologyServices(...)` and remains overrideable via
+`packageProviderOptions`.
+
+If your package does not follow that shape, you can still wire it manually:
 
 ```js
 createPackageCollectionProvider({
@@ -271,8 +322,6 @@ createPackageCollectionProvider({
   codeSystems: MY_PACKAGE_CODE_SYSTEMS
 })
 ```
-
-4. Add that provider to the `providers` array passed to `createDefaultTerminologyServices(...)` or `createTerminologyServices(...)`.
 
 This is optional consumer-side extension wiring. A `.npmrc` is not required when the dependency is installed from a direct URL or from the default npm registry; it is only needed when the package must be fetched from a custom registry such as GitHub Packages.
 

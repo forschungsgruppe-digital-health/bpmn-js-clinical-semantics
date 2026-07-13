@@ -23,6 +23,7 @@ export { FallbackProvider } from './providers/FallbackProvider.js';
 export {
   DEFAULT_PACKAGE_PROVIDER_IDS,
   loadHl7TerminologyR4CodeSystems,
+  loadHl7TerminologyR4CodeSystemsFromGlob,
   createPackagePresetProvider,
   createHl7TerminologyR4PackageProvider,
   createIheXdsClassCodeProvider,
@@ -56,6 +57,12 @@ export {
 export { createStaticProviderFromCodeSystem } from './services/CodeSystemProviderFactory.js';
 export { loadCodeSystemFromFhir } from './services/FhirCodeSystemLoader.js';
 export { createFhirTerminologyProviderLoader } from './services/TerminologyProviderLoader.js';
+export {
+  DEFAULT_DISCOVERY_INCLUDE,
+  DEFAULT_DISCOVERY_EXCLUDE,
+  collectPackageCodeSystemsFromModules,
+  discoverPackageProviders
+} from './services/PackageProviderDiscovery.js';
 export {
   createPackageTerminologyProvider,
   createPackageCollectionProvider,

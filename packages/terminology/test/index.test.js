@@ -103,6 +103,14 @@ describe('@forschungsgruppe-digital-health/terminology – core exports', () => 
     expect(mod.createTerminologyModule).toBeDefined();
   });
 
+  it('should export package discovery helpers', async () => {
+    const mod = await import('../src/services/PackageProviderDiscovery.js');
+    expect(mod.DEFAULT_DISCOVERY_INCLUDE).toBeDefined();
+    expect(mod.DEFAULT_DISCOVERY_EXCLUDE).toBeDefined();
+    expect(mod.collectPackageCodeSystemsFromModules).toBeDefined();
+    expect(mod.discoverPackageProviders).toBeDefined();
+  });
+
   it('should export configurable properties panel helpers', async () => {
     const mod = await import('../src/properties-panel/config.js');
     expect(mod.DEFAULT_TERMINOLOGY_PROPERTIES_CONFIG).toBeDefined();

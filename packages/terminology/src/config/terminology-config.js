@@ -3,6 +3,10 @@ import {
   createPackagePresetProvider,
   DEFAULT_PACKAGE_PROVIDER_IDS
 } from '../providers/presets/index.js';
+import {
+  collectPackageCodeSystemsFromModules,
+  discoverPackageProviders
+} from '../services/PackageProviderDiscovery.js';
 import { createTerminologyModule, createTerminologyServices } from '../services/TerminologyServices.js';
 
 const DEFAULT_SERVER_CONFIG = Object.freeze({
@@ -116,16 +120,36 @@ export function createDefaultPackageProviders(config = {}) {
   const {
     packageProviderOptions = {},
     additionalPackageProviders = [],
+    packageDiscovery = {},
     disabledProviderIds = [],
     hl7CodeSystems
   } = config;
 
+  const packageCodeSystems = packageDiscovery?.packages || collectPackageCodeSystemsFromModules(
+    packageDiscovery?.modules || {},
+    packageDiscovery?.packageNames || []
+  );
+  const discoveryInclude = packageDiscovery?.include || packageDiscovery?.packageNames;
+  const discoveryMode = packageDiscovery?.mode || (packageDiscovery?.packageNames?.length ? 'whitelist' : 'auto');
+  const resolvedHl7CodeSystems = hl7CodeSystems || packageCodeSystems['hl7.terminology.r4'];
+
+  const discoveredPackageProviders = packageDiscovery?.enabled
+    ? discoverPackageProviders(packageCodeSystems, {
+      ...packageDiscovery,
+      ...(discoveryInclude ? { include: discoveryInclude } : {}),
+      mode: discoveryMode
+    })
+    : [];
+
   const providers = [
     ...DEFAULT_PACKAGE_PROVIDER_IDS.map(providerId => createPackagePresetProvider(providerId, {
       ...(packageProviderOptions[providerId] || {}),
-      ...(providerId === 'hl7-terminology-r4-package' && hl7CodeSystems ? { codeSystems: hl7CodeSystems } : {})
+      ...(providerId === 'hl7-terminology-r4-package' && resolvedHl7CodeSystems
+        ? { codeSystems: resolvedHl7CodeSystems }
+        : {})
     })),
-    ...additionalPackageProviders
+    ...additionalPackageProviders,
+    ...discoveredPackageProviders
   ].filter(Boolean);
 
   return filterDisabled(providers, toDisabledSet(disabledProviderIds));

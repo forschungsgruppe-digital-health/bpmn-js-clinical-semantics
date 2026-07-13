@@ -11,14 +11,24 @@
     ".": "./src/index.js",
     "./moddle": "./src/moddle/clinical.json",
     "./properties-panel": "./src/properties-panel/index.js",
-    "./providers/presets": "./src/providers/presets/index.js"
+    "./providers/presets": "./src/providers/presets/index.js",
+    "./vite": "./src/vite/plugin.js",
+    "./vite/types": "./src/vite/types.d.ts"
   },
   "peerDependencies": {
     "bpmn-js": ">=15.0.0",
     "bpmn-js-properties-panel": ">=5.0.0",
     "@bpmn-io/properties-panel": ">=3.0.0"
   },
-  "keywords": ["bpmn", "terminology", "snomed", "loinc", "icd-10", "fhir", "clinical"],
+  "keywords": [
+    "bpmn",
+    "terminology",
+    "snomed",
+    "loinc",
+    "icd-10",
+    "fhir",
+    "clinical"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

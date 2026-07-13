@@ -3,13 +3,38 @@ import { createPackageCollectionProvider } from '../../services/TerminologyServi
 import iheXdsClassCodeSystem from 'de.ihe-d.terminology/CodeSystem-IHEXDSclassCode.json';
 import iheXdsTypeCodeSystem from 'de.ihe-d.terminology/CodeSystem-IHEXDStypeCode.json';
 import kdlCodeSystem from 'dvmd.kdl.r4/codesystem-kdl.xml.json';
+import hl7GeneratedCodeSystems from './hl7-r4-codesystems.generated.js';
 
-export function loadHl7TerminologyR4CodeSystems() {
-  if (typeof import.meta.glob !== 'function') {
+let hasWarnedAboutMissingHl7PackageCodeSystems = false;
+
+function warnMissingHl7PackageCodeSystems() {
+  if (hasWarnedAboutMissingHl7PackageCodeSystems) {
+    return;
+  }
+
+  hasWarnedAboutMissingHl7PackageCodeSystems = true;
+  console.warn(
+    '[terminology] No CodeSystem JSON resources were found for "hl7.terminology.r4". ' +
+    'The "hl7-terminology-r4-package" preset will be skipped. ' +
+    'If needed, override the preset via createDefaultTerminologyServices(...) and pass ' +
+    '`packageProviderOptions["hl7-terminology-r4-package"].codeSystems`.'
+  );
+}
+
+export function loadHl7TerminologyR4CodeSystemsFromGlob(globFn) {
+  if (typeof globFn !== 'function') {
     return [];
   }
 
-  const absoluteMatches = Object.values(import.meta.glob(
+  const packageMatches = Object.values(globFn(
+    'hl7.terminology.r4/CodeSystem-*.json',
+    {
+      eager: true,
+      import: 'default'
+    }
+  ));
+
+  const absoluteMatches = Object.values(globFn(
     '/node_modules/hl7.terminology.r4/CodeSystem-*.json',
     {
       eager: true,
@@ -17,7 +42,7 @@ export function loadHl7TerminologyR4CodeSystems() {
     }
   ));
 
-  const localWorkspaceMatches = Object.values(import.meta.glob(
+  const localWorkspaceMatches = Object.values(globFn(
     '../../../node_modules/hl7.terminology.r4/CodeSystem-*.json',
     {
       eager: true,
@@ -25,7 +50,7 @@ export function loadHl7TerminologyR4CodeSystems() {
     }
   ));
 
-  const hoistedWorkspaceMatches = Object.values(import.meta.glob(
+  const hoistedWorkspaceMatches = Object.values(globFn(
     '../../../../../node_modules/hl7.terminology.r4/CodeSystem-*.json',
     {
       eager: true,
@@ -37,6 +62,7 @@ export function loadHl7TerminologyR4CodeSystems() {
   const seenSystemUris = new Set();
 
   for (const codeSystem of [
+    ...packageMatches,
     ...absoluteMatches,
     ...localWorkspaceMatches,
     ...hoistedWorkspaceMatches
@@ -51,6 +77,15 @@ export function loadHl7TerminologyR4CodeSystems() {
   }
 
   return codeSystems;
+}
+
+export function loadHl7TerminologyR4CodeSystems() {
+  const fromGlob = loadHl7TerminologyR4CodeSystemsFromGlob(import.meta.glob);
+  if (fromGlob.length > 0) {
+    return fromGlob;
+  }
+
+  return hl7GeneratedCodeSystems;
 }
 
 export const DEFAULT_PACKAGE_PROVIDER_IDS = Object.freeze([
@@ -94,6 +129,9 @@ export function createPackagePresetProvider(presetId, config = {}) {
   const codeSystems = preset.resolveCodeSystems(config);
 
   if (preset.returnNullIfEmpty && !codeSystems.length) {
+    if (preset.id === 'hl7-terminology-r4-package') {
+      warnMissingHl7PackageCodeSystems();
+    }
     return null;
   }
 
