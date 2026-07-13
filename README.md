@@ -86,9 +86,9 @@ For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE
 
 | Package | Description | Install |
 |---|---|---|
-| [`@bpmn-js-clinical-semantics/terminology`](packages/terminology/) | Terminology annotation engine, providers, moddle extension, properties panel | `npm i @bpmn-js-clinical-semantics/terminology` |
-| [`@bpmn-js-clinical-semantics/fhir-mapping`](packages/fhir-mapping/) | FHIR resource mapping, moddle extension, properties panel | `npm i @bpmn-js-clinical-semantics/fhir-mapping` |
-| [`@bpmn-js-clinical-semantics/vue`](packages/vue/) | Vue 3 composables (`useTerminology`, `useFhirMapping`) | `npm i @bpmn-js-clinical-semantics/vue` |
+| [`@forschungsgruppe-digital-health/terminology`](packages/terminology/) | Terminology annotation engine, providers, moddle extension, properties panel | `npm i @forschungsgruppe-digital-health/terminology` |
+| [`@forschungsgruppe-digital-health/fhir-mapping`](packages/fhir-mapping/) | FHIR resource mapping, moddle extension, properties panel | `npm i @forschungsgruppe-digital-health/fhir-mapping` |
+| [`@forschungsgruppe-digital-health/demo`](packages/demo/) | Vue 3 demo app (private; not published) | (not published) |
 
 Either package can be installed independently. The Vue package is optional and only needed for Vue 3 projects.
 
