@@ -33,7 +33,7 @@ BPMN 2.0 is widely used for modelling clinical pathways, but its elements carry 
 
 **bpmn-js-clinical-semantics** closes this gap by adding two optional annotation layers: terminology annotations (`term:` namespace) for codes from SNOMED CT, LOINC, ICD-10-GM, OPS, IHE XDS, KDL, and other systems; and FHIR resource mappings (`fhirmap:` namespace) for declaring resource types, profiles, interactions, and key elements. Both layers use standard BPMN `extensionElements`, so non-clinical tools simply ignore them.
 
-For the full background and design rationale, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For the full background and design rationale, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
