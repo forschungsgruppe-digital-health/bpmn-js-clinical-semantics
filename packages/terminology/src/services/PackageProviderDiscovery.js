@@ -10,6 +10,15 @@ export const DEFAULT_DISCOVERY_EXCLUDE = Object.freeze([
   'dvmd.kdl.r4'
 ]);
 
+const DEFAULT_AUTO_DISCOVERY_GLOBS = Object.freeze([
+  '/node_modules/*/CodeSystem-*.json',
+  '/node_modules/@*/*/CodeSystem-*.json',
+  '../../../node_modules/*/CodeSystem-*.json',
+  '../../../node_modules/@*/*/CodeSystem-*.json',
+  '../../../../../node_modules/*/CodeSystem-*.json',
+  '../../../../../node_modules/@*/*/CodeSystem-*.json'
+]);
+
 function toProviderId(packageName) {
   return `pkg-${packageName
     .toLowerCase()
@@ -67,6 +76,27 @@ function getNodeModulesPackagePath(packageName) {
   return `/node_modules/${packageName}/`;
 }
 
+function getPackageNameFromNodeModulesPath(path) {
+  const marker = '/node_modules/';
+  const markerIndex = path.indexOf(marker);
+  if (markerIndex < 0) {
+    return null;
+  }
+
+  const relative = path.slice(markerIndex + marker.length);
+  const parts = relative.split('/');
+
+  if (!parts[0]) {
+    return null;
+  }
+
+  if (parts[0].startsWith('@') && parts[1]) {
+    return `${parts[0]}/${parts[1]}`;
+  }
+
+  return parts[0];
+}
+
 /**
  * Group Vite glob-loaded CodeSystem modules by explicit package names.
  *
@@ -100,6 +130,53 @@ export function collectPackageCodeSystemsFromModules(modules = {}, packageNames 
       seenUris.add(systemUri);
       codeSystemsByPackageName[packageName].push(codeSystem);
       break;
+    }
+  }
+
+  return codeSystemsByPackageName;
+}
+
+/**
+ * Group Vite glob-loaded CodeSystem modules by package path detection.
+ *
+ * @param {(pattern: string, options: { eager: true, import: 'default' }) => Record<string, import('@types/fhir').fhir4.CodeSystem>} globFn
+ * @param {{ patterns?: string[] }} [config]
+ * @returns {Record<string, import('@types/fhir').fhir4.CodeSystem[]>}
+ */
+export function collectPackageCodeSystemsFromGlob(globFn, config = {}) {
+  if (typeof globFn !== 'function') {
+    return {};
+  }
+
+  const patterns = config.patterns || DEFAULT_AUTO_DISCOVERY_GLOBS;
+  const codeSystemsByPackageName = {};
+  const seenUrisByPackageName = {};
+
+  for (const pattern of patterns) {
+    const modules = globFn(pattern, { eager: true, import: 'default' }) || {};
+    for (const [path, codeSystem] of Object.entries(modules)) {
+      const packageName = getPackageNameFromNodeModulesPath(path);
+      if (!packageName) {
+        continue;
+      }
+
+      const systemUri = codeSystem?.url || `${codeSystem?.id || ''}`;
+      if (!systemUri) {
+        continue;
+      }
+
+      if (!codeSystemsByPackageName[packageName]) {
+        codeSystemsByPackageName[packageName] = [];
+        seenUrisByPackageName[packageName] = new Set();
+      }
+
+      const seenUris = seenUrisByPackageName[packageName];
+      if (seenUris.has(systemUri)) {
+        continue;
+      }
+
+      seenUris.add(systemUri);
+      codeSystemsByPackageName[packageName].push(codeSystem);
     }
   }
 

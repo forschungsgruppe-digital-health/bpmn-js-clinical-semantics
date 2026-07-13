@@ -4,6 +4,7 @@ import {
   DEFAULT_PACKAGE_PROVIDER_IDS
 } from '../providers/presets/index.js';
 import {
+  collectPackageCodeSystemsFromGlob,
   collectPackageCodeSystemsFromModules,
   discoverPackageProviders
 } from '../services/PackageProviderDiscovery.js';
@@ -121,19 +122,38 @@ export function createDefaultPackageProviders(config = {}) {
     packageProviderOptions = {},
     additionalPackageProviders = [],
     packageDiscovery = {},
+    packageAutoDiscovery = false,
     disabledProviderIds = [],
     hl7CodeSystems
   } = config;
 
-  const packageCodeSystems = packageDiscovery?.packages || collectPackageCodeSystemsFromModules(
-    packageDiscovery?.modules || {},
-    packageDiscovery?.packageNames || []
-  );
-  const discoveryInclude = packageDiscovery?.include || packageDiscovery?.packageNames;
+  const autoDiscoveryOptions = packageAutoDiscovery === true
+    ? {}
+    : (packageAutoDiscovery || null);
+  const autoDiscoveryPackages = autoDiscoveryOptions
+    ? (
+      autoDiscoveryOptions.packages
+      || globalThis?.[autoDiscoveryOptions.globalKey || '__FDH_TERMINOLOGY_PACKAGES__']
+      || collectPackageCodeSystemsFromGlob(autoDiscoveryOptions.globFn || import.meta.glob)
+    )
+    : null;
+
+  const packageCodeSystems = packageDiscovery?.packages
+    || (
+      packageDiscovery?.packageNames?.length || Object.keys(packageDiscovery?.modules || {}).length
+        ? collectPackageCodeSystemsFromModules(
+          packageDiscovery?.modules || {},
+          packageDiscovery?.packageNames || []
+        )
+        : (autoDiscoveryPackages || {})
+    );
+  const discoveryInclude = packageDiscovery?.include
+    || packageDiscovery?.packageNames
+    || (autoDiscoveryOptions ? ['*'] : undefined);
   const discoveryMode = packageDiscovery?.mode || (packageDiscovery?.packageNames?.length ? 'whitelist' : 'auto');
   const resolvedHl7CodeSystems = hl7CodeSystems || packageCodeSystems['hl7.terminology.r4'];
 
-  const discoveredPackageProviders = packageDiscovery?.enabled
+  const discoveredPackageProviders = (packageDiscovery?.enabled || Boolean(autoDiscoveryOptions))
     ? discoverPackageProviders(packageCodeSystems, {
       ...packageDiscovery,
       ...(discoveryInclude ? { include: discoveryInclude } : {}),

@@ -9,10 +9,13 @@ import { createRequire } from 'node:module';
  * @property {string[]} [includeTransitiveFrom]
  * @property {string[]} [exclude]
  * @property {string[]} [resourceTypes]
+ * @property {boolean} [exposeGlobal]
+ * @property {string} [globalKey]
  */
 
 const VIRTUAL_MODULE_ID = 'virtual:fdh-terminology-packages';
 const RESOLVED_VIRTUAL_MODULE_ID = '\0' + VIRTUAL_MODULE_ID;
+const DEFAULT_GLOBAL_PACKAGES_KEY = '__FDH_TERMINOLOGY_PACKAGES__';
 
 const BUILTIN_PRESET_PACKAGES = Object.freeze([
   'de.ihe-d.terminology',
@@ -257,7 +260,9 @@ export function terminologyVitePlugin(options = {}) {
     autoDiscover = true,
     includeTransitiveFrom = DEFAULT_TRANSITIVE_ROOT_PACKAGES,
     exclude: userExclude = [],
-    resourceTypes = DEFAULT_RESOURCE_TYPES
+    resourceTypes = DEFAULT_RESOURCE_TYPES,
+    exposeGlobal = true,
+    globalKey = DEFAULT_GLOBAL_PACKAGES_KEY
   } = options;
 
   /** @type {string} */
@@ -334,6 +339,26 @@ export function terminologyVitePlugin(options = {}) {
         exportEntries.join(',\n'),
         '};'
       ].join('\n');
+    },
+
+    transformIndexHtml(html) {
+      if (!exposeGlobal) {
+        return html;
+      }
+
+      return {
+        html,
+        tags: [
+          {
+            tag: 'script',
+            attrs: {
+              type: 'module'
+            },
+            children: `import discoveredPackages from '${VIRTUAL_MODULE_ID}'; globalThis[${JSON.stringify(globalKey)}] = discoveredPackages;`,
+            injectTo: 'head-prepend'
+          }
+        ]
+      };
     }
   };
 }

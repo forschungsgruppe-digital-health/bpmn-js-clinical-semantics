@@ -361,4 +361,41 @@ describe('TerminologyServices', () => {
 
     expect(searchResult.total).toBe(1);
   });
+
+  it('should support packageAutoDiscovery shortcut via global discovered packages', async () => {
+    const globalKey = '__FDH_TERMINOLOGY_PACKAGES__';
+    const previousValue = globalThis[globalKey];
+    globalThis[globalKey] = {
+      'acme.custom': [
+        {
+          resourceType: 'CodeSystem',
+          id: 'acme-cs',
+          url: 'https://example.org/CodeSystem/acme',
+          concept: [
+            { code: 'A1', display: 'Acme One' }
+          ]
+        }
+      ]
+    };
+
+    try {
+      const services = createDefaultTerminologyServices({
+        loaderConfig: false,
+        packageAutoDiscovery: true
+      });
+
+      const provider = services.terminologyRegistry.getProvider('pkg-acme-custom');
+      expect(provider).toBeDefined();
+
+      await expect(
+        services.terminologyRegistry.search('acme', 'pkg-acme-custom')
+      ).resolves.toMatchObject({ total: 1 });
+    } finally {
+      if (previousValue === undefined) {
+        delete globalThis[globalKey];
+      } else {
+        globalThis[globalKey] = previousValue;
+      }
+    }
+  });
 });

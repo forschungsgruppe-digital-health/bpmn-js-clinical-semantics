@@ -213,7 +213,8 @@ addAnnotation(businessObject, moddle, {
 | `packageProviderOptions` | `Record<string, object>` | Override built-in package providers by ID. |
 | `hl7CodeSystems` | `CodeSystem[]` | Inject explicit HL7 package CodeSystems instead of auto-loaded defaults. |
 | `additionalPackageProviders` | `TerminologyProvider[]` | Add extra package-backed providers. |
-| `packageDiscovery` | `{ enabled?: boolean, packageNames?: string[], modules?: Record<string, CodeSystem>, packages?: Record<string, CodeSystem[]>, include?: string[], exclude?: string[], mode?: 'auto'\|'whitelist' }` | Auto-register package providers. Recommended with Vite: pass the generated `virtual:fdh-terminology-packages` map to `packages`. |
+| `packageDiscovery` | `{ enabled?: boolean, packageNames?: string[], modules?: Record<string, CodeSystem>, packages?: Record<string, CodeSystem[]>, include?: string[], exclude?: string[], mode?: 'auto'\|'whitelist' }` | Advanced package provider registration (explicit package maps and filtering controls). |
+| `packageAutoDiscovery` | `boolean \| { packages?: Record<string, CodeSystem[]>, globalKey?: string, globFn?: Function }` | Shortcut for plugin-driven package discovery (`true` reads `globalThis.__FDH_TERMINOLOGY_PACKAGES__`). |
 | `providers` / `fhirProviders` / `packageProviders` | arrays | Append additional provider instances/configs directly. |
 | `loaderConfig` | `false \| object` | Override loader setup or disable loader with `false`. |
 
@@ -259,24 +260,30 @@ npm install <your-terminology-package>
 import { defineConfig } from 'vite';
 import { terminologyVitePlugin } from '@forschungsgruppe-digital-health/terminology/vite';
 
+const ENABLE_PACKAGE_DISCOVERY = false;
+
 export default defineConfig({
-  plugins: [terminologyVitePlugin()]
+  plugins: [
+    ENABLE_PACKAGE_DISCOVERY ? terminologyVitePlugin() : null
+  ].filter(Boolean)
 });
 ```
 
-3. Pass the generated virtual module to `createDefaultTerminologyServices(...)`:
+Set `ENABLE_PACKAGE_DISCOVERY` to `true` when you want the demo to auto-discover installed
+terminology packages.
+
+3. Enable auto-discovery in `createDefaultTerminologyServices(...)`:
 
 ```js
 import { createDefaultTerminologyServices } from '@forschungsgruppe-digital-health/terminology';
-import discoveredPackages from 'virtual:fdh-terminology-packages';
 
 createDefaultTerminologyServices({
-  packageDiscovery: {
-    enabled: true,
-    packages: discoveredPackages
-  }
+  packageAutoDiscovery: true
 });
 ```
+
+The plugin exposes discovered packages automatically on `globalThis.__FDH_TERMINOLOGY_PACKAGES__`,
+which is consumed by `packageAutoDiscovery: true`.
 
 4. Restart the dev server after dependency changes.
 
@@ -291,6 +298,18 @@ terminologyVitePlugin({
   packages: ['hl7.terminology.r4'],            // explicit allow-list (overrides auto discovery)
   includeTransitiveFrom: ['@forschungsgruppe-digital-health/terminology'],
   exclude: ['hl7.fhir.r4.core', 'hl7.fhir.uv.extensions.r4']
+});
+```
+
+Or pass an explicit package map directly:
+
+```js
+createDefaultTerminologyServices({
+  packageAutoDiscovery: {
+    packages: {
+      'my-terminology-package': [myCodeSystem]
+    }
+  }
 });
 ```
 

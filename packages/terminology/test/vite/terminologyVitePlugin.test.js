@@ -179,4 +179,23 @@ describe('terminologyVitePlugin', () => {
     expect(code).toContain('"hl7.terminology.r4": [');
     expect(code).toContain('CodeSystem-v3-ActCode.json');
   });
+
+  it('injects discovered packages into a global by default', () => {
+    const root = createTestRoot();
+    tmpRoots.push(root);
+
+    writeJson(join(root, 'package.json'), {
+      name: 'consumer-app',
+      dependencies: {}
+    });
+
+    const plugin = terminologyVitePlugin();
+    plugin.configResolved({ root });
+
+    const transformed = plugin.transformIndexHtml('<html><head></head><body></body></html>');
+    const injectedScript = transformed.tags.find(tag => tag.tag === 'script');
+
+    expect(injectedScript.children).toContain("virtual:fdh-terminology-packages");
+    expect(injectedScript.children).toContain('__FDH_TERMINOLOGY_PACKAGES__');
+  });
 });

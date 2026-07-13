@@ -60,6 +60,7 @@ export { createFhirTerminologyProviderLoader } from './services/TerminologyProvi
 export {
   DEFAULT_DISCOVERY_INCLUDE,
   DEFAULT_DISCOVERY_EXCLUDE,
+  collectPackageCodeSystemsFromGlob,
   collectPackageCodeSystemsFromModules,
   discoverPackageProviders
 } from './services/PackageProviderDiscovery.js';
