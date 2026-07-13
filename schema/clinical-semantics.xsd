@@ -26,7 +26,7 @@
   </xsd:attribute>
 
   <!-- Extension element: Annotations -->
-  <xsd:element name="Annotations">
+  <xsd:element name="annotations">
     <xsd:annotation>
       <xsd:documentation>
         Container element for multiple clinical terminology annotations.
@@ -34,7 +34,7 @@
     </xsd:annotation>
     <xsd:complexType>
       <xsd:sequence>
-        <xsd:element name="Annotation" type="term:tAnnotation" minOccurs="0" maxOccurs="unbounded" />
+        <xsd:element name="annotation" type="term:tAnnotation" minOccurs="0" maxOccurs="unbounded" />
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -42,12 +42,11 @@
   <xsd:complexType name="tAnnotation">
     <xsd:annotation>
       <xsd:documentation>
-        A single terminology annotation, containing text, codings, and optional mapping targets.
+        A single terminology annotation, containing text and codings.
       </xsd:documentation>
     </xsd:annotation>
     <xsd:sequence>
-      <xsd:element name="Coding" type="term:tCoding" minOccurs="0" maxOccurs="unbounded" />
-      <xsd:element name="MappingTarget" type="term:tMappingTarget" minOccurs="0" maxOccurs="1" />
+      <xsd:element name="coding" type="term:tCoding" minOccurs="0" maxOccurs="unbounded" />
     </xsd:sequence>
     <xsd:attribute name="id" type="xsd:string" use="optional" />
     <xsd:attribute name="text" type="xsd:string" use="optional" />
