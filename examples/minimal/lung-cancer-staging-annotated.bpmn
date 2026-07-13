@@ -62,7 +62,7 @@
             <term:coding system="http://ihe-d.de/CodeSystems/IHEXDStypeCode" version="2020-02-07T07:55:58" code="ERGE"
                          display="Diagnostic imaging results"/>
           </term:annotation>
-          <term:annotation id="term-ann-2" mode="prescriptive">
+          <term:annotation id="term-ann-2">
             <term:coding system="http://ihe-d.de/CodeSystems/IHEXDSclassCode" version="2021-06-25T13:44:47" code="BEF"
                          display="Clinical reports"/>
           </term:annotation>
