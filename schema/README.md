@@ -44,7 +44,7 @@ npm install @forschungsgruppe-digital-health/terminology
 
 ```javascript
 import BpmnModdle from 'bpmn-moddle';
-import clinicalSchema from '@bpmn-js-clinical-semantics/terminology/moddle';
+import clinicalSchema from '@forschungsgruppe-digital-health/terminology/moddle';
 
 const moddle = new BpmnModdle({
   term: clinicalSchema
