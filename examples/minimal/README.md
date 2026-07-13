@@ -271,7 +271,7 @@ Example from `Task_Staging`:
 <bpmn2:task id="Task_Staging" name="Perform TNM Staging" term:clinicalDomain="staging">
   <bpmn2:extensionElements>
     <term:annotations>
-      <term:annotation id="term-ann-1" mode="descriptive"
+      <term:annotation id="term-ann-1"
                        text="Clinical TNM staging ...">
         <term:coding system="http://snomed.info/sct" code="254292007" display="Tumor staging"/>
         <term:coding system="http://loinc.org" code="21908-9" display="Stage group.clinical Cancer"/>
