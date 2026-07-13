@@ -22,12 +22,12 @@ To use these extensions in your BPMN 2.0 XML files, declare the namespace and in
     <!-- The clinicalDomain attribute can be added to FlowNodes, DataObjects, etc. -->
     <bpmn:task id="Task_1" name="Measure Blood Pressure" term:clinicalDomain="Nursing">
       <bpmn:extensionElements>
-        <term:Annotations>
+        <term:annotations>
           <!-- A single annotation with a coding concept -->
-          <term:Annotation aspect="clinicalContent" mode="descriptive" text="Blood pressure measurement">
-            <term:Coding system="http://snomed.info/sct" code="46973005" display="Blood pressure taking" />
-          </term:Annotation>
-        </term:Annotations>
+          <term:annotation id="term-ann-1" text="Blood pressure measurement">
+            <term:coding system="http://snomed.info/sct" code="46973005" display="Blood pressure taking" />
+          </term:annotation>
+        </term:annotations>
       </bpmn:extensionElements>
     </bpmn:task>
   </bpmn:process>
