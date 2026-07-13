@@ -39,7 +39,7 @@ To use these extensions in your BPMN 2.0 XML files, declare the namespace and in
 If you are building tools using the [bpmn.io](https://bpmn.io/) ecosystem, you can use our JSON moddle descriptor to work with this schema natively in JavaScript:
 
 ```bash
-npm install @bpmn-js-clinical-semantics/terminology
+npm install @forschungsgruppe-digital-health/terminology
 ```
 
 ```javascript
