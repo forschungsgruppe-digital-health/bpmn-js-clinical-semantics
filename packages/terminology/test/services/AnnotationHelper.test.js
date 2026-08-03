@@ -45,7 +45,7 @@ describe('AnnotationHelper', () => {
 
     it('should return undefined if no term:Annotations', () => {
       const bo = createBusinessObject({
-        values: [{ $type: 'fhirmap:ResourceMappings' }]
+        values: [{ $type: 'other:Container' }]
       });
       expect(getAnnotationsContainer(bo)).toBeUndefined();
     });
@@ -281,35 +281,5 @@ describe('AnnotationHelper', () => {
       expect(() => removeAnnotation(bo, 0)).not.toThrow();
     });
 
-    it('should clear matching FHIR terminology bindings when removing an annotation', () => {
-      const bo = createBusinessObject({
-        values: [
-          {
-            $type: 'term:Annotations',
-            values: [
-          { $type: 'term:Annotation', id: 'term-ann-1', text: 'First' }
-            ]
-          },
-          {
-            $type: 'fhirmap:ResourceMappings',
-            mappings: [
-              {
-                $type: 'fhirmap:ResourceMapping',
-                keyElements: [
-                  { $type: 'fhirmap:KeyElement', path: 'DocumentReference.type', terminologyBinding: 'term-ann-1' },
-                  { $type: 'fhirmap:KeyElement', path: 'DocumentReference.status', terminologyBinding: 'status-1' }
-                ]
-              }
-            ]
-          }
-        ]
-      });
-
-      removeAnnotation(bo, 0);
-
-      const keyElements = bo.extensionElements.values[1].mappings[0].keyElements;
-      expect(keyElements[0].terminologyBinding).toBeUndefined();
-      expect(keyElements[1].terminologyBinding).toBe('status-1');
-    });
   });
 });

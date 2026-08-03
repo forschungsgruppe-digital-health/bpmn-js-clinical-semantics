@@ -113,25 +113,6 @@ export function addAnnotation(bo, moddle, { id, aspect, mode, text, codings, tar
 export function removeAnnotation(bo, index) {
   const container = getAnnotationsContainer(bo);
   if (container?.values && index >= 0 && index < container.values.length) {
-    const [removedAnnotation] = container.values.splice(index, 1);
-    clearTerminologyBindings(bo, removedAnnotation?.id);
+    container.values.splice(index, 1);
   }
-}
-
-function clearTerminologyBindings(bo, id) {
-  if (!id || !bo.extensionElements?.values) {
-    return;
-  }
-
-  bo.extensionElements.values
-    .filter((value) => value.$type === 'fhirmap:ResourceMappings')
-    .forEach((container) => {
-      (container.mappings || []).forEach((mapping) => {
-        (mapping.keyElements || []).forEach((keyElement) => {
-          if (keyElement.terminologyBinding === id) {
-            keyElement.terminologyBinding = undefined;
-          }
-        });
-      });
-    });
 }

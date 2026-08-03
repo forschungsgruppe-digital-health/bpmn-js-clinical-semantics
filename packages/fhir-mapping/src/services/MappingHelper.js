@@ -176,6 +176,24 @@ export function removeResourceMapping(bo, index) {
   }
 }
 
+export function clearTerminologyBindings(bo, annotationId) {
+  if (!annotationId || !bo.extensionElements?.values) {
+    return;
+  }
+
+  bo.extensionElements.values
+    .filter((value) => value.$type === 'fhirmap:ResourceMappings')
+    .forEach((container) => {
+      (container.mappings || []).forEach((mapping) => {
+        (mapping.keyElements || []).forEach((keyElement) => {
+          if (keyElement.terminologyBinding === annotationId) {
+            keyElement.terminologyBinding = undefined;
+          }
+        });
+      });
+    });
+}
+
 /**
  * Export all FHIR mappings from a BPMN model as JSON.
  *

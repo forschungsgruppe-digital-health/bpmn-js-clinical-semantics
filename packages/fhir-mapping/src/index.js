@@ -29,5 +29,6 @@ export {
   getBindableTerminologyAnnotations,
   addResourceMapping,
   removeResourceMapping,
+  clearTerminologyBindings,
   exportMappingsAsJson
 } from './services/MappingHelper.js';

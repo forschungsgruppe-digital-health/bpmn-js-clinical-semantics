@@ -4,6 +4,7 @@ import {
   getBindableTerminologyAnnotations,
   addResourceMapping,
   removeResourceMapping,
+  clearTerminologyBindings,
   exportMappingsAsJson
 } from '../../src/services/MappingHelper.js';
 
@@ -221,6 +222,33 @@ describe('MappingHelper', () => {
     it('should handle missing container gracefully', () => {
       const bo = createBusinessObject();
       expect(() => removeResourceMapping(bo, 0)).not.toThrow();
+    });
+  });
+
+  describe('clearTerminologyBindings()', () => {
+    it('should clear matching terminology bindings on FHIR mappings', () => {
+      const bo = createBusinessObject({
+        values: [
+          {
+            $type: 'fhirmap:ResourceMappings',
+            mappings: [
+              {
+                $type: 'fhirmap:ResourceMapping',
+                keyElements: [
+                  { $type: 'fhirmap:KeyElement', path: 'DocumentReference.type', terminologyBinding: 'term-ann-1' },
+                  { $type: 'fhirmap:KeyElement', path: 'DocumentReference.status', terminologyBinding: 'status-1' }
+                ]
+              }
+            ]
+          }
+        ]
+      });
+
+      clearTerminologyBindings(bo, 'term-ann-1');
+
+      const keyElements = bo.extensionElements.values[0].mappings[0].keyElements;
+      expect(keyElements[0].terminologyBinding).toBeUndefined();
+      expect(keyElements[1].terminologyBinding).toBe('status-1');
     });
   });
 
