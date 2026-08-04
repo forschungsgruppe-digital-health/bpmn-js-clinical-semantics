@@ -302,15 +302,15 @@ terminologyVitePlugin({
 ```
 
 To include only selected CodeSystem resources from an installed package, use a
-package-to-file map with an explicit `include` filter:
+package map with an explicit `include` filter containing canonical URLs:
 
 ```js
 terminologyVitePlugin({
   packages: {
     'hl7.terminology.r4': {
       include: [
-        'CodeSystem-condition-clinical.json',
-        'CodeSystem-allergyintolerance-clinical.json'
+        'http://terminology.hl7.org/CodeSystem/condition-clinical',
+        'http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical'
       ]
     }
   }
@@ -325,7 +325,7 @@ terminologyVitePlugin({
   packages: {
     'hl7.fhir.r4.core': {
       exclude: [
-        'CodeSystem-condition-clinical.json'
+        'http://terminology.hl7.org/CodeSystem/condition-clinical'
       ]
     }
   }
@@ -341,7 +341,7 @@ needed by the application:
 terminologyVitePlugin({
   packages: {
     'hl7.fhir.r4.core': {
-      exclude: ['CodeSystem-condition-clinical.json']
+      exclude: ['http://terminology.hl7.org/CodeSystem/condition-clinical']
     }
   },
   exclude: []
@@ -352,7 +352,9 @@ When using `createDefaultTerminologyServices(...)`, pass
 `packageDiscovery: { exclude: [] }` as well, because built-in preset packages
 and FHIR infrastructure packages are excluded from discovery by default. After
 restarting the dev server, only the two selected CodeSystems are included in
-the discovery provider.
+the discovery provider. `include` and `exclude` always use exact canonical
+`CodeSystem.url` values; a configured URL that does not exist in the package
+causes an error. Filenames are not valid selectors.
 
 Or pass an explicit package map directly:
 
