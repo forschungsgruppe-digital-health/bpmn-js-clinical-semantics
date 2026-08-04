@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 
 /**
  * @typedef {object} TerminologyVitePluginOptions
- * @property {string[]} [packages]
+ * @property {string[] | Record<string, { include?: string[], exclude?: string[] }>} [packages]
  * @property {boolean} [autoDiscover]
  * @property {string[]} [includeTransitiveFrom]
  * @property {string[]} [exclude]
@@ -76,6 +76,32 @@ function findResourceFiles(packageDir, resourceTypes) {
   }
 
   return getResourceFilesFromGlob(packageDir);
+}
+
+function normalizePackageSelection(explicitPackages) {
+  if (Array.isArray(explicitPackages)) {
+    return {
+      packageNames: explicitPackages,
+      resourceFilters: {}
+    };
+  }
+
+  const resourceFilters = Object.fromEntries(
+    Object.entries(explicitPackages || {}).map(([packageName, filter]) => {
+      if (Array.isArray(filter)) {
+        throw new Error(
+          `Package resource filter for "${packageName}" must use the "include" keyword.`
+        );
+      }
+
+      return [packageName, filter || {}];
+    })
+  );
+
+  return {
+    packageNames: Object.keys(explicitPackages || {}),
+    resourceFilters
+  };
 }
 
 function findPackageRoot(startDir, expectedPackageName) {
@@ -270,12 +296,14 @@ export function terminologyVitePlugin(options = {}) {
 
   /** @type {Set<string>} */
   let excludeSet;
+  let packageSelection;
 
   return {
     name: 'fdh-terminology-packages',
 
     configResolved(config) {
       root = config.root;
+      packageSelection = normalizePackageSelection(explicitPackages);
       excludeSet = new Set([
         ...BUILTIN_PRESET_PACKAGES,
         ...INFRASTRUCTURE_PACKAGES,
@@ -294,9 +322,9 @@ export function terminologyVitePlugin(options = {}) {
         return;
       }
 
-      const packageNames = explicitPackages || (
-        autoDiscover ? discoverPackages(root, excludeSet, includeTransitiveFrom) : []
-      );
+      const packageNames = explicitPackages
+        ? packageSelection.packageNames
+        : (autoDiscover ? discoverPackages(root, excludeSet, includeTransitiveFrom) : []);
 
       const importStatements = [];
       const exportEntries = [];
@@ -313,7 +341,13 @@ export function terminologyVitePlugin(options = {}) {
           continue;
         }
 
-        const resourceFiles = findResourceFiles(packageDir, resourceTypes);
+        const resourceFilter = packageSelection.resourceFilters[packageName];
+        const resourceFiles = findResourceFiles(packageDir, resourceTypes)
+          .filter(filename =>
+            (!resourceFilter?.include
+              || resourceFilter.include.some(pattern => pattern === '*' || pattern === filename))
+            && !resourceFilter?.exclude?.includes(filename)
+          );
         if (resourceFiles.length === 0) {
           console.warn(`[fdh-terminology] No CodeSystem resources found in "${packageName}" - skipping.`);
           continue;

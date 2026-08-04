@@ -301,6 +301,59 @@ terminologyVitePlugin({
 });
 ```
 
+To include only selected CodeSystem resources from an installed package, use a
+package-to-file map with an explicit `include` filter:
+
+```js
+terminologyVitePlugin({
+  packages: {
+    'hl7.terminology.r4': {
+      include: [
+        'CodeSystem-condition-clinical.json',
+        'CodeSystem-allergyintolerance-clinical.json'
+      ]
+    }
+  }
+});
+```
+
+To include every CodeSystem resource from a package, use `include: ['*']`.
+To load everything except selected resources, omit `include` and use `exclude`:
+
+```js
+terminologyVitePlugin({
+  packages: {
+    'hl7.fhir.r4.core': {
+      exclude: [
+        'CodeSystem-condition-clinical.json'
+      ]
+    }
+  }
+});
+```
+
+For a practical filter test, `hl7.fhir.r4.core` is a suitable package because
+it contains many CodeSystems and is not provided by a terminology preset. It
+is already a dependency of the vanilla example. Select only the resources
+needed by the application:
+
+```js
+terminologyVitePlugin({
+  packages: {
+    'hl7.fhir.r4.core': {
+      exclude: ['CodeSystem-condition-clinical.json']
+    }
+  },
+  exclude: []
+});
+```
+
+When using `createDefaultTerminologyServices(...)`, pass
+`packageDiscovery: { exclude: [] }` as well, because built-in preset packages
+and FHIR infrastructure packages are excluded from discovery by default. After
+restarting the dev server, only the two selected CodeSystems are included in
+the discovery provider.
+
 Or pass an explicit package map directly:
 
 ```js

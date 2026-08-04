@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { terminologyVitePlugin } from '../../src/vite/plugin.js';
 
@@ -32,5 +33,30 @@ describe('terminologyVitePlugin (vanilla integration)', () => {
 
     expect(code).toContain('"de.ihe-d.terminology": [');
     expect(code).toContain('CodeSystem-IHEXDSclassCode.json');
+  });
+
+  it('includes every CodeSystem resource from the installed terminology package', () => {
+    const vanillaRoot = resolve(process.cwd(), '../../examples/vanilla');
+    const packageRoot = resolve(vanillaRoot, '../../node_modules/hl7.fhir.r4.core');
+    const codeSystemFiles = readdirSync(packageRoot)
+      .filter(fileName => /^CodeSystem-.*\.json$/i.test(fileName));
+    const plugin = terminologyVitePlugin({
+      packages: {
+        'hl7.fhir.r4.core': {
+          include: ['*']
+        }
+      }
+    });
+
+    plugin.configResolved({
+      root: vanillaRoot
+    });
+
+    const resolvedId = plugin.resolveId('virtual:fdh-terminology-packages');
+    const code = plugin.load(resolvedId);
+    const importedCodeSystemFiles = code.match(/CodeSystem-[^"]+\.json/g) || [];
+
+    expect(importedCodeSystemFiles).toHaveLength(codeSystemFiles.length);
+    expect(code).toContain(codeSystemFiles.at(-1));
   });
 });

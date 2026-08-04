@@ -88,7 +88,7 @@ async function bootstrap() {
   }
 
   if (DEMO_FEATURES.showTerminology) {
-    const terminologyServices = createDemoTerminologyServices();
+    const terminologyServices = await createDemoTerminologyServices();
     const terminologyServicesModule = createTerminologyModule(terminologyServices);
 
     additionalModules.push(

@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite';
 import { terminologyVitePlugin } from '@forschungsgruppe-digital-health/terminology/vite';
-
-const ENABLE_PACKAGE_DISCOVERY = false;
+import {
+  DISCOVERY_PACKAGES,
+  ENABLE_PACKAGE_DISCOVERY
+} from './src/terminology-config.js';
 
 export default defineConfig({
   base: '/bpmn-js-clinical-semantics/',
@@ -9,8 +11,12 @@ export default defineConfig({
     preserveSymlinks: true
   },
   plugins: [
-    ENABLE_PACKAGE_DISCOVERY ? terminologyVitePlugin() : null
-  ].filter(Boolean),
+    terminologyVitePlugin({
+      packages: ENABLE_PACKAGE_DISCOVERY ? DISCOVERY_PACKAGES : [],
+      autoDiscover: ENABLE_PACKAGE_DISCOVERY,
+      exposeGlobal: true
+    })
+  ],
   build: {
     outDir: '../../site',
     emptyOutDir: true,

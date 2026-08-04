@@ -145,6 +145,102 @@ describe('terminologyVitePlugin', () => {
     expect(code).not.toContain('"hl7.terminology.r4": [');
   });
 
+  it('loads only explicitly selected resources from a package', () => {
+    const root = createTestRoot();
+    tmpRoots.push(root);
+
+    writeJson(join(root, 'package.json'), {
+      name: 'consumer-app',
+      dependencies: {
+        'example-terminology': '1.0.0'
+      }
+    });
+
+    createPackage(root, 'example-terminology', {
+      exports: './index.js'
+    }, {
+      'index.js': 'export default {};\n',
+      'CodeSystem-first.json': '{"resourceType":"CodeSystem","url":"http://example.org/first"}\n',
+      'CodeSystem-second.json': '{"resourceType":"CodeSystem","url":"http://example.org/second"}\n'
+    });
+
+    const code = runPlugin(root, {
+      packages: {
+        'example-terminology': {
+          include: ['CodeSystem-second.json']
+        }
+      }
+    });
+
+    expect(code).toContain('CodeSystem-second.json');
+    expect(code).not.toContain('CodeSystem-first.json');
+  });
+
+  it('includes every CodeSystem resource from an explicitly selected package', () => {
+    const root = createTestRoot();
+    tmpRoots.push(root);
+
+    writeJson(join(root, 'package.json'), {
+      name: 'consumer-app',
+      dependencies: {
+        'example-terminology': '1.0.0'
+      }
+    });
+
+    createPackage(root, 'example-terminology', {
+      exports: './index.js'
+    }, {
+      'index.js': 'export default {};\n',
+      'CodeSystem-first.json': '{"resourceType":"CodeSystem","url":"http://example.org/first"}\n',
+      'CodeSystem-middle.json': '{"resourceType":"CodeSystem","url":"http://example.org/middle"}\n',
+      'CodeSystem-last.json': '{"resourceType":"CodeSystem","url":"http://example.org/last"}\n'
+    });
+
+    const code = runPlugin(root, {
+      packages: {
+        'example-terminology': {
+          include: ['*']
+        }
+      }
+    });
+    const importedCodeSystemFiles = code.match(/CodeSystem-[^"]+\.json/g) || [];
+
+    expect(importedCodeSystemFiles).toHaveLength(3);
+    expect(code).toContain('CodeSystem-first.json');
+    expect(code).toContain('CodeSystem-last.json');
+  });
+
+  it('excludes selected resources while loading the rest of a package', () => {
+    const root = createTestRoot();
+    tmpRoots.push(root);
+
+    writeJson(join(root, 'package.json'), {
+      name: 'consumer-app',
+      dependencies: {
+        'example-terminology': '1.0.0'
+      }
+    });
+
+    createPackage(root, 'example-terminology', {
+      exports: './index.js'
+    }, {
+      'index.js': 'export default {};\n',
+      'CodeSystem-first.json': '{"resourceType":"CodeSystem","url":"http://example.org/first"}\n',
+      'CodeSystem-second.json': '{"resourceType":"CodeSystem","url":"http://example.org/second"}\n'
+    });
+
+    const code = runPlugin(root, {
+      packages: {
+        'example-terminology': {
+          exclude: ['CodeSystem-second.json']
+        }
+      }
+    });
+
+    expect(code).toContain('CodeSystem-first.json');
+    expect(code).not.toContain('CodeSystem-second.json');
+  });
+
   it('discovers transitive packages from nested node_modules under root packages', () => {
     const root = createTestRoot();
     tmpRoots.push(root);
