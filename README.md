@@ -212,6 +212,7 @@ addAnnotation(businessObject, moddle, {
 | `additionalFhirProviders` | `Array<FhirProviderConfig>` | Add extra FHIR providers. |
 | `packageProviderOptions` | `Record<string, object>` | Override built-in package providers by ID. |
 | `hl7CodeSystems` | `CodeSystem[]` | Inject explicit HL7 package CodeSystems instead of auto-loaded defaults. |
+| `packageMetadata` | `Record<string, { title?: string, version?: string }>` | Package labels from `package.json`; applies to built-in presets even when package auto-discovery is disabled. |
 | `additionalPackageProviders` | `TerminologyProvider[]` | Add extra package-backed providers. |
 | `packageDiscovery` | `{ enabled?: boolean, packageNames?: string[], modules?: Record<string, CodeSystem>, packages?: Record<string, CodeSystem[]>, include?: string[], exclude?: string[], mode?: 'auto'\|'whitelist' }` | Advanced package provider registration (explicit package maps and filtering controls). |
 | `packageAutoDiscovery` | `boolean \| { packages?: Record<string, CodeSystem[]>, globalKey?: string, globFn?: Function }` | Shortcut for plugin-driven package discovery (`true` reads `globalThis.__FDH_TERMINOLOGY_PACKAGES__`). |
@@ -282,8 +283,12 @@ createDefaultTerminologyServices({
 });
 ```
 
-The plugin exposes discovered packages automatically on `globalThis.__FDH_TERMINOLOGY_PACKAGES__`,
-which is consumed by `packageAutoDiscovery: true`.
+The plugin exposes discovered packages automatically on
+`globalThis.__FDH_TERMINOLOGY_PACKAGES__`, which is consumed by
+`packageAutoDiscovery: true`. It also exposes package metadata on
+`globalThis.__FDH_TERMINOLOGY_PACKAGE_METADATA__`; provider names use the package `title`
+and append the package `version` in parentheses. If no `title` exists, the package name or
+the configured package name is used as a fallback.
 
 4. Restart the dev server after dependency changes.
 

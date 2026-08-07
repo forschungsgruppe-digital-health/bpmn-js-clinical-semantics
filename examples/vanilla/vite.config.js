@@ -10,6 +10,9 @@ export default defineConfig({
   resolve: {
     preserveSymlinks: true
   },
+  optimizeDeps: {
+    force: true
+  },
   plugins: [
     terminologyVitePlugin({
       packages: ENABLE_PACKAGE_DISCOVERY ? DISCOVERY_PACKAGES : [],

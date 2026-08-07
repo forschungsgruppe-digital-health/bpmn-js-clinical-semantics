@@ -157,7 +157,9 @@ describe('terminologyVitePlugin', () => {
     });
 
     createPackage(root, 'example-terminology', {
-      exports: './index.js'
+      exports: './index.js',
+      title: 'Example Terminology',
+      version: '1.2.3'
     }, {
       'index.js': 'export default {};\n',
       'CodeSystem-first.json': '{"resourceType":"CodeSystem","url":"http://example.org/first"}\n',
@@ -174,6 +176,8 @@ describe('terminologyVitePlugin', () => {
 
     expect(code).toContain('CodeSystem-second.json');
     expect(code).not.toContain('CodeSystem-first.json');
+    expect(code).toContain('"title": "Example Terminology"');
+    expect(code).toContain('"version": "1.2.3"');
   });
 
   it('includes every CodeSystem resource from an explicitly selected package', () => {
@@ -315,5 +319,6 @@ describe('terminologyVitePlugin', () => {
 
     expect(injectedScript.children).toContain("virtual:fdh-terminology-packages");
     expect(injectedScript.children).toContain('__FDH_TERMINOLOGY_PACKAGES__');
+    expect(injectedScript.children).toContain('__FDH_TERMINOLOGY_PACKAGE_METADATA__');
   });
 });
