@@ -14,7 +14,7 @@ export default defineConfig({
     terminologyVitePlugin({
       packages: ENABLE_PACKAGE_DISCOVERY ? DISCOVERY_PACKAGES : [],
       autoDiscover: ENABLE_PACKAGE_DISCOVERY,
-      exposeGlobal: true
+      exposeGlobal: false
     })
   ],
   build: {

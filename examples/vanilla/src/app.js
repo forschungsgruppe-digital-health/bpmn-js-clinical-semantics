@@ -18,6 +18,7 @@ import { DEMO_FEATURES } from './demo-config.js';
 import {
   createDemoTerminologyServices
 } from './terminology-config.js';
+import discoveredPackages from 'virtual:fdh-terminology-packages';
 
 import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-js.css';
@@ -88,7 +89,7 @@ async function bootstrap() {
   }
 
   if (DEMO_FEATURES.showTerminology) {
-    const terminologyServices = await createDemoTerminologyServices();
+    const terminologyServices = await createDemoTerminologyServices(discoveredPackages);
     const terminologyServicesModule = createTerminologyModule(terminologyServices);
 
     additionalModules.push(
