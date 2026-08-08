@@ -1,32 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { ASPECTS, MODES, CLINICAL_DOMAINS } from '../../src/core/types.js';
+import { ASPECTS, MODES, TRANSFORMS, CLINICAL_DOMAINS } from '../../src/core/types.js';
 
-describe('types – ASPECTS', () => {
-  it('should expose all eight aspect constants', () => {
-    expect(Object.keys(ASPECTS)).toHaveLength(8);
-    expect(ASPECTS.CLINICAL_CONTENT).toBe('clinicalContent');
-    expect(ASPECTS.DOCUMENT_CLASS).toBe('documentClass');
-    expect(ASPECTS.DOCUMENT_TYPE).toBe('documentType');
-    expect(ASPECTS.NOTE).toBe('note');
-    expect(ASPECTS.CONFIDENTIALITY).toBe('confidentiality');
-    expect(ASPECTS.STATUS).toBe('status');
-    expect(ASPECTS.FORMAT).toBe('format');
-    expect(ASPECTS.PARTICIPANT).toBe('participant');
-  });
-
-  it('should have unique values', () => {
-    const values = Object.values(ASPECTS);
-    expect(new Set(values).size).toBe(values.length);
-  });
-});
-
-describe('types – MODES', () => {
-  it('should expose descriptive and prescriptive modes', () => {
-    expect(MODES.DESCRIPTIVE).toBe('descriptive');
-    expect(MODES.PRESCRIPTIVE).toBe('prescriptive');
-    expect(Object.keys(MODES)).toHaveLength(2);
-  });
-});
 
 describe('types – CLINICAL_DOMAINS', () => {
   it('should provide seven clinical domains', () => {

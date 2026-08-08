@@ -4,6 +4,13 @@
  *
  * Used by: SnomedCtProvider (and optionally LoincProvider when hosted on Snowstorm)
  */
+import languageConfig from '../config/terminology-language-config.js';
+
+function normalizeLanguage(lang) {
+  if (!lang) return undefined;
+  return String(lang).split(',')[0].split(';')[0].split('-')[0];
+}
+
 export class SnowstormAdapter {
 
   /**
@@ -20,6 +27,9 @@ export class SnowstormAdapter {
     this._auth = config.auth;
     this._fetch = config.fetchFn || globalThis.fetch.bind(globalThis);
     this._extraHeaders = config.headers || {};
+    // language config
+    this._languageStrategy = config.languageStrategy ?? languageConfig.languageStrategy ?? 'param';
+    this._configuredLanguage = config.language ?? languageConfig.language;
   }
 
   /**
@@ -38,7 +48,15 @@ export class SnowstormAdapter {
     url.searchParams.set('offset', String(params.offset));
     url.searchParams.set('activeFilter', 'true');
 
-    if (params.language) url.searchParams.set('language', params.language);
+    // Resolve language and apply according to strategy
+    const resolvedLanguage = this._resolveLanguage();
+    if (resolvedLanguage) {
+      if (this._languageStrategy === 'param') {
+        url.searchParams.set('language', resolvedLanguage);
+      } else if (this._languageStrategy === 'header') {
+        this._extraHeaders['Accept-Language'] = resolvedLanguage;
+      }
+    }
 
     if (params.additionalParams) {
       for (const [k, v] of Object.entries(params.additionalParams)) {
@@ -93,14 +111,32 @@ export class SnowstormAdapter {
     return (Array.isArray(items) ? items : []).map(i => this._mapConcept(i));
   }
 
-  /** @private */
+  _resolveLanguage() {
+    if (this._configuredLanguage) return normalizeLanguage(this._configuredLanguage);
+    const nav = typeof globalThis !== 'undefined' ? globalThis.navigator : undefined;
+    const browserLang = nav?.languages?.[0] || nav?.language || nav?.userLanguage;
+    if (browserLang) return normalizeLanguage(browserLang);
+    return 'en';
+  }
+
+/** @private */
   _mapConcept(item) {
     const fsnTerm = item.fsn?.term || '';
     const semanticTag = fsnTerm.match(/\(([^)]+)\)$/)?.[1] || undefined;
+    
+    const effectiveTime = item.releasedEffectiveTime ?? item.effectiveTime ?? item.version;
+    const moduleId = item.moduleId;
+
+    // Wenn beides da ist: Baue die offizielle FHIR Canonical URI. Ansonsten Fallback auf effectiveTime.
+    const versionUri = (moduleId && effectiveTime)
+      ? `http://snomed.info/sct/${moduleId}/version/${effectiveTime}`
+      : (effectiveTime !== undefined && effectiveTime !== null ? String(effectiveTime) : undefined);
+
     return {
       code: item.conceptId,
       display: item.pt?.term || fsnTerm,
       system: 'http://snomed.info/sct',
+      version: versionUri, 
       active: item.active,
       properties: {
         fsn: fsnTerm,

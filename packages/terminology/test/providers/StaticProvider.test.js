@@ -78,6 +78,37 @@ describe('StaticProvider', () => {
       const result = await createProvider().search('one');
       expect(result.concepts).toHaveLength(3); // Alpha One, Beta One, Gamma One
     });
+
+    it('should search through the beginning and end of a large concept array', async () => {
+      const concepts = Array.from({ length: 5000 }, (_, index) => ({
+        code: `CODE-${index}`,
+        display: `Concept ${index}`,
+        system: 'http://example.com/cs'
+      }));
+      concepts.unshift({
+        code: 'FIRST-CODE',
+        display: 'First concept',
+        system: 'http://example.com/cs'
+      });
+      concepts.push({
+        code: 'LAST-CODE',
+        display: 'Final concept',
+        system: 'http://example.com/cs'
+      });
+
+      const provider = createProvider(concepts);
+      const firstResult = await provider.search('FIRST-CODE');
+      const lastResult = await provider.search('LAST-CODE');
+
+      expect(firstResult.total).toBe(1);
+      expect(firstResult.concepts).toEqual([
+        expect.objectContaining({ code: 'FIRST-CODE' })
+      ]);
+      expect(lastResult.total).toBe(1);
+      expect(lastResult.concepts).toEqual([
+        expect.objectContaining({ code: 'LAST-CODE' })
+      ]);
+    });
   });
 
   // ─── lookup() ──────────────────────────────────────────────

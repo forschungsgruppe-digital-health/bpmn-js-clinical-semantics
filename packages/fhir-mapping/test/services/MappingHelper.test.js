@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   getResourceMappings,
+  getBindableTerminologyAnnotations,
   addResourceMapping,
   removeResourceMapping,
+  clearTerminologyBindings,
   exportMappingsAsJson
 } from '../../src/services/MappingHelper.js';
 
@@ -56,6 +58,30 @@ describe('MappingHelper', () => {
     });
   });
 
+  describe('getBindableTerminologyAnnotations()', () => {
+    it('should return terminology annotations with IDs from the same business object', () => {
+      const bo = createBusinessObject({
+        values: [
+          {
+            $type: 'term:Annotations',
+            values: [
+              { $type: 'term:Annotation', id: 'term-ann-1', text: 'Discharge summary' },
+              { $type: 'term:Annotation' }
+            ]
+          }
+        ]
+      });
+
+      expect(getBindableTerminologyAnnotations(bo)).toEqual([
+        {
+          id: 'term-ann-1',
+          text: 'Discharge summary',
+          codings: []
+        }
+      ]);
+    });
+  });
+
   // ─── addResourceMapping ───────────────────────────────────
 
   describe('addResourceMapping()', () => {
@@ -99,7 +125,7 @@ describe('MappingHelper', () => {
         resourceType: 'DiagnosticReport',
         keyElements: [
           { path: 'DiagnosticReport.status', semanticRole: 'trigger', fixedValue: 'final' },
-          { path: 'DiagnosticReport.code', semanticRole: 'classifier', terminologyBinding: 'http://loinc.org' }
+          { path: 'DiagnosticReport.code', semanticRole: 'classifier', terminologyBinding: 'term-ann-1' }
         ]
       });
 
@@ -108,7 +134,7 @@ describe('MappingHelper', () => {
       expect(mapping.keyElements[0].path).toBe('DiagnosticReport.status');
       expect(mapping.keyElements[0].semanticRole).toBe('trigger');
       expect(mapping.keyElements[0].fixedValue).toBe('final');
-      expect(mapping.keyElements[1].terminologyBinding).toBe('http://loinc.org');
+      expect(mapping.keyElements[1].terminologyBinding).toBe('term-ann-1');
     });
 
     it('should add searchParams', () => {
@@ -196,6 +222,33 @@ describe('MappingHelper', () => {
     it('should handle missing container gracefully', () => {
       const bo = createBusinessObject();
       expect(() => removeResourceMapping(bo, 0)).not.toThrow();
+    });
+  });
+
+  describe('clearTerminologyBindings()', () => {
+    it('should clear matching terminology bindings on FHIR mappings', () => {
+      const bo = createBusinessObject({
+        values: [
+          {
+            $type: 'fhirmap:ResourceMappings',
+            mappings: [
+              {
+                $type: 'fhirmap:ResourceMapping',
+                keyElements: [
+                  { $type: 'fhirmap:KeyElement', path: 'DocumentReference.type', terminologyBinding: 'term-ann-1' },
+                  { $type: 'fhirmap:KeyElement', path: 'DocumentReference.status', terminologyBinding: 'status-1' }
+                ]
+              }
+            ]
+          }
+        ]
+      });
+
+      clearTerminologyBindings(bo, 'term-ann-1');
+
+      const keyElements = bo.extensionElements.values[0].mappings[0].keyElements;
+      expect(keyElements[0].terminologyBinding).toBeUndefined();
+      expect(keyElements[1].terminologyBinding).toBe('status-1');
     });
   });
 

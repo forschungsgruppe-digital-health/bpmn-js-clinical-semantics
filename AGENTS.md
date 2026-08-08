@@ -84,6 +84,16 @@ demand, detection-only): `dead-code-detector`, `feature-inventarist`, `docs-audi
 - Conventional Commits; scope = package name (`terminology`, `fhir-mapping`, `demo`).
 - `npm install --legacy-peer-deps` (overlapping bpmn-js peer ranges).
 
+## Branching and pull requests
+
+- Land **every change as a pull request into `dev`** (`gh pr create --base dev`), bundling its
+  commits. Do **not** push directly to `dev` or `main`, and do **not** fast-forward `main`
+  (no `git push origin dev:main`).
+- Promotion to a release is a separate **`dev` → `main`** pull request (release-please drives the
+  `main` side).
+- One logical change per PR; keep diffs reviewable; CI (lint + tests + the conformance gate) must
+  pass. A human reviews and merges — **agents do not self-merge**.
+
 ## Hard rules (do not violate)
 
 - Clinical data goes in `<extensionElements>` under the custom prefix — **never**

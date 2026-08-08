@@ -1,8 +1,5 @@
 # Minimal Example: Lung Cancer Treatment Decision
 
-> Part of **[bpmn-js-clinical-semantics](../../README.md)** — this annotated diagram is the default
-> example shown in the [live demo](../../README.md#demo-and-github-pages).
-
 This directory contains a minimal, self-contained example that demonstrates the mapping between BPMN process models and FHIR R4 resources. It is intended for onboarding new developers and for testing the `fhirmap:` extension.
 
 ## Clinical Scenario
@@ -262,9 +259,9 @@ All `definitionCanonical` and `reference` values resolve within the Bundle via `
 
 The annotated BPMN uses two independent XML namespaces:
 
-**`term:` (terminology annotations)** — codes from SNOMED CT, LOINC, OPS, ATC on each task, with aspect (clinicalContent, documentType, documentClass), mode (descriptive/prescriptive), and optional free text. The `term:` namespace is purely semantic — it carries no FHIR paths or transforms.
+**`term:` (terminology annotations)** — codes from SNOMED CT, LOINC, OPS, ATC on each task, with `id` and optional free text. The `term:` namespace is purely semantic — it carries no FHIR paths or transforms.
 
-**`fhirmap:` (FHIR resource mappings)** — declares which FHIR resource type, profile, interaction, and key elements each BPMN task or data object produces/consumes. Key elements use FHIRPath paths, semantic roles (trigger, classifier, payload), and one of: `fixedValue` (FHIR-structural constants like status/intent) or `terminologyBinding`+`terminologyAspect` (resolved from `term:coding` by aspect+system composite key).
+**`fhirmap:` (FHIR resource mappings)** — declares which FHIR resource type, profile, interaction, and key elements each BPMN task or data object produces/consumes. Key elements use FHIRPath paths, semantic roles (trigger, classifier, payload), and one of: `fixedValue` (FHIR-structural constants like status/intent) or `terminologyBinding`+`id` (resolved from `term:annotation` by id).
 
 Both namespaces extend `DataObjectReference` in addition to `FlowNode`, so data objects like the MRI report and discharge letter carry the same annotation structure as tasks.
 
@@ -274,7 +271,7 @@ Example from `Task_Staging`:
 <bpmn2:task id="Task_Staging" name="Perform TNM Staging" term:clinicalDomain="staging">
   <bpmn2:extensionElements>
     <term:annotations>
-      <term:annotation aspect="clinicalContent" mode="descriptive"
+      <term:annotation id="term-ann-1"
                        text="Clinical TNM staging ...">
         <term:coding system="http://snomed.info/sct" code="254292007" display="Tumor staging"/>
         <term:coding system="http://loinc.org" code="21908-9" display="Stage group.clinical Cancer"/>
@@ -283,8 +280,7 @@ Example from `Task_Staging`:
     <fhirmap:resourceMappings>
       <fhirmap:resourceMapping resourceType="Observation" interaction="create" direction="output">
         <fhirmap:keyElement path="Observation.code" semanticRole="classifier"
-                           terminologyBinding="http://loinc.org"
-                           terminologyAspect="clinicalContent"/>
+                           terminologyBinding="term-ann-1"/>
         <fhirmap:keyElement path="Observation.status" semanticRole="trigger"
                            fixedValue="final"/>
       </fhirmap:resourceMapping>
@@ -299,7 +295,7 @@ Example from `DataObj_MRI` (data object with DocumentReference mapping):
 <bpmn2:dataObjectReference id="DataObj_MRI" name="MRI Scan Report" term:clinicalDomain="diagnostics">
   <bpmn2:extensionElements>
     <term:annotations>
-      <term:annotation aspect="documentType" mode="prescriptive"
+      <term:annotation id="term-ann-1" mode="prescriptive"
                        text="MRI scan report of the thorax ...">
         <term:coding system="http://loinc.org" code="18748-4" display="Diagnostic imaging study"/>
       </term:annotation>
@@ -307,8 +303,7 @@ Example from `DataObj_MRI` (data object with DocumentReference mapping):
     <fhirmap:resourceMappings>
       <fhirmap:resourceMapping resourceType="DocumentReference" interaction="read" direction="input">
         <fhirmap:keyElement path="DocumentReference.type" semanticRole="classifier"
-                           terminologyBinding="http://loinc.org"
-                           terminologyAspect="documentType"/>
+                           terminologyBinding="term-ann-1"/>
         <fhirmap:keyElement path="DocumentReference.status" semanticRole="trigger"
                            fixedValue="current"/>
       </fhirmap:resourceMapping>

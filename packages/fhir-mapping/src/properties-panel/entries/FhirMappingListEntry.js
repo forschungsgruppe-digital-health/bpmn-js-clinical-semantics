@@ -3,6 +3,7 @@ import { useState } from '@bpmn-io/properties-panel/preact/hooks';
 import { useService } from 'bpmn-js-properties-panel';
 import {
   getResourceMappings,
+  getBindableTerminologyAnnotations,
   addResourceMapping,
   removeResourceMapping
 } from '../../services/MappingHelper.js';
@@ -25,11 +26,12 @@ export function FhirMappingListEntry(props) {
 
   const bo = element.businessObject;
   const mappings = getResourceMappings(bo);
+  const terminologyAnnotations = getBindableTerminologyAnnotations(bo);
 
   function emptyForm() {
     return {
       resourceType: '', profile: '', interaction: 'create', direction: 'output',
-      kePath: '', keRole: '', keFixed: ''
+      kePath: '', keRole: '', keBinding: '', keFixed: ''
     };
   }
 
@@ -39,6 +41,7 @@ export function FhirMappingListEntry(props) {
       keyElements.push({
         path: form.kePath,
         semanticRole: form.keRole || undefined,
+        terminologyBinding: form.keBinding || undefined,
         fixedValue: form.keFixed || undefined
       });
     }
@@ -82,7 +85,12 @@ export function FhirMappingListEntry(props) {
               ${(m.keyElements || []).map(ke => html`
                 <div class="fhir-mapping-item__key-element">
                   <code>${ke.path}</code>
-                  ${ke.semanticRole && html`<span class="badge badge--descriptive">${ke.semanticRole}</span>`}
+                  ${ke.semanticRole && html`<span class="badge badge--annotation">${ke.semanticRole}</span>`}
+                  ${ke.terminologyBinding && html`
+                    <span class="badge badge--annotation">
+                      ${getTerminologyBindingLabel(ke.terminologyBinding, terminologyAnnotations)}
+                    </span>
+                  `}
                   ${ke.fixedValue && html`<span> = ${ke.fixedValue}</span>`}
                 </div>
               `)}
@@ -104,8 +112,8 @@ export function FhirMappingListEntry(props) {
       ${showForm && html`
         <div class="annotation-form">
           <div class="form-row">
-            <label>FHIR Ressourcentyp</label>
-            <select value=${form.resourceType} onChange=${e => u('resourceType', e.target.value)}>
+            <label class="bio-properties-panel-label">FHIR Ressourcentyp</label>
+            <select class="bio-properties-panel-input" value=${form.resourceType} onChange=${e => u('resourceType', e.target.value)}>
               <option value="">– auswählen –</option>
               ${FHIR_RESOURCE_TYPES.map(r =>
                 html`<option value=${r.type}>${r.label}</option>`
@@ -114,21 +122,21 @@ export function FhirMappingListEntry(props) {
           </div>
 
           <div class="form-row">
-            <label>Profil-URL (optional)</label>
-            <input type="text" placeholder="https://mii.de/fhir/..." value=${form.profile}
+            <label class="bio-properties-panel-label">Profil-URL (optional)</label>
+            <input class="bio-properties-panel-input" type="text" placeholder="https://mii.de/fhir/..." value=${form.profile}
                    onInput=${e => u('profile', e.target.value)} />
           </div>
 
           <div class="form-row">
-            <label>Interaktion</label>
-            <select value=${form.interaction} onChange=${e => u('interaction', e.target.value)}>
+            <label class="bio-properties-panel-label">Interaktion</label>
+            <select class="bio-properties-panel-input" value=${form.interaction} onChange=${e => u('interaction', e.target.value)}>
               ${INTERACTIONS.map(i => html`<option value=${i.value}>${i.label}</option>`)}
             </select>
           </div>
 
           <div class="form-row">
-            <label>Richtung</label>
-            <select value=${form.direction} onChange=${e => u('direction', e.target.value)}>
+            <label class="bio-properties-panel-label">Richtung</label>
+            <select class="bio-properties-panel-input" value=${form.direction} onChange=${e => u('direction', e.target.value)}>
               ${DIRECTIONS.map(d => html`<option value=${d.value}>${d.label}</option>`)}
             </select>
           </div>
@@ -136,20 +144,29 @@ export function FhirMappingListEntry(props) {
           <fieldset class="form-fieldset">
             <legend>Key Element (optional)</legend>
             <div class="form-row">
-              <label>FHIRPath</label>
-              <input type="text" placeholder="z.B. DiagnosticReport.status" value=${form.kePath}
+              <label class="bio-properties-panel-label">FHIRPath</label>
+              <input class="bio-properties-panel-input" type="text" placeholder="z.B. DiagnosticReport.status" value=${form.kePath}
                      onInput=${e => u('kePath', e.target.value)} />
             </div>
             <div class="form-row">
-              <label>Semantische Rolle</label>
-              <select value=${form.keRole} onChange=${e => u('keRole', e.target.value)}>
+              <label class="bio-properties-panel-label">Semantische Rolle</label>
+              <select class="bio-properties-panel-input" value=${form.keRole} onChange=${e => u('keRole', e.target.value)}>
                 <option value="">– keine –</option>
                 ${SEMANTIC_ROLES.map(r => html`<option value=${r.value}>${r.label}</option>`)}
               </select>
             </div>
             <div class="form-row">
-              <label>Fester Wert (optional)</label>
-              <input type="text" placeholder="z.B. final" value=${form.keFixed}
+              <label class="bio-properties-panel-label">Terminology binding</label>
+              <select class="bio-properties-panel-input" value=${form.keBinding} onChange=${e => u('keBinding', e.target.value)}>
+                <option value="">– none –</option>
+                ${terminologyAnnotations.map((annotation) => html`
+                  <option value=${annotation.id}>${getTerminologyBindingLabel(annotation.id, terminologyAnnotations)}</option>
+                `)}
+              </select>
+            </div>
+            <div class="form-row">
+              <label class="bio-properties-panel-label">Fester Wert (optional)</label>
+              <input class="bio-properties-panel-input" type="text" placeholder="z.B. final" value=${form.keFixed}
                      onInput=${e => u('keFixed', e.target.value)} />
             </div>
           </fieldset>
@@ -168,4 +185,16 @@ function shortenUrl(url) {
   if (!url) return '';
   const parts = url.split('/');
   return parts.length > 3 ? '…/' + parts.slice(-2).join('/') : url;
+}
+
+function getTerminologyBindingLabel(id, annotations) {
+  const annotation = annotations.find((entry) => entry.id === id);
+
+  if (!annotation) {
+    return id;
+  }
+
+  const text = annotation.text ? ` - ${annotation.text}` : '';
+
+  return `${annotation.id}${text}`;
 }

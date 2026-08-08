@@ -4,48 +4,34 @@ import {
   BpmnPropertiesProviderModule
 } from 'bpmn-js-properties-panel';
 
-// ─── Import from @forschungsgruppe-digital-health/terminology ──────────────────
 import {
+  createTerminologyModule,
   TerminologyModdleDescriptor,
-  TerminologyPropertiesPanelModule
+  createTerminologyPropertiesPanelModule
 } from '@forschungsgruppe-digital-health/terminology';
 
-// ─── Import from @forschungsgruppe-digital-health/fhir-mapping ────────────────
 import {
   FhirMappingModdleDescriptor,
   FhirMappingPropertiesPanelModule
 } from '@forschungsgruppe-digital-health/fhir-mapping';
+import { DEMO_FEATURES } from './demo-config.js';
+import {
+  createDemoTerminologyServices
+} from './terminology-config.js';
+import discoveredPackages, {
+  packageMetadata
+} from 'virtual:fdh-terminology-packages';
 
-// ─── CSS ─────────────────────────────────────────────────────
 import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-js.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
+import './styles.css';
 
-// ─── Example diagrams (single source: examples/minimal, bundled via Vite ?raw) ─
 import annotatedBpmn from '../../minimal/lung-cancer-staging-annotated.bpmn?raw';
 import plainBpmn from '../../minimal/lung-cancer-staging.bpmn?raw';
 
-// ─── Create modeler with BOTH extensions ─────────────────────
-
-const modeler = new BpmnModeler({
-  container: '#canvas',
-  propertiesPanel: {
-    parent: '#properties'
-  },
-  additionalModules: [
-    BpmnPropertiesPanelModule,
-    BpmnPropertiesProviderModule,
-    TerminologyPropertiesPanelModule,    // ← Terminology annotations group
-    FhirMappingPropertiesPanelModule     // ← FHIR mapping group
-  ],
-  moddleExtensions: {
-    term: TerminologyModdleDescriptor,   // ← term: namespace
-    fhirmap: FhirMappingModdleDescriptor // ← fhirmap: namespace
-  }
-});
-
-// ─── Example diagrams (the minimal example is the default) ───
+let modeler;
 
 const SAMPLES = {
   annotated: { label: 'Lung cancer — annotated (term: + fhirmap:)', xml: annotatedBpmn },
@@ -64,44 +50,130 @@ async function loadSample(key) {
   }
 }
 
-const sampleSelect = document.getElementById('sample-select');
-if (sampleSelect) {
+function setupSampleSelect() {
+  const sampleSelect = document.getElementById('sample-select');
+
+  if (!sampleSelect) {
+    return;
+  }
+
   for (const [key, sample] of Object.entries(SAMPLES)) {
     const option = document.createElement('option');
     option.value = key;
     option.textContent = sample.label;
     sampleSelect.appendChild(option);
   }
+
   sampleSelect.value = 'annotated';
   sampleSelect.addEventListener('change', () => loadSample(sampleSelect.value));
 }
 
-loadSample('annotated');
+function setVisibility(selector, isVisible) {
+  const node = document.querySelector(selector);
+  if (!node) {
+    return null;
+  }
 
-// ─── XML Download ────────────────────────────────────────────
+  node.hidden = !isVisible;
 
-document.getElementById('btn-download').addEventListener('click', async () => {
-  const { xml } = await modeler.saveXML({ format: true });
-  const blob = new Blob([xml], { type: 'application/xml' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'clinical-annotated.bpmn';
-  a.click();
-  URL.revokeObjectURL(url);
-});
+  return node;
+}
 
-// ─── XML Viewer Toggle ──────────────────────────────────────
+async function bootstrap() {
+  const additionalModules = [];
+  const moddleExtensions = {};
 
-const xmlOverlay = document.getElementById('xml-overlay');
-const xmlContent = document.getElementById('xml-content');
+  if (DEMO_FEATURES.showPropertiesPanel) {
+    additionalModules.push(
+      BpmnPropertiesPanelModule,
+      BpmnPropertiesProviderModule
+    );
+  }
 
-document.getElementById('btn-xml-toggle').addEventListener('click', async () => {
-  const { xml } = await modeler.saveXML({ format: true });
-  xmlContent.textContent = xml;
-  xmlOverlay.classList.remove('xml-overlay--hidden');
-});
+  if (DEMO_FEATURES.showTerminology) {
+    const terminologyServices = await createDemoTerminologyServices(
+      discoveredPackages,
+      packageMetadata
+    );
+    const terminologyServicesModule = createTerminologyModule(terminologyServices);
 
-document.getElementById('btn-xml-close').addEventListener('click', () => {
-  xmlOverlay.classList.add('xml-overlay--hidden');
+    additionalModules.push(
+      createTerminologyPropertiesPanelModule({
+        showClinicalDomain: DEMO_FEATURES.showTerminologyClinicalDomain,
+        showAnnotations: DEMO_FEATURES.showTerminologyAnnotations,
+        showMappingTarget: DEMO_FEATURES.showTerminologyMappingTarget
+      }),
+      terminologyServicesModule
+    );
+
+    moddleExtensions.term = TerminologyModdleDescriptor;
+  }
+
+  if (DEMO_FEATURES.showFhirMapping) {
+    additionalModules.push(FhirMappingPropertiesPanelModule);
+    moddleExtensions.fhirmap = FhirMappingModdleDescriptor;
+  }
+
+  modeler = new BpmnModeler({
+    container: '#canvas',
+    ...(DEMO_FEATURES.showPropertiesPanel
+      ? {
+        propertiesPanel: {
+          parent: '#properties'
+        }
+      }
+      : {}),
+    additionalModules,
+    moddleExtensions
+  });
+
+  const downloadButton = setVisibility('#btn-download', DEMO_FEATURES.showXmlDownload);
+  const xmlToggleButton = setVisibility('#btn-xml-toggle', DEMO_FEATURES.showXmlPreview);
+
+  setVisibility('#properties', DEMO_FEATURES.showPropertiesPanel);
+  setVisibility('.app-footer', DEMO_FEATURES.showFooter);
+
+  const headerActions = document.querySelector('.app-header__actions');
+
+  if (headerActions) {
+    headerActions.hidden = !DEMO_FEATURES.showXmlDownload && !DEMO_FEATURES.showXmlPreview;
+  }
+
+  if (downloadButton) {
+    downloadButton.addEventListener('click', async () => {
+      const { xml } = await modeler.saveXML({ format: true });
+      const blob = new Blob([xml], { type: 'application/xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'clinical-annotated.bpmn';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  const xmlOverlay = document.getElementById('xml-overlay');
+  const xmlContent = document.getElementById('xml-content');
+
+  if (xmlToggleButton) {
+    xmlToggleButton.addEventListener('click', async () => {
+      const { xml } = await modeler.saveXML({ format: true });
+      xmlContent.textContent = xml;
+      xmlOverlay.classList.remove('xml-overlay--hidden');
+    });
+  }
+
+  const xmlCloseButton = document.getElementById('btn-xml-close');
+  if (xmlCloseButton) {
+    xmlCloseButton.addEventListener('click', () => {
+      xmlOverlay.classList.add('xml-overlay--hidden');
+    });
+  }
+
+  setupSampleSelect();
+  await loadSample('annotated');
+}
+
+void bootstrap().catch(err => {
+  console.error('Failed to bootstrap demo', err);
 });

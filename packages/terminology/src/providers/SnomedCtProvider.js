@@ -8,8 +8,10 @@ export class SnomedCtProvider extends TerminologyProvider {
    * @param {string} config.baseUrl - Snowstorm base URL
    * @param {string} [config.branch='MAIN'] - SNOMED edition branch
    * @param {string} [config.language='en']
+   * @param {string} [config.languageStrategy='header']
    * @param {number} [config.maxResults=15]
    * @param {string} [config.defaultEcl] - Default ECL constraint
+   * @param {string} [config.version] - Optional SNOMED edition/release version
    * @param {import('../core/types').ConnectionConfig['auth']} [config.auth]
    * @param {typeof fetch} [config.fetchFn]
    */
@@ -18,12 +20,14 @@ export class SnomedCtProvider extends TerminologyProvider {
     this._id = 'snomed-ct';
     this._displayName = config.displayName || 'SNOMED CT';
     this._branch = config.branch || 'MAIN';
-    this._language = config.language || 'en';
+    this._version = config.version;
     this._maxResults = config.maxResults || 15;
     this._defaultEcl = config.defaultEcl;
     this._adapter = new SnowstormAdapter({
       baseUrl: config.baseUrl,
       branch: this._branch,
+      language: config.language,
+      languageStrategy: config.languageStrategy ?? 'header',
       auth: config.auth,
       fetchFn: config.fetchFn,
       headers: config.headers
@@ -33,6 +37,7 @@ export class SnomedCtProvider extends TerminologyProvider {
   get id() { return this._id; }
   get displayName() { return this._displayName; }
   get systemUri() { return 'http://snomed.info/sct'; }
+  get version() { return this._version; }
   get capabilities() {
     return { search: true, lookup: true, hierarchy: true, validate: true };
   }
@@ -45,13 +50,17 @@ export class SnomedCtProvider extends TerminologyProvider {
     if (options.semanticTag) {
       additionalParams.semanticTag = options.semanticTag;
     }
-    return this._adapter.search({
+    const result = await this._adapter.search({
       term,
       limit: options.limit ?? this._maxResults,
       offset: options.offset ?? 0,
-      language: options.language ?? this._language,
       additionalParams
     });
+
+    return {
+      concepts: result.items || [],
+      total: result.total ?? 0
+    };
   }
 
   async lookup(code) {

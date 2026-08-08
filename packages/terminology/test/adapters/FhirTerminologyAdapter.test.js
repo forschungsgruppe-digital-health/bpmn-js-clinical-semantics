@@ -27,10 +27,11 @@ describe('FhirTerminologyAdapter', () => {
       const adapter = new FhirTerminologyAdapter({
         baseUrl: BASE_URL,
         systemUri: SYSTEM_URI,
-        fetchFn: mockFetch
+        fetchFn: mockFetch,
+        language: 'de'
       });
 
-      const result = await adapter.search({ term: 'Lunge', limit: 10, offset: 0, language: 'de' });
+      const result = await adapter.search({ term: 'Lunge', limit: 10, offset: 0 });
 
       const calledUrl = new URL(mockFetch.mock.calls[0][0]);
       expect(calledUrl.pathname).toContain('ValueSet/$expand');
@@ -48,6 +49,42 @@ describe('FhirTerminologyAdapter', () => {
         active: true
       });
       expect(result.total).toBe(1);
+    });
+
+    it('should append configured expand parameters', async () => {
+      const mockFetch = createMockFetch({ expansion: { contains: [] } });
+
+      const adapter = new FhirTerminologyAdapter({
+        baseUrl: BASE_URL,
+        systemUri: 'http://fhir.de/ValueSet/bfarm/icd-10-gm',
+        expandParameters: {
+          valueSetVersion: '2020',
+          'system-version': 'http://fhir.de/CodeSystem/bfarm/icd-10-gm|2020'
+        },
+        fetchFn: mockFetch
+      });
+
+      await adapter.search({ term: '', limit: 10, offset: 0 });
+
+      const calledUrl = new URL(mockFetch.mock.calls[0][0]);
+      expect(calledUrl.searchParams.get('valueSetVersion')).toBe('2020');
+      expect(calledUrl.searchParams.get('system-version')).toBe('http://fhir.de/CodeSystem/bfarm/icd-10-gm|2020');
+    });
+
+    it('should use an explicit valueSetUri without appending ?vs', async () => {
+      const mockFetch = createMockFetch({ expansion: { contains: [] } });
+
+      const adapter = new FhirTerminologyAdapter({
+        baseUrl: BASE_URL,
+        systemUri: 'http://loinc.org',
+        valueSetUri: 'http://loinc.org/vs',
+        fetchFn: mockFetch
+      });
+
+      await adapter.search({ term: 'discharge', limit: 10, offset: 0 });
+
+      const calledUrl = new URL(mockFetch.mock.calls[0][0]);
+      expect(calledUrl.searchParams.get('url')).toBe('http://loinc.org/vs');
     });
 
     it('should handle inactive concepts', async () => {
@@ -130,7 +167,8 @@ describe('FhirTerminologyAdapter', () => {
       const mockFetch = createMockFetch({
         parameter: [
           { name: 'display', valueString: 'Bösartige Neubildung des Bronchus' },
-          { name: 'name', valueString: 'ICD-10-GM' }
+          { name: 'name', valueString: 'ICD-10-GM' },
+          { name: 'version', valueString: '2024' }
         ]
       });
 
@@ -151,6 +189,7 @@ describe('FhirTerminologyAdapter', () => {
         code: 'C34.1',
         display: 'Bösartige Neubildung des Bronchus',
         system: SYSTEM_URI,
+        version: '2024',
         active: true
       });
     });
@@ -170,6 +209,24 @@ describe('FhirTerminologyAdapter', () => {
 
       const concept = await adapter.lookup('X99');
       expect(concept.display).toBe('ICD-10-GM Code');
+    });
+
+    it('should append configured lookup parameters', async () => {
+      const mockFetch = createMockFetch({ parameter: [] });
+
+      const adapter = new FhirTerminologyAdapter({
+        baseUrl: BASE_URL,
+        systemUri: SYSTEM_URI,
+        lookupParameters: {
+          version: '2025.0.0'
+        },
+        fetchFn: mockFetch
+      });
+
+      await adapter.lookup('C34.1');
+
+      const calledUrl = new URL(mockFetch.mock.calls[0][0]);
+      expect(calledUrl.searchParams.get('version')).toBe('2025.0.0');
     });
 
     it('should return null on non-OK response', async () => {
